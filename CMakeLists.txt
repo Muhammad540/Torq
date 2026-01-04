@@ -42,7 +42,9 @@ FetchContent_MakeAvailable(yaml-cpp)
 # Library
 # =======
 set(CORE_SOURCES
-    src/core/dummy.cpp
+    src/physics/MujocoDriver.cpp
+    src/core/RobotSystem.cpp
+    src/visualization/Visualizer.cpp
 )
 
 add_library(openmanip SHARED ${CORE_SOURCES})
@@ -53,19 +55,16 @@ target_include_directories(openmanip PUBLIC
 )
 
 target_link_libraries(openmanip PUBLIC
+    glfw
     pinocchio::pinocchio
     mujoco::mujoco
     yaml-cpp
 )
 
+set_target_properties(openmanip PROPERTIES NO_SYSTEM_FROM_IMPORTED ON)
 # ===========
 # Application
 # ===========
-add_executable(so101_robot workspace/so101/main.cpp)
-
-target_link_libraries(so101_robot PRIVATE
-    openmanip
-    mujoco::mujoco
-)
+add_subdirectory(workspace/so101)
 
 message(STATUS "--- Configuration Done ---")
