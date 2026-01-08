@@ -1,4 +1,8 @@
+# Build Artifcats
 build/
 .vscode/
 .cache/
 compile_commands.json
+
+# my notes
+OpenManip.md
