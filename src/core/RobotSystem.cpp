@@ -1,35 +1,44 @@
 #include "openmanip/RobotSystem.hpp"
 #include "openmanip/MujocoDriver.hpp"
+#include "openmanip/PinocchioModel.hpp"
 
 #include <iostream>
+#include <memory>
 
 namespace openmanip {
     RobotSystem::RobotSystem() {
-        physics_ = std::make_unique<MujocoDriver>();
+        hardware_ = std::make_unique<MujocoDriver>();
+        kinematics_ = std::make_unique<KinematicsEngine>();
     }
     RobotSystem::~RobotSystem() {
-        std::cout << "\033[32mRobot System cleaned up\033[0m" << std::endl;
+        log.info() << "[RobotSystem] cleaned up" << std::endl;
     }
 
-    bool RobotSystem::initialize(const std::string& model_path) {
-        if (!physics_) {
-            std::cerr << "RobotSystem::initialize() Error: Physics driver not initialized" << std::endl;
+    bool RobotSystem::initialize(const std::string& model_path_xml, std::string& model_path_urdf) {
+        if (!hardware_) {
+            log.error() << "[RobotSystem] Hardware abstraction not initialized" << std::endl;
             return false;
         }
-        if (!physics_->loadModel(model_path)) {
-            std::cerr << "RobotSystem::initialize() Error: Failed to load model" << std::endl;
+        if (!hardware_->connect(model_path)) {
+            log.error() << "[RobotSystem] Failed to connect Hardware" << std::endl;
+            return false;
+        }
+        if (!kinematics_->initialize(model_path_urdf)) {
+            log.error() << "[RobotSystem] Failed to initialize the Kinematics Engine" << std::endl;
             return false;
         }
         return true;
     }
 
     void RobotSystem::update() {
-        if (physics_) {
-            physics_->step();
+        if (hardware_ && kinematics_) {
+            hardware_->step();
+            Eigen::VectorXd jp = hardware_->getJointPositions();
+            kinematics_->update(jp);   
         }
     }
 
     MujocoDriver* RobotSystem::getPhysics() {
-        return physics_.get();
+        return dynamic_cast<MujocoDriver*>(hardware_.get());
     }
 }

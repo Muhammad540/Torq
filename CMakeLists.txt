@@ -45,6 +45,7 @@ set(CORE_SOURCES
     src/physics/MujocoDriver.cpp
     src/core/RobotSystem.cpp
     src/visualization/Visualizer.cpp
+    src/kinematics/PinocchioModel.cpp
 )
 
 add_library(openmanip SHARED ${CORE_SOURCES})

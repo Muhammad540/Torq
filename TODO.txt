@@ -1,7 +1,13 @@
 # HIGH
-[] startup is a bit slow, the glfwWindow comes up after around 5 to 7 seconds.
-[] HAL is needed, package Mujoco Driver using it
+[] Pinocchio integration
+[] IK solver
+[] YAML config loader
+[] Collision Detector
+[] RRTPlanner
+[] HAL is needed, package Mujoco Driver using it sort of done
 
 # MEDIUM 
-
+[] Dynamixel Driver
+ 
 # LOW
+[] startup is a bit slow, the glfwWindow comes up after around 5 to 7 seconds.
