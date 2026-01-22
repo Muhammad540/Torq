@@ -7,6 +7,9 @@
 #include <mujoco/mujoco.h>
 
 #include "HardwareInterface.hpp"
+#include "openmanip/logger.hpp"
+
+class Logger;
 
 namespace openmanip {
 
@@ -39,6 +42,8 @@ namespace openmanip {
         private:
             ModelPtr model_{nullptr, &mj_deleteModel};
             DataPtr  data_{nullptr,  &mj_deleteData};
+
+            mutable Logger logger;
     };
 }
 

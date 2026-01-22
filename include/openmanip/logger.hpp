@@ -17,17 +17,19 @@ class Logger{
     public:
         class LogStream {
             private:
-                std::ostream oss;
-                const std::string& color_;
+                std::string color_;
+                std::ostringstream buffer_;
             public:
-                LogStream(const std::string& color, const std::string& prefix): color_(color){}
+                LogStream(const std::string& color): color_(color){}
+                
                 template <typename T>
                 LogStream& operator<<(const T& value){
-                    oss << value;
+                    buffer_ << value;
                     return *this;
                 }
+                
                 ~LogStream(){
-                    std::cout << color_ << oss.str() << Color::RESET << std::endl;
+                    std::cout << color_ << buffer_.str() << Color::RESET << std::endl;
                 }
         };
 

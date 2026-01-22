@@ -5,6 +5,7 @@
 #include "mujoco/mjvisualize.h"
 #include "openmanip/RobotSystem.hpp"
 #include "openmanip/MujocoDriver.hpp"
+#include "openmanip/logger.hpp"
 
 #include <mujoco/mujoco.h>
 #include <GLFW/glfw3.h>
@@ -27,7 +28,7 @@ namespace openmanip {
             glfwTerminate();
         }
         window_ = nullptr;
-        std::cout << "\033[32mVisualizer cleaned up\033[0m" << std::endl;
+        logger.info() << "[Visualizer] cleaned up";
     }
 
     bool Visualizer::initialize(RobotSystem* robot, const std::string& title) {

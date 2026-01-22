@@ -7,20 +7,8 @@
 #include <Eigen/Dense>
 #include <vector>
 
-
-namespace pinocchio {
-        template<typename _Scalar, int _Options> 
-        struct JointCollectionDefaultTpl;
-
-        template<typename _Scalar,int _Options,template<typename S, int O> class JointCollectionTpl>
-        struct ModelTpl;
-
-        template<typename _Scalar,int _Options,template<typename S, int O> class JointCollectionTpl>
-        struct DataTpl;
-
-        using Model = ModelTpl<double, 0, JointCollectionDefaultTpl>;
-        using Data = DataTpl<double, 0, JointCollectionDefaultTpl>;
-}
+#include "pinocchio/algorithm/joint-configuration.hpp"
+#include "pinocchio/algorithm/kinematics.hpp"
 
 namespace openmanip {
 
@@ -42,7 +30,7 @@ namespace openmanip {
             void printFrames();
         
         private:
-            Logger log;
+            mutable Logger log;
             std::unique_ptr<pinocchio::Model> model_ = nullptr;
             std::unique_ptr<pinocchio::Data> data_ = nullptr;
     };

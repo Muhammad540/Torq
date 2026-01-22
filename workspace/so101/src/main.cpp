@@ -1,13 +1,16 @@
 #include "openmanip/RobotSystem.hpp"
 #include "openmanip/Visualizer.hpp"
+#include "openmanip/logger.hpp"
 #include <iostream>
+
+static Logger logger;
 
 int main(int argc, char** argv){
     openmanip::RobotSystem robot;
-    std::string modelPath = "/home/ambi/OpenManip/workspace/models/SO101/so101_new_calib.xml";
-
-    if (!robot.initialize(modelPath)){
-        std::cerr << "Failed to load model" << std::endl;
+    std::string modelPath_xml = "/home/ambi/OpenManip/workspace/models/SO101/so101_new_calib.xml";
+    std::string modelPath_urdf = "/home/ambi/OpenManip/workspace/models/SO101/so101_new_calib.urdf";
+    if (!robot.initialize(modelPath_xml, modelPath_urdf)){
+        logger.error() << "Failed to load model";
         return 1;
     }
 

@@ -11,20 +11,20 @@ namespace openmanip {
         kinematics_ = std::make_unique<KinematicsEngine>();
     }
     RobotSystem::~RobotSystem() {
-        log.info() << "[RobotSystem] cleaned up" << std::endl;
+        log.info() << "[RobotSystem] cleaned up";
     }
 
     bool RobotSystem::initialize(const std::string& model_path_xml, std::string& model_path_urdf) {
         if (!hardware_) {
-            log.error() << "[RobotSystem] Hardware abstraction not initialized" << std::endl;
+            log.error() << "[RobotSystem] Hardware abstraction not initialized";
             return false;
         }
-        if (!hardware_->connect(model_path)) {
-            log.error() << "[RobotSystem] Failed to connect Hardware" << std::endl;
+        if (!hardware_->connect(model_path_xml)) {
+            log.error() << "[RobotSystem] Failed to connect Hardware";
             return false;
         }
         if (!kinematics_->initialize(model_path_urdf)) {
-            log.error() << "[RobotSystem] Failed to initialize the Kinematics Engine" << std::endl;
+            log.error() << "[RobotSystem] Failed to initialize the Kinematics Engine";
             return false;
         }
         return true;

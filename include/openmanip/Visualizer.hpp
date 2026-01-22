@@ -1,6 +1,7 @@
 #ifndef VISUALIZER_HPP
 #define VISUALIZER_HPP
 
+#include "openmanip/logger.hpp"
 #include <memory>
 #include <string>
 
@@ -14,6 +15,8 @@ using mjvCamera  = struct mjvCamera_;
 using mjvOption  = struct mjvOption_;
 using mjvScene   = struct mjvScene_;
 using mjrContext = struct mjrContext_;
+
+class Logger; 
 
 namespace openmanip {
     class RobotSystem;
@@ -46,6 +49,8 @@ namespace openmanip {
             static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);
             static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
             static Visualizer* getVis(GLFWwindow* window);
+
+            mutable Logger logger;
     };
 }
 

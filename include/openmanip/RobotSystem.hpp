@@ -15,7 +15,7 @@ namespace openmanip {
             RobotSystem();
             ~RobotSystem();
 
-            bool initialize(const std::string& model_path);
+            bool initialize(const std::string& model_path_xml, std::string& model_path_urdf);
             // Update Sequence:
             // 1. step physics 
             // 2. get sensor data like joint pose 

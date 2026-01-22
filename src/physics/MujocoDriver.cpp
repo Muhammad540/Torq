@@ -1,4 +1,6 @@
 #include "openmanip/MujocoDriver.hpp"
+#include "openmanip/logger.hpp"
+
 #include "Eigen/src/Core/Matrix.h"
 #include "mujoco/mjdata.h"
 #include "mujoco/mjmodel.h"
@@ -9,14 +11,14 @@ namespace openmanip {
     MujocoDriver::MujocoDriver() {}
 
     MujocoDriver::~MujocoDriver() {
-        std::cout << "\033[32mMujocoDriver cleaned up\033[0m" << std::endl;
+        logger.info() << "[MujocoDriver] cleaned up";
     }
 
     bool MujocoDriver::loadModel(const std::string& model_path) {
         char error[1000];
         mjModel* raw_model_ = mj_loadXML(model_path.c_str(), nullptr, error, 1000);
         if (!raw_model_) {
-            std::cerr << "MujocoDriver::loadModel() Error: " << error << std::endl;
+            logger.error() << "[MujocoDriver] Error: " << error;
             return false;
         }
         model_.reset(raw_model_);
@@ -38,7 +40,7 @@ namespace openmanip {
     }
 
     void MujocoDriver::disconnect() {
-        std::cout << "\033[32mDisconnected\033[0m" << std::endl;
+        logger.info() << "[MujocoDriver] Disconnected";
         model_.reset();
         data_.reset();
     }
@@ -62,8 +64,8 @@ namespace openmanip {
     void MujocoDriver::setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
         if (!model_ || !data_) return;
         if (q.size() != model_->nq) {
-            std::cerr << "MujocoDriver::setJointPositions() Error: Size mismatch. "
-                      << "Expected " << model_->nq << ", got " << q.size() << std::endl;
+            logger.error() << "[MujocoDriver] Error: Size mismatch. "
+                           << "Expected " << model_->nq << ", got " << q.size();
             return;
         }
         Eigen::Map<Eigen::VectorXd>(data_->qpos, model_->nq) = q;
@@ -72,8 +74,8 @@ namespace openmanip {
     void MujocoDriver::setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd){
         if (!model_ || !data_) return;
         if (qd.size() != model_->nv) {
-            std::cerr << "MujocoDriver::setJointVelocities() Error: Size mismatch. "
-                      << "Expected " << model_->nv << ", got " << qd.size() << std::endl;
+            logger.error()  << "[MujocoDriver] Error: Size mismatch. "
+                            << "Expected " << model_->nv << ", got " << qd.size();
             return;
         }
         Eigen::Map<Eigen::VectorXd>(data_->qvel, model_->nv) = qd;

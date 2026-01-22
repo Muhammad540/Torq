@@ -2,8 +2,6 @@
 #include <exception>
 #include <memory>
 #include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/algorithm/joint-configuration.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include "Eigen/src/Core/Matrix.h"
@@ -11,28 +9,27 @@
 #include "pinocchio/multibody/fwd.hpp"
 
 namespace openmanip {
-    KinematicsEngine::KinematicsEngine();
+    KinematicsEngine::KinematicsEngine() {}
     KinematicsEngine::~KinematicsEngine() {}
 
     bool KinematicsEngine::initialize(const std::string& urdf_path) {
         try {
             model_ = std::make_unique<pinocchio::Model>();
-            pinocchio::urdf::buildModel(urdf_path, model_.get());
-            data_  = std::make_unique<pinocchio::Data>(model_.get());
-            log,info() << urdf_path << std::endl;
-            log,info() << "[Pinocchio] Read Joints: " << model_->nq << std::endl;
+            pinocchio::urdf::buildModel(urdf_path, *model_);
+            data_  = std::make_unique<pinocchio::Data>(*model_);
+            log.info() << urdf_path;
+            log.info() << "[Pinocchio] Read Joints: " << model_->nq;
             return true;
-        } catch(const std::exception as e) {
-            log.error() << "[Pinocchio] Error loading URDF: " << e.what() << std::endl;
+        } catch(const std::exception & e) {
+            log.error() << "[Pinocchio] Error loading URDF: " << e.what();
             return false;
         }
     }
 
     void KinematicsEngine::update(const Eigen::VectorXd& q) {
         if (!model_ || !data_) return;
-        pinocchio::forwardKinematics(model_.get(), data_.get(), q);
-        pinocchio::updateFramePlacement(model_.get(), data_.get());
-        pinocchio::computeJointJacobians(model_.get(), data_.get());
+        pinocchio::forwardKinematics(*model_, *data_, q);
+        pinocchio::computeJointJacobians(*model_, *data_);
     }
 
     // fw kin 
@@ -40,10 +37,10 @@ namespace openmanip {
         if (!model_ || !data_) return Eigen::Matrix4d::Identity();
         if (model_->existFrame(frame_name)){
             pinocchio::FrameIndex frameId = model_->getFrameId(frame_name);
-            const auto& transform = data_->oMf[frameid];
+            const auto& transform = data_->oMf[frameId];
             return transform.toHomogeneousMatrix();
-        } eles {
-            log.error() << "[Pinocchio] Frame not found: " << frame_name << std::endl;
+        } else {
+            log.error() << "[Pinocchio] Frame not found: " << frame_name;
             return Eigen::Matrix4d::Identity();
         }
     }
@@ -56,18 +53,18 @@ namespace openmanip {
 
         if (model_->existFrame(frame_name)){
             pinocchio::FrameIndex frameId = model_->getFrameId(frame_name);
-            pinocchio::getFrameJacobian(model_.get(), data_.get(), frameId, pinocchio::LOCAL_WORLD_ALIGNED, J);
+            pinocchio::getFrameJacobian(*model_, *data_, frameId, pinocchio::LOCAL_WORLD_ALIGNED, J);
         }
         return J;
     }
     
-    void printFrames(){
+    void KinematicsEngine::printFrames(){
         if (!model_){
-            log.info() << "[Pinocchio] Model not setup" << std::endl;
+            log.info() << "[Pinocchio] Model not setup";
         }
-        log.info() << "....... ROBOT FRAMES ....." << std::endl;
+        log.info() << "....... ROBOT FRAMES .....";
         for (const auto& frame: model_->frames){
-            log.info() << "Frame: " << frame.name << std::endl;
+            log.info() << "Frame: " << frame.name;
         }
     }
 }
