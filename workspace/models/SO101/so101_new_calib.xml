@@ -3,6 +3,11 @@
 <!-- Onshape https://cad.onshape.com/documents/7715cc284bb430fe6dab4ffd/w/4fd0791b683777b02f8d975a/e/826c553ede3b7592eb9ca800 -->
 <mujoco model="so101_new_calib">
   <compiler angle="radian" meshdir="assets" autolimits="true"/>
+  <visual>
+    <headlight active="1"/>
+    <global azimuth="120" elevation="-20"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+  </visual>
   <default>
     <default class="so101_new_calib">
       <joint damping="1" frictionloss="0.1" armature="0.005"/>
@@ -32,6 +37,8 @@
     </default>
   </default>
   <worldbody>
+    <geom name="floor" size="2 2 .05" type="plane" material="grid" condim="3"/>
+    <light name="spotlight" mode="targetbodycom" target="base" diffuse=".8 .8 .8" specular="0.3 0.3 0.3" pos="0 -1 3" cutoff="100"/>
     <!-- Link base -->
     <body name="base" pos="0 0 0" quat="1 0 0 0" childclass="so101_new_calib">
       <inertial pos="0.0137179 -5.19711e-05 0.0334843" mass="0.147" fullinertia="0.000114686 0.000136117 0.000130364 -4.59787e-07 4.97151e-06 9.75275e-08"/>
@@ -126,6 +133,9 @@
     </body>
   </worldbody>
   <asset>
+    <texture type="skybox" builtin="gradient" rgb1=".3 .5 .7" rgb2="0 0 0" width="32" height="32"/>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3" rgb2=".2 .3 .4"/>
+    <material name="grid" texture="grid" texrepeat="10 10" texuniform="true" reflectance=".2"/>
     <mesh file="waveshare_mounting_plate_so101_v2.stl"/>
     <mesh file="sts3215_03a_v1.stl"/>
     <mesh file="motor_holder_so101_base_v1.stl"/>

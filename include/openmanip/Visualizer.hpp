@@ -6,6 +6,8 @@
 #include <string>
 
 struct GLFWwindow;
+struct mjModel_;
+struct mjData_;
 struct mjvCamera_;
 struct mjvOption_;
 struct mjvScene_;
@@ -15,6 +17,9 @@ using mjvCamera  = struct mjvCamera_;
 using mjvOption  = struct mjvOption_;
 using mjvScene   = struct mjvScene_;
 using mjrContext = struct mjrContext_;
+using mjModel = struct mjModel_;
+using mjData = struct mjData_;
+
 
 class Logger; 
 
@@ -28,11 +33,16 @@ namespace openmanip {
 
             bool initialize(RobotSystem* robot_system, const std::string& title = "OpenManip");
             bool windowIsOpen() const;
+            /* NOTE(AHMED): user application is responsible to call this */
             void render();
 
+            void toggleOption(int flag);
+            void toggleFrame(int frameType);
+
+            mjvCamera* getCamera() { return cam_.get(); }
         private:
-            void *model_ = nullptr;
-            void *data_ = nullptr;
+            mjModel *model_ = nullptr;
+            mjData *data_ = nullptr;
 
             GLFWwindow *window_ = nullptr;
             std::unique_ptr<mjvCamera>  cam_;
@@ -42,6 +52,7 @@ namespace openmanip {
 
             bool buttonLeft_ = false;
             bool buttonRight_ = false;
+            bool buttonMiddle_ = false;
             double lastX_ = 0;
             double lastY_ = 0;
 
