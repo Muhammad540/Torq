@@ -1,3 +1,16 @@
+<!-- 
+Links: 
+  base_link (The root/base of the robot, usually at 0,0,0)
+  shoulder_link (Rotates via shoulder_pan)
+  upper_arm_link (Rotates via shoulder_lift)
+  lower_arm_link (Rotates via elbow_flex)
+  wrist_link (Rotates via wrist_flex)
+  gripper_link (Rotates via wrist_roll)
+End-Effector:
+  These are attached to the end of the arm:
+  gripper_frame_link
+  moving_jaw_so101_v1_link
+-->
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generated using onshape-to-robot -->
 <!-- Onshape https://cad.onshape.com/documents/7715cc284bb430fe6dab4ffd/w/4fd0791b683777b02f8d975a/e/826c553ede3b7592eb9ca800 -->

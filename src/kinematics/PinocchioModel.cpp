@@ -29,10 +29,17 @@ namespace openmanip {
     void KinematicsEngine::update(const Eigen::VectorXd& q) {
         if (!model_ || !data_) return;
         pinocchio::forwardKinematics(*model_, *data_, q);
+        // recomputing the frame position after fk 
+        pinocchio::updateFramePlacements(*model_, *data_);
         pinocchio::computeJointJacobians(*model_, *data_);
     }
 
-    // fw kin 
+    /*Returns a homogeneous transformation matrix:
+        [R R R tx]
+        [R R R ty]
+        [R R R tz]
+        [0 0 0  1]
+    */
     Eigen::Matrix4d KinematicsEngine::getFramePose(const std::string& frame_name) const{
         if (!model_ || !data_) return Eigen::Matrix4d::Identity();
         if (model_->existFrame(frame_name)){

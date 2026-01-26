@@ -24,6 +24,9 @@ namespace openmanip {
             
             // NOTE: for visualizer use only
             MujocoDriver* getPhysics();
+
+            // Common Getters
+            Eigen::Matrix4d getFramePose(std::string frame_name);
         private:
             Logger log;
             std::unique_ptr<HardwareInterface> hardware_;

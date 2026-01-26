@@ -1,4 +1,5 @@
 #include "openmanip/RobotSystem.hpp"
+#include "Eigen/src/Core/Matrix.h"
 #include "openmanip/MujocoDriver.hpp"
 #include "openmanip/PinocchioModel.hpp"
 
@@ -40,5 +41,9 @@ namespace openmanip {
 
     MujocoDriver* RobotSystem::getPhysics() {
         return dynamic_cast<MujocoDriver*>(hardware_.get());
+    }
+
+    Eigen::Matrix4d RobotSystem::getFramePose(std::string frame_name){
+        return kinematics_->getFramePose(frame_name);
     }
 }

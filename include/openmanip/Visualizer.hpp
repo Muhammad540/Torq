@@ -1,7 +1,9 @@
 #ifndef VISUALIZER_HPP
 #define VISUALIZER_HPP
 
+#include <Eigen/Dense>
 #include "openmanip/logger.hpp"
+#include <vector>
 #include <memory>
 #include <string>
 
@@ -25,6 +27,14 @@ class Logger;
 
 namespace openmanip {
     class RobotSystem;
+    
+    #ifdef ENABLE_TRACKING_POINTS
+    struct TrackingPoint{
+        Eigen::Vector3d position;
+        double radius;
+        Eigen::Vector3d color;
+    };
+    #endif
 
     class Visualizer {
         public:
@@ -40,6 +50,12 @@ namespace openmanip {
             void toggleFrame(int frameType);
 
             mjvCamera* getCamera() { return cam_.get(); }
+
+            // Methods for debugging
+            #ifdef ENABLE_TRACKING_POINTS
+            // Draws tracking point (internally updates the mjv Scene), user should call this method to specific the tracking points.
+            void drawtp(const Eigen::Vector3d& pos, double radius, const Eigen::Vector3d& color);
+            #endif
         private:
             mjModel *model_ = nullptr;
             mjData *data_ = nullptr;
@@ -47,6 +63,7 @@ namespace openmanip {
             GLFWwindow *window_ = nullptr;
             std::unique_ptr<mjvCamera>  cam_;
             std::unique_ptr<mjvOption>  opt_;
+            // NOTE: mjvscene holds list of all visual objects that need to be drawn in a single frame (This can be used to add decorative points like contact points, force vectors etc)
             std::unique_ptr<mjvScene>   scn_;
             std::unique_ptr<mjrContext> ctx_;
 
@@ -61,7 +78,11 @@ namespace openmanip {
             static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
             static Visualizer* getVis(GLFWwindow* window);
 
+            // Debugging Specific
             mutable Logger logger;
+            #ifdef ENABLE_TRACKING_POINTS
+            std::vector<openmanip::TrackingPoint> tps;
+            #endif
     };
 }
 

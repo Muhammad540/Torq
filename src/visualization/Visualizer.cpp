@@ -2,6 +2,7 @@
 #include "mujoco/mjdata.h"
 #include "mujoco/mjmodel.h"
 #include "mujoco/mjrender.h"
+#include "mujoco/mjtnum.h"
 #include "mujoco/mjvisualize.h"
 #include "openmanip/RobotSystem.hpp"
 #include "openmanip/MujocoDriver.hpp"
@@ -78,8 +79,31 @@ namespace openmanip {
         glfwGetFramebufferSize(window_, &viewport.width, &viewport.height);
 
         mjv_updateScene(model_, data_, opt_.get(), NULL, cam_.get(), mjCAT_ALL, scn_.get());
+        
+        #ifdef ENABLE_TRACKING_POINTS
+        for (const auto& point: tps){
+            if (scn_->ngeom < scn_->maxgeom){
+                mjvGeom* next_geom = scn_->geoms + scn_->ngeom;
+                float color[4] = {(float)point.color[0], (float)point.color[1], (float)point.color[2], 1.0f};
+                double pos[3] = {(double)point.position[0],(double)point.position[1],(double)point.position[2]};
+                double size[3] = {(double)point.radius, 0.0f, 0.0f};
+                
+                mjv_initGeom(next_geom, mjGEOM_SPHERE,size,pos,NULL,color);
+                next_geom->category = mjCAT_DECOR;
+                next_geom->emission = 0.5f;
+                scn_->ngeom += 1;
+            } else {
+                logger.warning() << "[VISUALIZER] Max geom exceeded!"; 
+                break;
+            }
+        }
+
+        tps.clear();
+        #endif
         mjr_render(viewport,scn_.get(),ctx_.get());
 
+        // Keeping track of simulation time 
+        // TODO(AHMED): Add wall clock time
         char timestr[50];
         std::snprintf(timestr, 50, "Time: %.3f", data_->time);
         mjr_overlay(mjFONT_NORMAL, mjGRID_BOTTOMLEFT, viewport, timestr, NULL, ctx_.get());
@@ -127,4 +151,9 @@ namespace openmanip {
         Visualizer* vis = getVis(window);
         mjv_moveCamera(vis->model_, mjMOUSE_ZOOM, 0, -0.05 * yoffset, vis->scn_.get(), vis->cam_.get());
     }
+    #ifdef ENABLE_TRACKING_POINTS
+    void Visualizer::drawtp(const Eigen::Vector3d &pos, double radius, const Eigen::Vector3d &color){
+        tps.push_back({pos, radius, color});
+    }
+    #endif
 }

@@ -17,6 +17,12 @@ cmake ..
 make -j4
 ```
 
+### Useful Compilation Flags
+
+| Flag | Description | Default | Usage |  
+|------|-------------|---------|-------|  
+| `ENABLE_TRACKING_POINTS` | Enables visualization of tracking points that can be manually added with position, size, and color | OFF | `cmake -DENABLE_TRACKING_POINTS=ON ..` |  
+
 ## Execute
 
 ```bash
