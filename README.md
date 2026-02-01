@@ -1,45 +1,83 @@
-# OpenManip: 
-**A C++ Framework for Robot Manipulation & Planning**
+# OpenManip
 
-OpenManip uses the physics simulation **MuJoCo** and rigid body dynamics algorithms from **Pinocchio**. It provides an environment for developing motion planning algorithms (RRT, IK) for robot manipulators.
+High performance C++ framework for robot manipulation that combines **MuJoCo** (physics + contacts) and **Pinocchio** (rigid body dynamics + kinematics) behind a concise and easy to use API. Designed for motion planning and control (FK/IK/RRT) with a **HAL** to switch simulation vs real hardware.
 
-## Installation
+## Dependencies
 
-This project targets **Linux (Ubuntu)**. While MuJoCo and YAML-CPP are downloaded automatically by CMake, **Pinocchio** must be installed on your system.
+- Linux (Ubuntu recommended)
+- CMake
+- Pinocchio (system install required)
+- Eigen3 (via Pinocchio on most setups)
+- MuJoCo (fetched by CMake)
+- yaml-cpp (fetched by CMake)
 
-## Setup
+### Install Pinocchio (Ubuntu)
+
+Follow the official Pinocchio installation instructions for your distro/toolchain:
+- https://stack-of-tasks.github.io/pinocchio/
+
+## Build
 
 ```bash
 git clone <this-repo>
 cd OpenManip
-mkdir build && cd build
+mkdir -p build && cd build
 cmake ..
-make -j4
+cmake --build . -j
 ```
 
-### Useful Compilation Flags
+### Useful CMake Options
 
-| Flag | Description | Default | Usage |  
-|------|-------------|---------|-------|  
-| `ENABLE_TRACKING_POINTS` | Enables visualization of tracking points that can be manually added with position, size, and color | OFF | `cmake -DENABLE_TRACKING_POINTS=ON ..` |  
+| Option | Description | Default |
+|------|-------------|---------|
+| `ENABLE_TRACKING_POINTS` | Visualize user defined tracking points (pos/size/color) | `OFF` |
 
-## Execute
+Example:
 
 ```bash
-cd bin
+cmake -DENABLE_TRACKING_POINTS=ON ..
+cmake --build . -j
+```
+
+## Run (SO-101 example)
+
+```bash
+cd build/bin
 ./so101_robot
 ```
 
-## Structure
+## Project Layout
 
 ```text
 OpenManip/
-├── models/        
-├── src/           
-│   ├── core/      
-│   ├── physics/   
-│   ├── kinematics/
-│   └── planning/  
-├── include/       
+├── include/                 # public API headers
+├── src/                     
+│   ├── core/                
+│   ├── physics/             
+│   ├── kinematics/          
+│   └── control/
+│
 └── workspace/
+    ├── models/               
+    ├── so101/               
+    └── <your_robot>/        # add your robot here
 ```
+
+## Architecture
+
+- **libopenmanip** (engine): reusable core library
+  - `RobotSystem`: loads config, owns physics + kinematics + control backends
+  - `MujocoDriver`: RAII wrapper around MuJoCo model/data, stepping, state IO
+  - `Visualizer`: passive viewer (render + input)
+  - `Pinocchio`: Handles FK/IK
+  - `Controller`
+  
+- **workspace/** (apps): robot specific code that links against the library
+  - example: `workspace/so101/src/main.cpp`
+
+## Sim vs Real (HAL)
+
+Planning/control code targets a driver interface; the driver decides where commands go.
+
+- `MujocoDriver`: simulation backend
+- `DynamixelDriver`: hardware backend
