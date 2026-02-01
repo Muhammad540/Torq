@@ -9,6 +9,8 @@
 
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/algorithm/kinematics.hpp"
+#include "pinocchio/spatial/se3.hpp"
+#include "pinocchio/spatial/explog.hpp"
 
 namespace openmanip {
 
@@ -27,6 +29,9 @@ namespace openmanip {
             // Jcb (6 x nq)
             Eigen::MatrixXd getFrameJacobian(const std::string& frame_name) const;
             
+            Eigen::VectorXd integrate(const Eigen::VectorXd& q, const Eigen::VectorXd& v, double dt);
+
+            Eigen::VectorXd computeTwistError(const std::string& frame_name, const Eigen::Matrix4d& target_pose);
             void printFrames();
         
         private:

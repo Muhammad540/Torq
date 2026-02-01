@@ -5,7 +5,6 @@
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include "Eigen/src/Core/Matrix.h"
-#include "openmanip/logger.hpp"
 #include "pinocchio/multibody/fwd.hpp"
 
 namespace openmanip {
@@ -64,7 +63,46 @@ namespace openmanip {
         }
         return J;
     }
-    
+
+    Eigen::VectorXd KinematicsEngine::integrate(const Eigen::VectorXd& q, const Eigen::VectorXd& v, double dt){
+      if (!model_) {
+	    log.error() << "[Pinocchio] Model not setup";
+	    return q;
+      }
+      Eigen::VectorXd q_next(model_->nq);
+      pinocchio::integrate(*model_, q, v*dt, q_next);
+      return q_next;
+    }
+
+    Eigen::VectorXd KinematicsEngine::computeTwistError(const std::string& frame_name, const Eigen::Matrix4d& target_pose){
+      if (!model_ || !data_){
+	    log.error() << "[Pinocchio] Model and Data not setup";
+	    return Eigen::VectorXd::Zero(6);
+          }
+
+        if (model_->existFrame(frame_name)){
+	        pinocchio::FrameIndex frameId = model_->getFrameId(frame_name);
+
+	        // oMf -> stores transformations of the 'operational' frames wrt world origin
+	        const pinocchio::SE3& T_curr = data_->oMf[frameId];
+
+	        pinocchio::SE3 T_des( target_pose.block<3,3>(0,0), target_pose.block<3,1>(0,3) );
+
+	        // Terr,body = Tcurr^-1 * Tdes
+	        pinocchio::SE3 err_body = T_curr.actInv(T_des);
+
+	        // SE(3) -> se(3) body frame 
+	        pinocchio::Motion v_err_body = pinocchio::log6(err_body);
+
+	        // lwa: local world alligned
+	        pinocchio::Motion v_err_lwa  = T_curr.act(v_err_body);
+
+	        return v_err_lwa.toVector();	
+        }
+
+        return Eigen::VectorXd::Zero(6);
+    }
+     
     void KinematicsEngine::printFrames(){
         if (!model_){
             log.info() << "[Pinocchio] Model not setup";

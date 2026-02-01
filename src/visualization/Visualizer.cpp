@@ -81,24 +81,24 @@ namespace openmanip {
         mjv_updateScene(model_, data_, opt_.get(), NULL, cam_.get(), mjCAT_ALL, scn_.get());
         
         #ifdef ENABLE_TRACKING_POINTS
-        for (const auto& point: tps){
-            if (scn_->ngeom < scn_->maxgeom){
-                mjvGeom* next_geom = scn_->geoms + scn_->ngeom;
-                float color[4] = {(float)point.color[0], (float)point.color[1], (float)point.color[2], 1.0f};
-                double pos[3] = {(double)point.position[0],(double)point.position[1],(double)point.position[2]};
-                double size[3] = {(double)point.radius, 0.0f, 0.0f};
-                
-                mjv_initGeom(next_geom, mjGEOM_SPHERE,size,pos,NULL,color);
-                next_geom->category = mjCAT_DECOR;
-                next_geom->emission = 0.5f;
-                scn_->ngeom += 1;
-            } else {
-                logger.warning() << "[VISUALIZER] Max geom exceeded!"; 
-                break;
+            for (const auto& point: tps){
+                if (scn_->ngeom < scn_->maxgeom){
+                    mjvGeom* next_geom = scn_->geoms + scn_->ngeom;
+                    float color[4] = {(float)point.color[0], (float)point.color[1], (float)point.color[2], 1.0f};
+                    double pos[3] = {(double)point.position[0],(double)point.position[1],(double)point.position[2]};
+                    double size[3] = {(double)point.radius, 0.0f, 0.0f};
+                    
+                    mjv_initGeom(next_geom, mjGEOM_SPHERE,size,pos,NULL,color);
+                    next_geom->category = mjCAT_DECOR;
+                    next_geom->emission = 0.5f;
+                    scn_->ngeom += 1;
+                } else {
+                    logger.warning() << "[VISUALIZER] Max geom exceeded!"; 
+                    break;
+                }
             }
-        }
 
-        tps.clear();
+            tps.clear();
         #endif
         mjr_render(viewport,scn_.get(),ctx_.get());
 

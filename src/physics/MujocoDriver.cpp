@@ -61,7 +61,7 @@ namespace openmanip {
         return Eigen::Map<const Eigen::VectorXd>(data_->qvel, model_->nv);
     }
     
-    void MujocoDriver::setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
+    void MujocoDriver::overrideJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
         if (!model_ || !data_) return;
         if (q.size() != model_->nq) {
             logger.error() << "[MujocoDriver] Error: Size mismatch. "
@@ -71,7 +71,7 @@ namespace openmanip {
         Eigen::Map<Eigen::VectorXd>(data_->qpos, model_->nq) = q;
     }
 
-    void MujocoDriver::setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd){
+    void MujocoDriver::overrideJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd){
         if (!model_ || !data_) return;
         if (qd.size() != model_->nv) {
             logger.error()  << "[MujocoDriver] Error: Size mismatch. "

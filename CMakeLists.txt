@@ -51,6 +51,8 @@ set(CORE_SOURCES
     src/core/RobotSystem.cpp
     src/visualization/Visualizer.cpp
     src/kinematics/PinocchioModel.cpp
+    src/control/Controller.cpp
+    src/control/InverseKinematics.cpp
 )
 
 add_library(openmanip SHARED ${CORE_SOURCES})

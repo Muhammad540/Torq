@@ -53,7 +53,7 @@ namespace openmanip {
 
             // Methods for debugging
             #ifdef ENABLE_TRACKING_POINTS
-            // Draws tracking point (internally updates the mjv Scene), user should call this method to specific the tracking points.
+            // Draws tracking point (internally updates the mjv Scene), user should call this method to add specific stracking points.
             void drawtp(const Eigen::Vector3d& pos, double radius, const Eigen::Vector3d& color);
             #endif
         private:

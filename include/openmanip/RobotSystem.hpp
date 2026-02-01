@@ -5,6 +5,7 @@
 #include "HardwareInterface.hpp"
 #include "logger.hpp"
 #include "PinocchioModel.hpp"
+#include "Controller.hpp"
 
 #include <string>
 #include <memory>
@@ -25,12 +26,17 @@ namespace openmanip {
             // NOTE: for visualizer use only
             MujocoDriver* getPhysics();
 
+            // Manipulation Utilities
+            void setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, std::string frame_name);
+            void setJointSpaceTarget(const Eigen::VectorXd& target_pose);
+
             // Common Getters
             Eigen::Matrix4d getFramePose(std::string frame_name);
         private:
             Logger log;
             std::unique_ptr<HardwareInterface> hardware_;
             std::unique_ptr<KinematicsEngine> kinematics_;
+            std::unique_ptr<Controller> controller_;
     };
 }
 

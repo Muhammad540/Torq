@@ -1,6 +1,7 @@
 #include "openmanip/RobotSystem.hpp"
 #include "openmanip/Visualizer.hpp"
 #include "openmanip/logger.hpp"
+#include <Eigen/src/Core/Matrix.h>
 #include <iostream>
 
 static Logger logger;
@@ -16,6 +17,12 @@ int main(int argc, char** argv){
 
     openmanip::Visualizer vis;
     vis.initialize(&robot, "SO-100 Control");
+
+    // TEST: IK
+    Eigen::Matrix4d target = Eigen::Matrix4d::Identity();
+    target.block<3,1>(0,3) << 1.0, 1.0, 1.0;
+    
+    robot.setTaskSpaceTarget(target, "gripper_frame_link");
 
     while (vis.windowIsOpen()){
         for (int i=0; i<10; ++i){

@@ -10,6 +10,7 @@ namespace openmanip {
     RobotSystem::RobotSystem() {
         hardware_ = std::make_unique<MujocoDriver>();
         kinematics_ = std::make_unique<KinematicsEngine>();
+	    controller_ = std::make_unique<Controller>(kinematics_.get(), hardware_.get());
     }
     RobotSystem::~RobotSystem() {
         log.info() << "[RobotSystem] cleaned up";
@@ -31,12 +32,42 @@ namespace openmanip {
         return true;
     }
 
+    void RobotSystem::setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, std::string frame_name) {
+      if (controller_){
+	    controller_->setTaskSpaceTarget(target_pose, frame_name);
+      } else {
+	    log.error() << "[RobotSystem] Failed to initialize the Controller";
+      }
+    }
+
+    void RobotSystem::setJointSpaceTarget(const Eigen::VectorXd& target_pose){
+      if (controller_){
+	    controller_->setJointSpaceTarget(target_pose);
+      } else {
+        log.error() << "[RobotSystem] Failed to initialize the Controller";
+      }
+    }
+
     void RobotSystem::update() {
-        if (hardware_ && kinematics_) {
-            hardware_->step();
-            Eigen::VectorXd jp = hardware_->getJointPositions();
-            kinematics_->update(jp);   
-        }
+            if (hardware_ && kinematics_) {
+	        // step physics 
+	        hardware_->step();
+
+	        // get sensor data 
+	        Eigen::VectorXd jp = hardware_->getJointPositions();
+
+	        // sync kinematics 
+	        kinematics_->update(jp);   
+
+	        // run controller
+	        if (controller_){
+	          controller_->update();
+ 	        } else {
+	          log.error() << "[RobotSystem] Controller not ready";
+	        }
+	    } else {
+	      log.error() << "[RobotSystem] Hardware or Kinematics Engine not ready";
+	    }
     }
 
     MujocoDriver* RobotSystem::getPhysics() {

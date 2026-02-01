@@ -5,9 +5,12 @@
 [] Collision Detector
 [] RRTPlanner
 [] HAL is needed, package Mujoco Driver using it sort of done
+[] Path Planning
 
 # MEDIUM 
 [] Dynamixel Driver
+[] Fix the duplicate URDF/XML input to the RobotSystem (for mujoco and Pinocchio) i think both can work with either one of the them.
  
 # LOW
-[] startup is a bit slow, the glfwWindow comes up after around 5 to 7 seconds.
+[] startup is a bit slow, debug this.
+[] add doxygen docs
