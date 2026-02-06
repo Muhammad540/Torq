@@ -20,7 +20,7 @@ int main(int argc, char** argv){
 
     // TEST: IK
     Eigen::Matrix4d target = Eigen::Matrix4d::Identity();
-    target.block<3,1>(0,3) << 1.0, 1.0, 1.0;
+    target.block<3,1>(0,3) << 0.5, 0.3, 0.5;
     
     robot.setTaskSpaceTarget(target, "gripper_frame_link");
 

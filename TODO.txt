@@ -6,11 +6,15 @@
 [] RRTPlanner
 [] HAL is needed, package Mujoco Driver using it sort of done
 [] Path Planning
+[] add control visualizer (to move each joints), enable/disable frames, enables/disable world frame axes
 
 # MEDIUM 
 [] Dynamixel Driver
 [] Fix the duplicate URDF/XML input to the RobotSystem (for mujoco and Pinocchio) i think both can work with either one of the them.
- 
+[] caching to reuse pose estiamtes btw frames
+[] Behavior Tree Example
+[] Display force contacts
+
 # LOW
 [] startup is a bit slow, debug this.
 [] add doxygen docs

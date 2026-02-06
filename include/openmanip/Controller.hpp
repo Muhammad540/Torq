@@ -20,6 +20,11 @@ namespace openmanip{
   struct ControllerConfig{
     float dt = 1;
   };
+
+  enum class TaskSpaceOutput {
+    Position, 
+    Velcotiy
+  };
   
   class Controller {
   // TODO: Add collision/safety checking to this class before sending to IK  
@@ -29,6 +34,7 @@ namespace openmanip{
 
     void setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, const std::string& frame_name);
     void setJointSpaceTarget(const Eigen::VectorXd& target_joints);
+    void setTaskSpaceOutput(const TaskSpaceOutput out) {task_output_ = out; }
     void update();
     
   private:
@@ -42,6 +48,7 @@ namespace openmanip{
     Eigen::Matrix4d target_pose_;
     std::string end_effector_frame_;
     Eigen::VectorXd target_joints_;
+    TaskSpaceOutput task_output_ = TaskSpaceOutput::Position;
 
     Logger logger;  
   };

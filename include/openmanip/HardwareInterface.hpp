@@ -16,8 +16,8 @@ namespace openmanip {
             virtual Eigen::VectorXd getJointPositions() const = 0;
             virtual Eigen::VectorXd getJointVelocities() const = 0;
             
-            virtual void overrideJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q) = 0;
-            virtual void overrideJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd) = 0;
+            virtual void setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q) = 0;
+            virtual void setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd) = 0;
             
             virtual void step() = 0;
             virtual double getTimestep() const = 0;

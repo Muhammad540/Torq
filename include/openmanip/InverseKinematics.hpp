@@ -12,7 +12,9 @@ namespace openmanip{
     // DLS damping factor 
     float damping = 1e-4;
     // Maximum joint velocity limit
-    float velocity_limit = 10.0;
+    double velocity_limit = 10.0;
+    // kp (1/s)
+    float kp = 1.0; 
   };
   
 class InverseKinematics{

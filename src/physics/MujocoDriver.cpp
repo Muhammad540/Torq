@@ -8,7 +8,9 @@
 #include <iostream>
 
 namespace openmanip {
-    MujocoDriver::MujocoDriver() {}
+    MujocoDriver::MujocoDriver() {
+        logger.info() << "[MujocoDriver] Initializing  ...";
+    }
 
     MujocoDriver::~MujocoDriver() {
         logger.info() << "[MujocoDriver] cleaned up";
@@ -79,6 +81,14 @@ namespace openmanip {
             return;
         }
         Eigen::Map<Eigen::VectorXd>(data_->qvel, model_->nv) = qd;
+    }
+
+
+    void MujocoDriver::setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
+        this->overrideJointPositions(q);
+    }
+    void MujocoDriver::setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd){
+        this->overrideJointVelocities(qd);
     }
     
     double MujocoDriver::getTimestep() const{

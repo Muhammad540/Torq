@@ -13,11 +13,12 @@ namespace openmanip {
 
     bool KinematicsEngine::initialize(const std::string& urdf_path) {
         try {
+            log.info() << "[Pinocchio] Initializing model for Pinocchio";
             model_ = std::make_unique<pinocchio::Model>();
             pinocchio::urdf::buildModel(urdf_path, *model_);
             data_  = std::make_unique<pinocchio::Data>(*model_);
             log.info() << urdf_path;
-            log.info() << "[Pinocchio] Read Joints: " << model_->nq;
+            log.info() << "[Pinocchio] Read " << model_->nq << " Joints.";
             return true;
         } catch(const std::exception & e) {
             log.error() << "[Pinocchio] Error loading URDF: " << e.what();
@@ -75,31 +76,24 @@ namespace openmanip {
     }
 
     Eigen::VectorXd KinematicsEngine::computeTwistError(const std::string& frame_name, const Eigen::Matrix4d& target_pose){
-      if (!model_ || !data_){
-	    log.error() << "[Pinocchio] Model and Data not setup";
-	    return Eigen::VectorXd::Zero(6);
-          }
+        if (!model_ || !data_){
+            log.error() << "[Pinocchio] Model and Data not setup";
+            return Eigen::VectorXd::Zero(6);
+        }
 
         if (model_->existFrame(frame_name)){
 	        pinocchio::FrameIndex frameId = model_->getFrameId(frame_name);
-
 	        // oMf -> stores transformations of the 'operational' frames wrt world origin
 	        const pinocchio::SE3& T_curr = data_->oMf[frameId];
-
 	        pinocchio::SE3 T_des( target_pose.block<3,3>(0,0), target_pose.block<3,1>(0,3) );
-
 	        // Terr,body = Tcurr^-1 * Tdes
 	        pinocchio::SE3 err_body = T_curr.actInv(T_des);
-
 	        // SE(3) -> se(3) body frame 
 	        pinocchio::Motion v_err_body = pinocchio::log6(err_body);
-
 	        // lwa: local world alligned
 	        pinocchio::Motion v_err_lwa  = T_curr.act(v_err_body);
-
 	        return v_err_lwa.toVector();	
         }
-
         return Eigen::VectorXd::Zero(6);
     }
      
