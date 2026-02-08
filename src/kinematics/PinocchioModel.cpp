@@ -1,3 +1,4 @@
+
 #include "openmanip/PinocchioModel.hpp"
 #include <exception>
 #include <memory>
@@ -17,7 +18,7 @@ namespace openmanip {
             model_ = std::make_unique<pinocchio::Model>();
             pinocchio::urdf::buildModel(urdf_path, *model_);
             data_  = std::make_unique<pinocchio::Data>(*model_);
-            log.info() << urdf_path;
+            log.info() << "[Pinocchio] Fetched model from: "  << urdf_path;
             log.info() << "[Pinocchio] Read " << model_->nq << " Joints.";
             return true;
         } catch(const std::exception & e) {
@@ -57,7 +58,7 @@ namespace openmanip {
         if (!model_ || !data_) return Eigen::MatrixXd::Zero(6, model_->nv);
         Eigen::MatrixXd J(6, model_->nv);
         J.setZero();
-
+	
         if (model_->existFrame(frame_name)){
             pinocchio::FrameIndex frameId = model_->getFrameId(frame_name);
             pinocchio::getFrameJacobian(*model_, *data_, frameId, pinocchio::LOCAL_WORLD_ALIGNED, J);

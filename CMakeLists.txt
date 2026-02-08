@@ -20,6 +20,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # ============
 # Dependencies
 # ============
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+
 include(FetchContent)
 
 set(MUJOCO_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -37,11 +40,28 @@ find_package(pinocchio REQUIRED)
 message(STATUS "Found Pinocchio version: ${pinocchio_VERSION}")
 
 FetchContent_Declare(
-    yaml-cpp
-    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-    GIT_TAG        master
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG docking
 )
-FetchContent_MakeAvailable(yaml-cpp)
+FetchContent_MakeAvailable(imgui)
+add_library(imgui_lib STATIC
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
+target_include_directories(imgui_lib PUBLIC
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
+)
+
+target_link_libraries(imgui_lib PUBLIC glfw)
+set_target_properties(imgui_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # =======
 # Library
@@ -49,7 +69,7 @@ FetchContent_MakeAvailable(yaml-cpp)
 set(CORE_SOURCES
     src/physics/MujocoDriver.cpp
     src/core/RobotSystem.cpp
-    src/visualization/Visualizer.cpp
+    src/gui/Gui.cpp
     src/kinematics/PinocchioModel.cpp
     src/control/Controller.cpp
     src/control/InverseKinematics.cpp
@@ -64,9 +84,11 @@ target_include_directories(openmanip PUBLIC
 
 target_link_libraries(openmanip PUBLIC
     glfw
+    OpenGL::GL
+    GLEW::GLEW
     pinocchio::pinocchio
     mujoco::mujoco
-    yaml-cpp
+    imgui_lib
 )
 
 set_target_properties(openmanip PROPERTIES NO_SYSTEM_FROM_IMPORTED ON)

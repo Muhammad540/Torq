@@ -66,17 +66,20 @@ namespace openmanip {
     void MujocoDriver::overrideJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
         if (!model_ || !data_) return;
         if (q.size() != model_->nq) {
-            logger.error() << "[MujocoDriver] Error: Size mismatch. "
+            logger.error() << "[MujocoDriver] Size mismatch. "
                            << "Expected " << model_->nq << ", got " << q.size();
             return;
         }
         Eigen::Map<Eigen::VectorXd>(data_->qpos, model_->nq) = q;
+        Eigen::Map<Eigen::VectorXd>(data_->ctrl, model_->nu) = q.head(model_->nu);
+        Eigen::Map<Eigen::VectorXd>(data_->qvel, model_->nv).setZero();
+        mj_forward(model_.get(), data_.get());
     }
 
     void MujocoDriver::overrideJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd){
         if (!model_ || !data_) return;
         if (qd.size() != model_->nv) {
-            logger.error()  << "[MujocoDriver] Error: Size mismatch. "
+            logger.error()  << "[MujocoDriver] Size mismatch. "
                             << "Expected " << model_->nv << ", got " << qd.size();
             return;
         }
@@ -85,10 +88,24 @@ namespace openmanip {
 
 
     void MujocoDriver::setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
-        this->overrideJointPositions(q);
+        if (!model_ || !data_) return;
+        if (q.size() != model_->nu){
+            logger.error() << "[MujocoDriver] Size mismatch. " << "Expected nu = " << model_->nu << ", got " << q.size();
+            return; 
+        }
+        Eigen::Map<Eigen::VectorXd>(data_->ctrl, model_->nu) = q;
     }
-    void MujocoDriver::setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd){
-        this->overrideJointVelocities(qd);
+    
+    void MujocoDriver::setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qdot){
+        if (!model_ || !data_) return;
+        if (qdot.size() != model_->nu){
+            logger.error() << "[MujocoDriver] Size mismatch. " << "Expected nu = " << model_->nu << ", got " << qdot.size();
+            return; 
+        }
+        // TODO: fix based on the actuators used in the sim model, currently assuming for the Position actuators
+        const double dt = getTimestep();
+        Eigen::Map<Eigen::VectorXd> ctrl_(data_->ctrl, model_->nu);
+        ctrl_ += qdot * dt;
     }
     
     double MujocoDriver::getTimestep() const{
