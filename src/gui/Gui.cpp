@@ -1,4 +1,5 @@
 #include "openmanip/Gui.hpp"
+#include "imgui_internal.h"
 #include "mujoco/mjrender.h"
 #include "mujoco/mjvisualize.h"
 #include "openmanip/RobotSystem.hpp"
@@ -125,7 +126,12 @@ namespace openmanip {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::DockSpaceOverViewport();
+        ImGuiID dockspaceid = ImGui::DockSpaceOverViewport();
+
+        if (first_frame_){
+            setupDockLayout(dockspaceid);
+            first_frame_ = false;
+        }
 
         // drawMenuBar();
         drawViewport();
@@ -174,7 +180,18 @@ namespace openmanip {
     }
 
     void Gui::setupDockLayout(unsigned int dockerspace_id){
+        ImGui::DockBuilderRemoveNodeChildNodes(dockerspace_id);
+        ImGui::DockBuilderAddNode(dockerspace_id, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dockerspace_id, ImGui::GetMainViewport()->Size);
         
+        ImGuiID dock_left, dock_center, dock_right;
+        ImGui::DockBuilderSplitNode(dockerspace_id, ImGuiDir_Left, 0.25f, &dock_left, &dock_center);
+        ImGui::DockBuilderSplitNode(dockerspace_id, ImGuiDir_Right, 0.25f, &dock_right, &dock_center);
+
+        ImGui::DockBuilderDockWindow("Viewport", dock_center);
+        ImGui::DockBuilderDockWindow("Joint Control", dock_left);
+        ImGui::DockBuilderDockWindow("Cartesian Control", dock_right);
+        ImGui::DockBuilderFinish(dockerspace_id);
     }
 
     void Gui::drawViewport(){

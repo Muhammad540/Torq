@@ -76,6 +76,7 @@ namespace openmanip {
             std::array<float, 4> clear_color_ = {0.45f, 0.55f, 0.60f, 1.00f};
             void createFBO(int width, int height);
             void destroyFBO();
+            bool first_frame_ = false;
 
             void setupDockLayout(unsigned int dockerspace_id);
             // void drawMenuBar();
