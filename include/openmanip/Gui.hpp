@@ -65,6 +65,7 @@ namespace openmanip {
             std::unique_ptr<mjvScene>   scn_;
             std::unique_ptr<mjrContext> ctx_;
 
+            //TODO(fix): get the frames from the urdf model
             std::vector<std::string> bnames_ = {};
             void getBodyNames(const mjModel*, std::vector<std::string>&);
 
@@ -86,9 +87,10 @@ namespace openmanip {
             // void drawInfoPanel();
 
             std::vector<float> joint_targets_;
-            std::array<float, 6> ik_target_= {};
+            std::array<float, 6> ik_target_= {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
             bool use_ik_ = false;
             std::string ik_frame_name_;
+            int selected_frame_idx_ = 0;
 
             static Gui* getGui(GLFWwindow* window);
 

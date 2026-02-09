@@ -1,4 +1,7 @@
 #include "openmanip/Gui.hpp"
+#include "Eigen/src/Core/Matrix.h"
+#include "Eigen/src/Geometry/AngleAxis.h"
+#include "Eigen/src/Geometry/Quaternion.h"
 #include "imgui_internal.h"
 #include "mujoco/mjrender.h"
 #include "mujoco/mjvisualize.h"
@@ -274,25 +277,23 @@ namespace openmanip {
         ImGui::Text("Inverse Kinematics - Task Space Jog");
         ImGui::Separator();
         
-        static char frameBuf[128] = {};
-        // TODO: check truncation 
-        snprintf(frameBuf, sizeof(frameBuf), "%s", bnames_.back().c_str());
-        int current_idx = -1;
-        for (int i = 0; i < (int)bnames_.size(); i++){
-            if (bnames_[i] == std::string(frameBuf)){
-                current_idx = i;
-                break;
-            }
+        if (bnames_.empty()){
+            ImGui::TextColored(ImVec4(1,0,0,1), "No Body names available");
+            ImGui::End();
+            return;
         }
 
-        ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_HeightLarge;
+        if (selected_frame_idx_ >= (int(bnames_.size()))) {selected_frame_idx_ = 0;}
+        
+        ImGuiComboFlags flags = ImGuiComboFlags_HeightLarge;
+        const char* preview = bnames_[selected_frame_idx_].c_str();
 
-        if (ImGui::BeginCombo("EE Frame", frameBuf, flags)){
+        if (ImGui::BeginCombo("Target Frame", preview, flags)){
             for (int n=0; n<(int)bnames_.size(); n++){
-                const bool is_selected = (current_idx == n);
+                const bool is_selected = (selected_frame_idx_ == n);
 
                 if (ImGui::Selectable(bnames_[n].c_str(), is_selected)){
-                    snprintf(frameBuf, sizeof(frameBuf), "%s", bnames_[n].c_str());
+                    selected_frame_idx_ = n;
                 }
 
                 if (is_selected) {
@@ -302,17 +303,37 @@ namespace openmanip {
             ImGui::EndCombo();
         }
 
-        ImGui::SliderFloat("X", &ik_target_[0], -1.0f, 1.0f, "%.2f m");
-        ImGui::SliderFloat("X", &ik_target_[1], -1.0f, 1.0f, "%.2f m");
-        ImGui::SliderFloat("X", &ik_target_[2],  0.0f, 1.0f, "%.2f m");
+        ImGui::Separator();
+        ImGui::Text("Target Position (m)");
+
+        ImGui::DragFloat("X", &ik_target_[0], 0.005f, -2.0f, 2.0f, "%.3f");
+        ImGui::DragFloat("Y", &ik_target_[1], 0.005f, -2.0f, 2.0f, "%.3f");
+        ImGui::DragFloat("Z", &ik_target_[2], 0.005f,  0.0f, 2.0f, "%.3f");
+        
+        ImGui::Separator();
+        ImGui::Text("Target Orientation (RPY - Rad)");
+
+        ImGui::DragFloat("Roll",  &ik_target_[3], 0.01f, -3.14159f, 3.14159f, "%.3f");
+        ImGui::DragFloat("Pitch", &ik_target_[4], 0.01f, -3.14159f, 3.14159f, "%.3f");
+        ImGui::DragFloat("Yaw",   &ik_target_[5], 0.01f, -3.14159f, 3.14159f, "%.3f");
+
+        if (ImGui::Button("Reset to Zero")) {
+            ik_target_.fill(0.0f);
+        }
 
         if (ImGui::Button("Send IK Target")) {
-            Eigen::Matrix4d target = Eigen::Matrix4d::Identity();
-            target(0,3) = ik_target_[0];
-            target(1,3) = ik_target_[1];
-            target(2,3) = ik_target_[2];
+            Eigen::Vector3d translation{ik_target_[0],ik_target_[1],ik_target_[2]};
+            Eigen::AngleAxisd rollAngle(ik_target_[3], Eigen::Vector3d::UnitX());
+            Eigen::AngleAxisd pitchAngle(ik_target_[4], Eigen::Vector3d::UnitY());
+            Eigen::AngleAxisd yawAngle(ik_target_[5], Eigen::Vector3d::UnitZ());
             
-            robot_->setTaskSpaceTarget(target, std::string(frameBuf));
+            Eigen::Quaterniond q = yawAngle * pitchAngle * rollAngle;
+            Eigen::Matrix3d rotationMatrix = q.matrix();
+
+            Eigen::Matrix4d target = Eigen::Matrix4d::Identity();
+            target.block<3,3>(0,0) = rotationMatrix;
+            target.block<3,1>(0,3) = translation;
+            robot_->setTaskSpaceTarget(target, "gripper_frame_link");
         }
 
         ImGui::End();    
