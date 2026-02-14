@@ -1,110 +1,147 @@
-
 #include "openmanip/PinocchioModel.hpp"
-#include <exception>
-#include <memory>
+#include "openmanip/utils.hpp"
+
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
-#include "Eigen/src/Core/Matrix.h"
-#include "pinocchio/multibody/fwd.hpp"
 
 namespace openmanip {
-    KinematicsEngine::KinematicsEngine() {}
-    KinematicsEngine::~KinematicsEngine() {}
+    Configuration::Configuration(
+        const pinocchio::Model& model,
+        const pinocchio::Data& data,
+        const Eigen::VectorXd& q,
+        bool forward_kinematics,
+        std::shared_ptr<pinocchio::GeometryModel> collision_model,
+        std::shared_ptr<pinocchio::GeometryData> collision_data)
+        : model_(model)
+        , data_(data)
+        , q_(q)
+        , collision_model_(std::move(collision_model))
+        , collision_data_(std::move(collision_data)){
+        if (collision_model_ && !collision_data_){
+	        collision_data_ = std::make_shared<pinocchio::GeometryData>(*collision_model_);
+            log.info() << "[Configuration] Created collision data from collision model";
+        }
+        if(forward_kinematics){
+	        update();
+        }      
+    }
 
+    void Configuration::update(const std::optional<Eigen::VectorXd>& q_in){
+        if (q_in.has_value()){
+	        q_ = q_in.value();
+        }
+        
+        if (collision_model_ && collision_data_){
+	        pinocchio::computeCollisions(model_, data_, collision_model_.get(), collision_data_.get(), q_, false);
+	        pinocchio::computeDistances(model_, data_, collision_model_.get(), collision_data_.get(), q_);
+        }
+        pinocchio::computeJointJacobians(model_, data_, q_);
+        pinocchio::updateFramePlacements(model_, data_);
+    }
+
+    void Configuration::checklimits(double tol, bool safety_break) {
+        const auto& q_max = model_.upperPositionLimit;
+        const auto& q_min = model_.lowerPositionLimit;
+        auto [root_nq, root_nv] = get_root_joint_dim(model_);
+
+        for (int i = root_nq; i < model_.nq; i++){
+            if (q_max(i) <= q_min(i) + tol){
+                continue;
+            }
+            if (q_(i) < q_min(i) - tol || q_(i) > q_max(i) + tol){
+                if (safety_break){
+                    last_error_ = ErrorCode::NotWithinConfigurationLimits;
+		    log.warning() << "[Configuration] Joint " << i
+				   << " violates limits: " << q_(i)
+				   << " not in [" << q_min(i)
+				   << ", " << q_max(i) << "]";
+                    return;
+                }
+		log.warning() << "[Configuration] Warning: Value " << q_(i)
+                                  << " at index " << i
+                                  << " is out of limits: [" << q_min(i)
+                                  << ", " << q_max(i) << "]";
+            }
+        }
+    }
+
+    Eigen::MatrixXd Configuration::getFrameJacobian(const std::string& frame) const {
+        if (!model_.existFrame(frame)){
+            last_error_ = ErrorCode::FrameNotFound;
+	    log.warning() << "[Configuration] Frame not found";
+	    return Eigen::MatrixXd::Zero(6, model_.nv);
+        }
+	
+        auto frame_id = model_.getFrameId(frame);
+	Eigen::MatrixXd J(6, model_.nv);
+        J.setZero();
+        pinocchio::getFrameJacobian(model_, data_, frame_id, pinocchio::LOCAL, J);
+        return J;
+    }
+
+    pinocchio::SE3 Configuration::getTransformFrameToWorld(const std::string& frame) const {
+      if (!model_.existFrame(frame)){
+	last_error_ = ErrorCode::FrameNotFound;
+	log.warning() << "[Configuration] frame not found: " << frame;
+	return pinocchio::SE3::Identity();
+      }
+
+      auto frame_id = model_.getFrameId(frame);
+      return data_.oMf[frame_id];
+    }
+
+    pinocchio::SE3 Configuration::getTransform(const std::string& source, const std::string& dest) const {
+        auto transform_source_to_world = getTransformFrameToWorld(source);
+        auto transform_dest_to_world = getTransformFrameToWorld(dest);
+
+	if (last_error_ != ErrorCode::None){
+	    return pinocchio::SE3::Identity();
+	}
+
+	return transform_dest_to_world.actInv(transform_source_to_world);    
+
+    }
+  
+    Eigen::VectorXd Configuration::integrate(const Eigen::VectorXd& velocity, double dt){
+        return pinocchio::integrate(model_, q_, velocity*dt);
+    }
+
+    
+    void Configuration::integrate_inplace(const Eigen::VectorXd& velocity, double dt){
+        Eigen::VectorXd q_new = pinocchio::integrate(model_, q_, velocity*dt);
+        this->update(q_new);
+    }
+    
     bool KinematicsEngine::initialize(const std::string& urdf_path) {
         try {
-            log.info() << "[Pinocchio] Initializing model for Pinocchio";
+            log.info() << "[KinematicsEngine] Loading URDF: " << urdf_path;
             model_ = std::make_unique<pinocchio::Model>();
             pinocchio::urdf::buildModel(urdf_path, *model_);
-            data_  = std::make_unique<pinocchio::Data>(*model_);
-            log.info() << "[Pinocchio] Fetched model from: "  << urdf_path;
-            log.info() << "[Pinocchio] Read " << model_->nq << " Joints.";
+            log.info() << "[KinematicsEngine] Model loaded: "
+                        << model_->nq << " config dims, "
+                        << model_->nv << " tangent dims";
             return true;
         } catch(const std::exception & e) {
-            log.error() << "[Pinocchio] Error loading URDF: " << e.what();
+            log_.error() << "[KinematicsEngine] Error loading URDF: " << e.what();
+            model_.reset();
             return false;
         }
     }
 
-    void KinematicsEngine::update(const Eigen::VectorXd& q) {
-        if (!model_ || !data_) return;
-        pinocchio::forwardKinematics(*model_, *data_, q);
-        // recomputing the frame position after fk 
-        pinocchio::updateFramePlacements(*model_, *data_);
-        pinocchio::computeJointJacobians(*model_, *data_);
+    Configuration KinematicsEngine::makeConfiguration(const Eigen::VectorXd& q) const {
+        pinocchio::Data data(*model_);
+        return Configuration(*model_, data, q);
     }
 
-    /*Returns a homogeneous transformation matrix:
-        [R R R tx]
-        [R R R ty]
-        [R R R tz]
-        [0 0 0  1]
-    */
-    Eigen::Matrix4d KinematicsEngine::getFramePose(const std::string& frame_name) const{
-        if (!model_ || !data_) return Eigen::Matrix4d::Identity();
-        if (model_->existFrame(frame_name)){
-            pinocchio::FrameIndex frameId = model_->getFrameId(frame_name);
-            const auto& transform = data_->oMf[frameId];
-            return transform.toHomogeneousMatrix();
-        } else {
-            log.error() << "[Pinocchio] Frame not found: " << frame_name;
-            return Eigen::Matrix4d::Identity();
+    void KinematicsEngine::printFrames() const {
+        if (!model_) {
+            log_.warning() << "[KinematicsEngine] Model not loaded";
+            return;
+        }
+        log.info() << "======= ROBOT FRAMES =======";
+        for (const auto& frame : model_->frames) {
+            log.info() << "  " << frame.name;
         }
     }
-    
-    // Jcb (6 x nq)
-    Eigen::MatrixXd KinematicsEngine::getFrameJacobian(const std::string& frame_name) const{
-        if (!model_ || !data_) return Eigen::MatrixXd::Zero(6, model_->nv);
-        Eigen::MatrixXd J(6, model_->nv);
-        J.setZero();
-	
-        if (model_->existFrame(frame_name)){
-            pinocchio::FrameIndex frameId = model_->getFrameId(frame_name);
-            pinocchio::getFrameJacobian(*model_, *data_, frameId, pinocchio::LOCAL_WORLD_ALIGNED, J);
-        }
-        return J;
-    }
-
-    Eigen::VectorXd KinematicsEngine::integrate(const Eigen::VectorXd& q, const Eigen::VectorXd& v, double dt){
-      if (!model_) {
-	    log.error() << "[Pinocchio] Model not setup";
-	    return q;
-      }
-      Eigen::VectorXd q_next(model_->nq);
-      pinocchio::integrate(*model_, q, v*dt, q_next);
-      return q_next;
-    }
-
-    Eigen::VectorXd KinematicsEngine::computeTwistError(const std::string& frame_name, const Eigen::Matrix4d& target_pose){
-        if (!model_ || !data_){
-            log.error() << "[Pinocchio] Model and Data not setup";
-            return Eigen::VectorXd::Zero(6);
-        }
-
-        if (model_->existFrame(frame_name)){
-	        pinocchio::FrameIndex frameId = model_->getFrameId(frame_name);
-	        // oMf -> stores transformations of the 'operational' frames wrt world origin
-	        const pinocchio::SE3& T_curr = data_->oMf[frameId];
-	        pinocchio::SE3 T_des( target_pose.block<3,3>(0,0), target_pose.block<3,1>(0,3) );
-	        // Terr,body = Tcurr^-1 * Tdes
-	        pinocchio::SE3 err_body = T_curr.actInv(T_des);
-	        // SE(3) -> se(3) body frame 
-	        pinocchio::Motion v_err_body = pinocchio::log6(err_body);
-	        // lwa: local world alligned
-	        pinocchio::Motion v_err_lwa  = T_curr.act(v_err_body);
-	        return v_err_lwa.toVector();	
-        }
-        return Eigen::VectorXd::Zero(6);
-    }
-     
-    void KinematicsEngine::printFrames(){
-        if (!model_){
-            log.info() << "[Pinocchio] Model not setup";
-        }
-        log.info() << "....... ROBOT FRAMES .....";
-        for (const auto& frame: model_->frames){
-            log.info() << "Frame: " << frame.name;
-        }
-    }
-}
+    } // namespace openmanip
