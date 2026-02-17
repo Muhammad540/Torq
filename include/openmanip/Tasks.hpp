@@ -17,9 +17,11 @@ namespace openmanip{
             min 0.5 * || W * (J*dq + alpha*e) ||^2
         which expands to:  0.5 * dq^T * H * dq + c^T * dq
 
-        Cost units:
-            - FrameTask: position in [cost]/m, orientation in [cost][rad]
-            - PostureTask/DampingTask: [cost]/[rad]
+        Cost: weight vector that determines the task's importance relative to other tasks
+        Gain: Task's gain for low pass filtering (1.0 for dead beat control, lower for more filtering)
+        lm_damping: To help with infeasible motions.
+        nq: Dimension of the position/configuration vector.
+        nv: Dimension of the velocity vector (tangent space).
     */
     class Task{
         public:
