@@ -189,7 +189,7 @@ namespace openmanip {
         
         ImGuiID dock_left, dock_center, dock_right;
         ImGui::DockBuilderSplitNode(dockerspace_id, ImGuiDir_Left, 0.25f, &dock_left, &dock_center);
-        ImGui::DockBuilderSplitNode(dockerspace_id, ImGuiDir_Right, 0.25f, &dock_right, &dock_center);
+        ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Right, 0.33f, &dock_right, &dock_center);
 
         ImGui::DockBuilderDockWindow("Viewport", dock_center);
         ImGui::DockBuilderDockWindow("Joint Control", dock_left);
@@ -201,7 +201,18 @@ namespace openmanip {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         
-        ImVec2 img_size = ImVec2(static_cast<float>(viewport_width_),static_cast<float>(viewport_height_));
+        ImVec2 avail = ImGui::GetContentRegionAvail();
+        int new_w = std::max(1, static_cast<int>(avail.x));
+        int new_h = std::max(1, static_cast<int>(avail.y));
+
+        if (new_w != viewport_width_ || new_h != viewport_height_) {
+            viewport_width_ = new_w;
+            viewport_height_ = new_h;
+            destroyFBO();
+            createFBO(viewport_width_, viewport_height_);
+        }
+    
+        ImVec2 img_size = ImVec2(static_cast<float>(viewport_width_), static_cast<float>(viewport_height_));
 
         ImGui::Image(
             (ImTextureID)(intptr_t)texture_color_,
