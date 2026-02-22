@@ -1,5 +1,4 @@
 #include "openmanip/RobotSystem.hpp"
-#include "Eigen/src/Core/Matrix.h"
 #include "openmanip/MujocoDriver.hpp"
 #include "openmanip/PinocchioModel.hpp"
 #include <Eigen/Geometry>
@@ -43,7 +42,7 @@ namespace openmanip {
 
     void RobotSystem::setJointSpaceTarget(const Eigen::VectorXd& target_pose){
       if (controller_){
-	    controller_->setJointSpaceTarget(target_pose);
+	      controller_->setJointSpaceTarget(target_pose);
       } else {
         log.error() << "[RobotSystem] Failed to initialize the Controller";
       }
@@ -131,6 +130,10 @@ namespace openmanip {
       double low  = m->actuator_ctrlrange[2 * gripper_actuator_idx_];
       double high = m->actuator_ctrlrange[2 * gripper_actuator_idx_ + 1];
       d->ctrl[gripper_actuator_idx_] = gripper_open_ ? high : low;
+    }
+
+    Eigen::VectorXd RobotSystem::getJointPositions(){
+      return hardware_->getJointPositions();
     }
   
 }

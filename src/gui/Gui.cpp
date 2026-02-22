@@ -1,7 +1,4 @@
 #include "openmanip/Gui.hpp"
-#include "Eigen/src/Core/Matrix.h"
-#include "Eigen/src/Geometry/AngleAxis.h"
-#include "Eigen/src/Geometry/Quaternion.h"
 #include "imgui_internal.h"
 #include "mujoco/mjrender.h"
 #include "mujoco/mjvisualize.h"
@@ -87,9 +84,9 @@ namespace openmanip {
         joint_targets_.resize(nj, 0.0f);
 
         lin_step_ = static_cast<float>(robot_->jogLinearStep());
-	ang_step_ = static_cast<float>(robot_->jogAngularStep());
-	
-	return true;
+        ang_step_ = static_cast<float>(robot_->jogAngularStep());
+        
+        return true;
     }
     
     bool Gui::windowIsOpen() const {
@@ -252,6 +249,10 @@ namespace openmanip {
         ImGui::Text("Forward Kinematics - Joint Jog");
         ImGui::Separator();
         
+        for (int i = 0; i < static_cast<int>(joint_targets_.size()); i++) {
+            joint_targets_[i] = static_cast<float>(data_->ctrl[i]);
+        }
+
         bool changed = false;
         for (int i=0; i<static_cast<int>(joint_targets_.size()); i++){
             const char* jname = mj_id2name(model_, mjOBJ_ACTUATOR, i); 

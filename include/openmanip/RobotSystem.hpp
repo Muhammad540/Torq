@@ -38,6 +38,8 @@ namespace openmanip {
             void setGripperActuator(int actuator_idx);
             // Common Getters
             Eigen::Matrix4d getFramePose(std::string frame_name);
+            Eigen::VectorXd getJointPositions();
+
         private:
             Logger log;
             std::unique_ptr<HardwareInterface> hardware_;
