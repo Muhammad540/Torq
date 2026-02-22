@@ -1,19 +1,41 @@
 #include "openmanip/Controller.hpp"
-#include "Eigen/src/Core/Matrix.h"
 
 namespace openmanip{
-  Controller::Controller(KinematicsEngine* kinematics, HardwareInterface* hardware): kinematics_(kinematics), hardware_(hardware) {
-    logger.info() << "[Controller] Initializing ..";
-    ik_solver_ = std::make_unique<InverseKinematics>(kinematics_);
+  Controller::Controller(KinematicsEngine* kinematics, HardwareInterface* hardware): kinematics_(kinematics), hardware_(hardware){
+    log_.info() << "[Controller] Initialized";
   }
 
-  Controller::~Controller() {
-    logger.info() << "[Controller] cleaned up";
-  }
+  void Controller::initIK() {
+      if (ik_ready_ || !kinematics_ || !kinematics_->isReady()) return;
 
+      const auto& model = kinematics_->model();
+
+      vel_limit_ = std::make_unique<VelocityLimit>(model);
+      cfg_limit_ = std::make_unique<ConfigurationLimit>(model);
+      posture_task_ = std::make_unique<PostureTask>(1e-3);
+      damping_task_ = std::make_unique<DampingTask>(1e-4);
+
+      // Set neutral posture as the regularization target
+      Eigen::VectorXd q0 = hardware_->getJointPositions();
+      auto config = kinematics_->makeConfiguration(q0);
+      posture_task_->setTargetFromConfiguration(config);
+
+      ik_ready_ = true;
+      log_.info() << "[Controller] IK tasks and limits initialized";
+  }
+  
   void Controller::setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, const std::string& frame_name){
-    target_pose_ = target_pose;
-    end_effector_frame_ = frame_name;
+    initIK();
+
+    if (!frame_task_ || frame_task_->frame() != frame_name) {
+        frame_task_ = std::make_unique<FrameTask>(frame_name, 1.0, 1.0);
+    }
+
+    pinocchio::SE3 se3_target(
+        target_pose.block<3,3>(0,0),
+        target_pose.block<3,1>(0,3));
+    frame_task_->setTarget(se3_target);
+
     mode_ = ControlMode::TASK_SPACE;
   }
 
@@ -23,31 +45,36 @@ namespace openmanip{
   }
 
   void Controller::update(){
-    if (!hardware_ || !kinematics_){
-      logger.error() << "[Controller] Hardware and Kinematics Engine is not ready";
-      return;
-    }
-    const double dt = hardware_->getTimestep();
-    if (mode_ == ControlMode::TASK_SPACE){
-      Eigen::VectorXd  q_curr = hardware_->getJointPositions();
-
-      if (task_output_ == TaskSpaceOutput::Velcotiy){
-        const Eigen::VectorXd qdot = ik_solver_->solve(q_curr, target_pose_, end_effector_frame_);
-        hardware_->setJointVelocities(qdot);
+    if (!hardware_ || !kinematics_ || !kinematics_->isReady()) {
+        log_.error() << "[Controller] Hardware or kinematics not ready";
         return;
-      }
+    }
 
-      constexpr int max_iter = 20;
-      for (int i = 0; i < max_iter; ++i){
-        const Eigen::VectorXd qdot = ik_solver_->solve(q_curr, target_pose_, end_effector_frame_);
-        q_curr = kinematics_->integrate(q_curr, qdot, dt);
-      }
-      
-      hardware_->setJointPositions(q_curr);
-      return;
-    } else if (mode_ == ControlMode::JOINT_SPACE){
-      hardware_->setJointPositions(target_joints_);
-      return;
+    if (mode_ == ControlMode::TASK_SPACE) {
+        if (!ik_ready_ || !frame_task_) return;
+
+        double dt = hardware_->getTimestep();
+        Eigen::VectorXd q = hardware_->getJointPositions();
+        auto config = kinematics_->makeConfiguration(q);
+
+        std::vector<Task*> tasks = {
+            frame_task_.get(),
+            posture_task_.get(),
+            damping_task_.get()
+        };
+        std::vector<Limit*> limits = {
+            vel_limit_.get(),
+            cfg_limit_.get()
+        };
+
+        Eigen::VectorXd velocity = ik_solver_.solve(
+            config, tasks, dt, /*damping=*/1e-12, limits);
+
+        config.integrateInplace(velocity, dt);
+        hardware_->setJointPositions(config.q());
+
+    } else if (mode_ == ControlMode::JOINT_SPACE) {
+        hardware_->setJointPositions(target_joints_);
     }
   }
 }

@@ -1,9 +1,10 @@
 #include "openmanip/Tasks.hpp"
 #include "openmanip/utils.hpp"
-#include "Eigen/src/Core/Matrix.h"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/spatial/fwd.hpp"
 #include <Eigen/Dense>
+#include "openmanip/PinocchioModel.hpp"
+#include <pinocchio/spatial/explog.hpp>
 
 namespace openmanip{
     Task::Task(const Eigen::VectorXd& cost, double gain, double lm_damping)
@@ -80,7 +81,7 @@ namespace openmanip{
     }
 
     void FrameTask::setOrientationCost(double cost){
-        cost_.tail<3>.setConstant(cost);
+        cost_.tail<3>().setConstant(cost);
     }
 
     void FrameTask::setOrientationCost(const Eigen::Vector3d& cost){

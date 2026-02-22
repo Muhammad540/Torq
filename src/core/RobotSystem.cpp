@@ -2,6 +2,7 @@
 #include "Eigen/src/Core/Matrix.h"
 #include "openmanip/MujocoDriver.hpp"
 #include "openmanip/PinocchioModel.hpp"
+#include <Eigen/Geometry>
 
 #include <iostream>
 #include <memory>
@@ -10,7 +11,7 @@ namespace openmanip {
     RobotSystem::RobotSystem() {
         hardware_ = std::make_unique<MujocoDriver>();
         kinematics_ = std::make_unique<KinematicsEngine>();
-	    controller_ = std::make_unique<Controller>(kinematics_.get(), hardware_.get());
+	controller_ = std::make_unique<Controller>(kinematics_.get(), hardware_.get());
     }
     RobotSystem::~RobotSystem() {
         log.info() << "[RobotSystem] cleaned up";
@@ -49,32 +50,87 @@ namespace openmanip {
     }
 
     void RobotSystem::update() {
-            if (hardware_ && kinematics_) {
-	        // step physics 
-	        hardware_->step();
-
-	        // get sensor data 
-	        Eigen::VectorXd jp = hardware_->getJointPositions();
-
-	        // sync kinematics 
-	        kinematics_->update(jp);   
-
-	        // run controller
-	        if (controller_){
-	          controller_->update();
- 	        } else {
-	          log.error() << "[RobotSystem] Controller not ready";
-	        }
-	    } else {
-	      log.error() << "[RobotSystem] Hardware or Kinematics Engine not ready";
-	    }
+       if (hardware_ && kinematics_) {
+          hardware_->step();
+          if (controller_) {
+            controller_->update();
+          }
+       }
     }
 
     MujocoDriver* RobotSystem::getPhysics() {
         return dynamic_cast<MujocoDriver*>(hardware_.get());
     }
 
-    Eigen::Matrix4d RobotSystem::getFramePose(std::string frame_name){
-        return kinematics_->getFramePose(frame_name);
+      Eigen::Matrix4d RobotSystem::getFramePose(std::string frame_name){
+      Eigen::VectorXd q = hardware_->getJointPositions();
+      auto config = kinematics_->makeConfiguration(q);
+      return config.getTransformFrameToWorld(frame_name).toHomogeneousMatrix();
     }
+
+    void RobotSystem::setHomePosition(){
+      if (hardware_){
+        home_position_ = hardware_->getJointPositions();
+        home_set_ = true;
+        log.info() << "[RobotSystem] Home position saved (" << home_position_.transpose() << ")";
+      }
+    }
+
+    void RobotSystem::moveToHome() {
+      if (!home_set_) {
+        log.warning() << "[RobotSystem] Home position not set";
+        return;
+      }
+      if (controller_) {
+	      controller_->setJointSpaceTarget(home_position_);
+      }
+    }
+
+    bool RobotSystem::hasHomePosition() const {
+      return home_set_;
+    }
+
+    void RobotSystem::setJogStep(double linear_step, double angular_step){
+      jog_linear_step_ = linear_step;
+      jog_angular_step_ = angular_step;
+    }
+
+    void RobotSystem::jogCartesian(int axis, double sign, const std::string& frame_name) {
+      Eigen::Matrix4d pose = getFramePose(frame_name);
+
+      if (axis < 3) {
+          pose(axis, 3) += sign * jog_linear_step_;
+      } else {
+          Eigen::Vector3d rot_axis = Eigen::Vector3d::Zero();
+          rot_axis(axis - 3) = 1.0;
+          Eigen::AngleAxisd delta(sign * jog_angular_step_, rot_axis);
+          pose.block<3,3>(0,0) = delta.toRotationMatrix() * pose.block<3,3>(0,0);
+      }
+
+      setTaskSpaceTarget(pose, frame_name);
+    }
+
+    void RobotSystem::setGripperActuator(int actuator_idx) {
+      gripper_actuator_idx_ = actuator_idx;
+    }
+
+    void RobotSystem::toggleGripper(){
+      auto* physics = getPhysics();
+      if (!physics) return;
+
+      mjModel* m = physics->getModel();
+      mjData* d = physics->getData();
+      if (!m || !d || m->nu == 0) return;
+
+      if (gripper_actuator_idx_ < 0) {
+        gripper_actuator_idx_ = m->nu - 1;
+      }
+
+      gripper_open_ = !gripper_open_;
+
+      double low  = m->actuator_ctrlrange[2 * gripper_actuator_idx_];
+      double high = m->actuator_ctrlrange[2 * gripper_actuator_idx_ + 1];
+      d->ctrl[gripper_actuator_idx_] = gripper_open_ ? high : low;
+    }
+  
 }

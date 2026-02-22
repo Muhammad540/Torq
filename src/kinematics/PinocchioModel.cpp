@@ -4,6 +4,9 @@
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
+#include <pinocchio/algorithm/geometry.hpp>
+#include <pinocchio/collision/collision.hpp>
+#include <pinocchio/collision/distance.hpp>
 
 namespace openmanip {
     Configuration::Configuration(
@@ -20,7 +23,7 @@ namespace openmanip {
         , collision_data_(std::move(collision_data)){
         if (collision_model_ && !collision_data_){
 	        collision_data_ = std::make_shared<pinocchio::GeometryData>(*collision_model_);
-            log.info() << "[Configuration] Created collision data from collision model";
+            log_.info() << "[Configuration] Created collision data from collision model";
         }
         if(forward_kinematics){
 	        update();
@@ -33,8 +36,8 @@ namespace openmanip {
         }
         
         if (collision_model_ && collision_data_){
-	        pinocchio::computeCollisions(model_, data_, collision_model_.get(), collision_data_.get(), q_, false);
-	        pinocchio::computeDistances(model_, data_, collision_model_.get(), collision_data_.get(), q_);
+	        pinocchio::computeCollisions(model_, data_, *collision_model_, *collision_data_, q_, false);
+	        pinocchio::computeDistances(model_, data_, *collision_model_, *collision_data_, q_);
         }
         pinocchio::computeJointJacobians(model_, data_, q_);
         pinocchio::updateFramePlacements(model_, data_);
@@ -52,13 +55,13 @@ namespace openmanip {
             if (q_(i) < q_min(i) - tol || q_(i) > q_max(i) + tol){
                 if (safety_break){
                     last_error_ = ErrorCode::NotWithinConfigurationLimits;
-		    log.warning() << "[Configuration] Joint " << i
+		    log_.warning() << "[Configuration] Joint " << i
 				   << " violates limits: " << q_(i)
 				   << " not in [" << q_min(i)
 				   << ", " << q_max(i) << "]";
                     return;
                 }
-		log.warning() << "[Configuration] Warning: Value " << q_(i)
+		log_.warning() << "[Configuration] Warning: Value " << q_(i)
                                   << " at index " << i
                                   << " is out of limits: [" << q_min(i)
                                   << ", " << q_max(i) << "]";
@@ -69,22 +72,22 @@ namespace openmanip {
     Eigen::MatrixXd Configuration::getFrameJacobian(const std::string& frame) const {
         if (!model_.existFrame(frame)){
             last_error_ = ErrorCode::FrameNotFound;
-	    log.warning() << "[Configuration] Frame not found";
+	    log_.warning() << "[Configuration] Frame not found";
 	    return Eigen::MatrixXd::Zero(6, model_.nv);
         }
 	
         auto frame_id = model_.getFrameId(frame);
 	Eigen::MatrixXd J(6, model_.nv);
         J.setZero();
-        pinocchio::getFrameJacobian(model_, data_, frame_id, pinocchio::LOCAL, J);
+        pinocchio::getFrameJacobian(model_, const_cast<pinocchio::Data&>(data_), frame_id, pinocchio::LOCAL, J);
         return J;
     }
 
     pinocchio::SE3 Configuration::getTransformFrameToWorld(const std::string& frame) const {
       if (!model_.existFrame(frame)){
-	last_error_ = ErrorCode::FrameNotFound;
-	log.warning() << "[Configuration] frame not found: " << frame;
-	return pinocchio::SE3::Identity();
+        last_error_ = ErrorCode::FrameNotFound;
+        log_.warning() << "[Configuration] frame not found: " << frame;
+        return pinocchio::SE3::Identity();
       }
 
       auto frame_id = model_.getFrameId(frame);
@@ -103,22 +106,22 @@ namespace openmanip {
 
     }
   
-    Eigen::VectorXd Configuration::integrate(const Eigen::VectorXd& velocity, double dt){
+    Eigen::VectorXd Configuration::integrate(const Eigen::VectorXd& velocity, double dt) const {
         return pinocchio::integrate(model_, q_, velocity*dt);
     }
 
     
-    void Configuration::integrate_inplace(const Eigen::VectorXd& velocity, double dt){
+    void Configuration::integrateInplace(const Eigen::VectorXd& velocity, double dt){
         Eigen::VectorXd q_new = pinocchio::integrate(model_, q_, velocity*dt);
         this->update(q_new);
     }
     
     bool KinematicsEngine::initialize(const std::string& urdf_path) {
         try {
-            log.info() << "[KinematicsEngine] Loading URDF: " << urdf_path;
+            log_.info() << "[KinematicsEngine] Loading URDF: " << urdf_path;
             model_ = std::make_unique<pinocchio::Model>();
             pinocchio::urdf::buildModel(urdf_path, *model_);
-            log.info() << "[KinematicsEngine] Model loaded: "
+            log_.info() << "[KinematicsEngine] Model loaded: "
                         << model_->nq << " config dims, "
                         << model_->nv << " tangent dims";
             return true;
@@ -139,9 +142,9 @@ namespace openmanip {
             log_.warning() << "[KinematicsEngine] Model not loaded";
             return;
         }
-        log.info() << "======= ROBOT FRAMES =======";
+        log_.info() << "======= ROBOT FRAMES =======";
         for (const auto& frame : model_->frames) {
-            log.info() << "  " << frame.name;
+            log_.info() << "  " << frame.name;
         }
     }
     } // namespace openmanip

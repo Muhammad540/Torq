@@ -1,6 +1,6 @@
 #ifndef OPENMANIP_GUI_HPP
 #define OPENMANIP_GUI_HPP
-
+#include <Eigen/Core>
 #include "openmanip/logger.hpp"
 #include <Eigen/Dense>
 #include <vector>
@@ -65,10 +65,6 @@ namespace openmanip {
             std::unique_ptr<mjvScene>   scn_;
             std::unique_ptr<mjrContext> ctx_;
 
-            //TODO(fix): get the frames from the urdf model
-            std::vector<std::string> bnames_ = {};
-            void getBodyNames(const mjModel*, std::vector<std::string>&);
-
             unsigned int fbo_ = 0;
             unsigned int rbo_depth_ = 0;
             unsigned int texture_color_ = 0;
@@ -87,11 +83,11 @@ namespace openmanip {
             // void drawInfoPanel();
 
             std::vector<float> joint_targets_;
-            std::array<float, 6> ik_target_= {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-            bool use_ik_ = false;
             std::string ik_frame_name_;
             int selected_frame_idx_ = 0;
-
+            float lin_step_;
+	    float ang_step_;
+	
             static Gui* getGui(GLFWwindow* window);
 
             // Debugging Specific

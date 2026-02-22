@@ -6,51 +6,49 @@
 #include <Eigen/Dense>
 
 #include "openmanip/InverseKinematics.hpp"
+#include "openmanip/Tasks.hpp"
+#include "openmanip/Limits.hpp"
 #include "openmanip/HardwareInterface.hpp"
 #include "openmanip/PinocchioModel.hpp"
 #include "openmanip/logger.hpp"
 
 namespace openmanip{
-  enum class ControlMode{
-    IDLE,
-    JOINT_SPACE,
-    TASK_SPACE
-  };
-  
-  struct ControllerConfig{
-    float dt = 1;
-  };
-
-  enum class TaskSpaceOutput {
-    Position, 
-    Velcotiy
-  };
+  enum class ControlMode{IDLE, JOINT_SPACE, TASK_SPACE};
   
   class Controller {
-  // TODO: Add collision/safety checking to this class before sending to IK  
+  
   public:
     Controller(KinematicsEngine* kinematics, HardwareInterface* hardware);
-    ~Controller();
-
-    void setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, const std::string& frame_name);
-    void setJointSpaceTarget(const Eigen::VectorXd& target_joints);
-    void setTaskSpaceOutput(const TaskSpaceOutput out) {task_output_ = out; }
-    void update();
+    ~Controller() = default;
     
+    /* Set an SE3 target for the end effector frame. Creates/updates the FrameTask and switches to TASK_SPACE mode. */
+    void setTaskSpaceTarget(const Eigen::Matrix4d& target_pose,
+                            const std::string& frame_name);
+
+    /* Direct joint space target. Bypasses IK entirely. */
+    void setJointSpaceTarget(const Eigen::VectorXd& target_joints);
+
+    /* Called every control tick by RobotSystem. */
+    void update();
   private:
+    void initIK();
+
     KinematicsEngine* kinematics_;
     HardwareInterface* hardware_;
-    // NOTE(Ahmed) This class owns the IK solver
-    std::unique_ptr<InverseKinematics> ik_solver_;
+
+    InverseKinematics ik_solver_;
+
+    std::unique_ptr<FrameTask> frame_task_;
+    std::unique_ptr<PostureTask> posture_task_;
+    std::unique_ptr<DampingTask> damping_task_;
+    std::unique_ptr<VelocityLimit> vel_limit_;
+    std::unique_ptr<ConfigurationLimit> cfg_limit_;
 
     ControlMode mode_ = ControlMode::IDLE;
-
-    Eigen::Matrix4d target_pose_;
-    std::string end_effector_frame_;
     Eigen::VectorXd target_joints_;
-    TaskSpaceOutput task_output_ = TaskSpaceOutput::Position;
+    bool ik_ready_ = false;
 
-    Logger logger;  
+    Logger log_;
   };
-}
+} // namespace openmanip
 #endif // OPENMANIP_CONTROLLER_HPP

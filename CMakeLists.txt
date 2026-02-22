@@ -44,6 +44,10 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG docking
 )
+
+find_package(osqp REQUIRED)
+find_package(OsqpEigen REQUIRED)
+
 FetchContent_MakeAvailable(imgui)
 add_library(imgui_lib STATIC
     ${imgui_SOURCE_DIR}/imgui.cpp
@@ -71,6 +75,8 @@ set(CORE_SOURCES
     src/core/RobotSystem.cpp
     src/gui/Gui.cpp
     src/kinematics/PinocchioModel.cpp
+    src/tasks/Tasks.cpp
+    src/limits/Limits.cpp
     src/control/Controller.cpp
     src/control/InverseKinematics.cpp
 )
@@ -83,12 +89,13 @@ target_include_directories(openmanip PUBLIC
 )
 
 target_link_libraries(openmanip PUBLIC
-    glfw
-    OpenGL::GL
-    GLEW::GLEW
-    pinocchio::pinocchio
-    mujoco::mujoco
-    imgui_lib
+  glfw
+  OpenGL::GL
+  GLEW::GLEW
+  pinocchio::pinocchio
+  mujoco::mujoco
+  imgui_lib
+  OsqpEigen::OsqpEigen
 )
 
 set_target_properties(openmanip PROPERTIES NO_SYSTEM_FROM_IMPORTED ON)

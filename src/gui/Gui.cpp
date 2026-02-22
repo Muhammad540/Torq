@@ -85,8 +85,11 @@ namespace openmanip {
         
         int nj = model_->nu;
         joint_targets_.resize(nj, 0.0f);
-        getBodyNames(model_,bnames_);
-        return true;
+
+        lin_step_ = static_cast<float>(robot_->jogLinearStep());
+	ang_step_ = static_cast<float>(robot_->jogAngularStep());
+	
+	return true;
     }
     
     bool Gui::windowIsOpen() const {
@@ -260,7 +263,7 @@ namespace openmanip {
             changed |= ImGui::SliderFloat(label.c_str(), &joint_targets_[i], low, high, "%.2f rad", ImGuiSliderFlags_ClampZeroRange);
         }
 
-        if (changed && !use_ik_){
+        if (changed){
             size_t num_joints = joint_targets_.size();
             Eigen::VectorXd q(num_joints);
             for (size_t i=0;i < num_joints; i++){
@@ -269,92 +272,70 @@ namespace openmanip {
             robot_->setJointSpaceTarget(q);
         }
 
-        ImGui::End();    
-    }
-
-    void Gui::drawCartesianPanel(){
-        ImGui::Begin("Cartesian Control");
-        ImGui::Text("Inverse Kinematics - Task Space Jog");
-        ImGui::Separator();
-        
-        if (bnames_.empty()){
-            ImGui::TextColored(ImVec4(1,0,0,1), "No Body names available");
-            ImGui::End();
-            return;
-        }
-
-        if (selected_frame_idx_ >= (int(bnames_.size()))) {selected_frame_idx_ = 0;}
-        
-        ImGuiComboFlags flags = ImGuiComboFlags_HeightLarge;
-        const char* preview = bnames_[selected_frame_idx_].c_str();
-
-        if (ImGui::BeginCombo("Target Frame", preview, flags)){
-            for (int n=0; n<(int)bnames_.size(); n++){
-                const bool is_selected = (selected_frame_idx_ == n);
-
-                if (ImGui::Selectable(bnames_[n].c_str(), is_selected)){
-                    selected_frame_idx_ = n;
-                }
-
-                if (is_selected) {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        ImGui::Separator();
-        ImGui::Text("Target Position (m)");
-
-        ImGui::DragFloat("X", &ik_target_[0], 0.005f, -2.0f, 2.0f, "%.3f");
-        ImGui::DragFloat("Y", &ik_target_[1], 0.005f, -2.0f, 2.0f, "%.3f");
-        ImGui::DragFloat("Z", &ik_target_[2], 0.005f,  0.0f, 2.0f, "%.3f");
-        
-        ImGui::Separator();
-        ImGui::Text("Target Orientation (RPY - Rad)");
-
-        ImGui::DragFloat("Roll",  &ik_target_[3], 0.01f, -3.14159f, 3.14159f, "%.3f");
-        ImGui::DragFloat("Pitch", &ik_target_[4], 0.01f, -3.14159f, 3.14159f, "%.3f");
-        ImGui::DragFloat("Yaw",   &ik_target_[5], 0.01f, -3.14159f, 3.14159f, "%.3f");
-
-        if (ImGui::Button("Reset to Zero")) {
-            ik_target_.fill(0.0f);
-        }
-
-        if (ImGui::Button("Send IK Target")) {
-            Eigen::Vector3d translation{ik_target_[0],ik_target_[1],ik_target_[2]};
-            Eigen::AngleAxisd rollAngle(ik_target_[3], Eigen::Vector3d::UnitX());
-            Eigen::AngleAxisd pitchAngle(ik_target_[4], Eigen::Vector3d::UnitY());
-            Eigen::AngleAxisd yawAngle(ik_target_[5], Eigen::Vector3d::UnitZ());
-            
-            Eigen::Quaterniond q = yawAngle * pitchAngle * rollAngle;
-            Eigen::Matrix3d rotationMatrix = q.matrix();
-
-            Eigen::Matrix4d target = Eigen::Matrix4d::Identity();
-            target.block<3,3>(0,0) = rotationMatrix;
-            target.block<3,1>(0,3) = translation;
-            robot_->setTaskSpaceTarget(target, "gripper_frame_link");
-        }
+	ImGui::Separator();
+	if (ImGui::Button("Set Home")) {
+	    robot_->setHomePosition();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Move to Home")) {
+	    robot_->moveToHome();
+	}
+	if (!robot_->hasHomePosition()) {
+	    ImGui::TextColored(ImVec4(1,1,0,1), "Home not set");
+	}
 
         ImGui::End();    
     }
 
-    void Gui::getBodyNames(const mjModel* m, std::vector<std::string>& bnames){
-        if(!m) {
-            logger.error() << "[Gui] Mj Model not found";
-            return;
-        }
+    void Gui::drawCartesianPanel() {
+	ImGui::Begin("Cartesian Control");
+	ImGui::Text("Inverse Kinematics - Task Space Jog");
+	ImGui::Separator();
 
-        for(int i=0; i < m->nbody; ++i){
-            const char* name = mj_id2name(const_cast<mjModel*>(m), mjOBJ_BODY, i);
-            if (name){
-                bnames.push_back(std::string(name));
-            } else {
-                bnames.push_back("body_" + std::to_string(i));
-            }
-        }
+	static char frame_buf[128] = "gripper_frame_link";
+	ImGui::InputText("Frame", frame_buf, sizeof(frame_buf));
+	std::string frame(frame_buf);
+
+	ImGui::Separator();
+
+        bool step_changed = false;
+	step_changed |= ImGui::DragFloat("Linear Step (m)", &lin_step_, 0.001f, 0.001f, 0.1f, "%.3f");
+	step_changed |= ImGui::DragFloat("Angular Step (rad)", &ang_step_, 0.005f, 0.01f, 0.5f, "%.3f");
+	if (step_changed) {
+	    robot_->setJogStep(lin_step_, ang_step_);
+	}
+
+	ImGui::Separator();
+	ImGui::Text("Position");
+
+	float bw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+
+	auto jogButtons = [&](const char* neg, const char* pos, int axis) {
+	    if (ImGui::Button(neg, ImVec2(bw, 0)))
+		robot_->jogCartesian(axis, -1.0, frame);
+	    ImGui::SameLine();
+	    if (ImGui::Button(pos, ImVec2(bw, 0)))
+		robot_->jogCartesian(axis, +1.0, frame);
+	};
+
+	jogButtons("-X", "+X", 0);
+	jogButtons("-Y", "+Y", 1);
+	jogButtons("-Z", "+Z", 2);
+
+	ImGui::Separator();
+	ImGui::Text("Orientation");
+
+	jogButtons("-Roll",  "+Roll",  3);
+	jogButtons("-Pitch", "+Pitch", 4);
+	jogButtons("-Yaw",   "+Yaw",   5);
+
+	ImGui::Separator();
+	const char* gripper_label = robot_->isGripperOpen() ? "Close Gripper" : "Open Gripper";
+	if (ImGui::Button(gripper_label, ImVec2(-1, 0))) {
+	    robot_->toggleGripper();
+	}
+	ImGui::End();
     }
-
     void Gui::destroyFBO(){ 
         if (texture_color_){
             glDeleteTextures(1, &texture_color_);

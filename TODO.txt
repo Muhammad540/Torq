@@ -7,6 +7,8 @@
 [] HAL is needed, package Mujoco Driver using it sort of done
 [] Path Planning
 [] add control visualizer (to move each joints), enable/disable frames, enables/disable world frame axes
+[] Use Null Space optimization 
+[] Add Constraints to the IK solver, to stay close to the home position while moving
 
 # MEDIUM 
 [] Dynamixel Driver
@@ -14,6 +16,7 @@
 [] caching to reuse pose estiamtes btw frames
 [] Behavior Tree Example
 [] Display force contacts
+[] Fix the viewport position and size, currently it is not properly centered.
 
 # LOW
 [] startup is a bit slow, debug this.

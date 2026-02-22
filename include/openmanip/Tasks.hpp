@@ -1,9 +1,12 @@
 #ifndef OPENMANIP_TASKS_HPP
 #define OPENMANIP_TASKS_HPP
 
-#include <eigen3/Eigen/src/Core/Matrix.h>
+#include <Eigen/Dense>
 #include <utility>
 #include <optional>
+#include <string>
+#include <pinocchio/spatial/se3.hpp>
+
 
 namespace openmanip{
     class Configuration;
@@ -133,9 +136,9 @@ namespace openmanip{
     */
     class DampingTask : public Task {
         public:
-
-            Eigen::VectorXd computeError(const Configuration& config) const override;
-            Eigen::VectorXd computeJacobian(const Configuration& config) const override;
+        DampingTask(double cost);
+        Eigen::VectorXd computeError(const Configuration& config) const override;
+        Eigen::MatrixXd computeJacobian(const Configuration& config) const override;
     };
 }
 

@@ -1,10 +1,8 @@
 #ifndef OPENMANIP_PINOCCHIOMODEL_HPP
 #define OPENMANIP_PINOCCHIOMODEL_HPP
 
-#include "Eigen/src/Core/Matrix.h"
 #include "openmanip/logger.hpp"
 #include "openmanip/utils.hpp"
-#include "pinocchio/multibody/fwd.hpp"
 
 #include <optional>
 #include <memory>
@@ -61,7 +59,7 @@ namespace openmanip {
            Eigen::VectorXd integrate(const Eigen::VectorXd& velocity, double dt) const;
 
            /* Integrate velocity for dt, update internal state */
-           void integrate_inplace(const Eigen::VectorXd& velocity, double dt);
+           void integrateInplace(const Eigen::VectorXd& velocity, double dt);
            
            /* tangent space dim */
            int nv() const { return model_.nv; }
@@ -82,7 +80,7 @@ namespace openmanip {
            void clearError() { last_error_ = ErrorCode::None; }
            
         private:
-            mutable Logger log;
+            mutable Logger log_;
             const pinocchio::Model& model_;
             pinocchio::Data data_;
             Eigen::VectorXd q_;
@@ -117,7 +115,7 @@ namespace openmanip {
             /* Print all the frame names */
             void printFrames() const;
         private:
-            mutable Logger log;
+            mutable Logger log_;
             std::unique_ptr<pinocchio::Model> model_ = nullptr;
     };
 }

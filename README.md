@@ -9,7 +9,8 @@ High performance C++ framework for robot manipulation that combines **MuJoCo** (
 - Pinocchio (system install required)
 - Eigen3 (via Pinocchio on most setups)
 - MuJoCo (fetched by CMake)
-- yaml-cpp (fetched by CMake)
+- osqp (system install required)
+- osqpEigen (system install required)
 
 ### Install Pinocchio (Ubuntu)
 
