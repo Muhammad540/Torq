@@ -289,53 +289,55 @@ namespace openmanip {
     }
 
     void Gui::drawCartesianPanel() {
-	ImGui::Begin("Cartesian Control");
-	ImGui::Text("Inverse Kinematics - Task Space Jog");
-	ImGui::Separator();
+        ImGui::Begin("Cartesian Control");
+        ImGui::Text("Inverse Kinematics - Task Space Jog");
+        ImGui::Separator();
 
-	static char frame_buf[128] = "gripper_frame_link";
-	ImGui::InputText("Frame", frame_buf, sizeof(frame_buf));
-	std::string frame(frame_buf);
+        static char frame_buf[128] = "gripper_frame_link";
+        ImGui::InputText("Frame", frame_buf, sizeof(frame_buf));
+        std::string frame(frame_buf);
 
-	ImGui::Separator();
+        ImGui::Separator();
 
         bool step_changed = false;
-	step_changed |= ImGui::DragFloat("Linear Step (m)", &lin_step_, 0.001f, 0.001f, 0.1f, "%.3f");
-	step_changed |= ImGui::DragFloat("Angular Step (rad)", &ang_step_, 0.005f, 0.01f, 0.5f, "%.3f");
-	if (step_changed) {
-	    robot_->setJogStep(lin_step_, ang_step_);
-	}
+        step_changed |= ImGui::DragFloat("Linear Step (m)", &lin_step_, 0.001f, 0.001f, 0.1f, "%.3f");
+        step_changed |= ImGui::DragFloat("Angular Step (rad)", &ang_step_, 0.005f, 0.01f, 0.5f, "%.3f");
+        if (step_changed) {
+            robot_->setJogStep(lin_step_, ang_step_);
+        }
 
-	ImGui::Separator();
-	ImGui::Text("Position");
+        ImGui::Separator();
+        ImGui::Text("Position");
 
-	float bw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+        float bw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
-	auto jogButtons = [&](const char* neg, const char* pos, int axis) {
-	    if (ImGui::Button(neg, ImVec2(bw, 0)))
-		robot_->jogCartesian(axis, -1.0, frame);
-	    ImGui::SameLine();
-	    if (ImGui::Button(pos, ImVec2(bw, 0)))
-		robot_->jogCartesian(axis, +1.0, frame);
-	};
+        auto jogButtons = [&](const char* neg, const char* pos, int axis) {
+            if (ImGui::Button(neg, ImVec2(bw, 0))) {}
+            bool negHeld = ImGui::IsItemActive();
+            ImGui::SameLine();
+            if (ImGui::Button(pos, ImVec2(bw, 0))) {}
+            bool posHeld = ImGui::IsItemActive();
+            if (negHeld)robot_->jogCartesian(axis, -1.0, frame);
+            if (posHeld)robot_->jogCartesian(axis, +1.0, frame);
+        };
 
-	jogButtons("-X", "+X", 0);
-	jogButtons("-Y", "+Y", 1);
-	jogButtons("-Z", "+Z", 2);
+        jogButtons("-X", "+X", 0);
+        jogButtons("-Y", "+Y", 1);
+        jogButtons("-Z", "+Z", 2);
 
-	ImGui::Separator();
-	ImGui::Text("Orientation");
+        ImGui::Separator();
+        ImGui::Text("Orientation");
 
-	jogButtons("-Roll",  "+Roll",  3);
-	jogButtons("-Pitch", "+Pitch", 4);
-	jogButtons("-Yaw",   "+Yaw",   5);
+        jogButtons("-Roll",  "+Roll",  3);
+        jogButtons("-Pitch", "+Pitch", 4);
+        jogButtons("-Yaw",   "+Yaw",   5);
 
-	ImGui::Separator();
-	const char* gripper_label = robot_->isGripperOpen() ? "Close Gripper" : "Open Gripper";
-	if (ImGui::Button(gripper_label, ImVec2(-1, 0))) {
-	    robot_->toggleGripper();
-	}
-	ImGui::End();
+        ImGui::Separator();
+        const char* gripper_label = robot_->isGripperOpen() ? "Close Gripper" : "Open Gripper";
+        if (ImGui::Button(gripper_label, ImVec2(-1, 0))) {
+            robot_->toggleGripper();
+        }
+        ImGui::End();
     }
     void Gui::destroyFBO(){ 
         if (texture_color_){

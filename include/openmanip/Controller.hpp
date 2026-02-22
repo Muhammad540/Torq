@@ -19,7 +19,7 @@ namespace openmanip{
   
   public:
     Controller(KinematicsEngine* kinematics, HardwareInterface* hardware);
-    ~Controller() = default;
+    ~Controller();
     
     /* Set an SE3 target for the end effector frame. Creates/updates the FrameTask and switches to TASK_SPACE mode. */
     void setTaskSpaceTarget(const Eigen::Matrix4d& target_pose,

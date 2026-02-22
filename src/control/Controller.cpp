@@ -5,6 +5,10 @@ namespace openmanip{
     log_.info() << "[Controller] Initialized";
   }
 
+  Controller::~Controller(){
+    log_.info() << "[Controller] cleaned up";  
+  }
+
   void Controller::initIK() {
       if (ik_ready_ || !kinematics_ || !kinematics_->isReady()) return;
 
