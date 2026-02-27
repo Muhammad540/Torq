@@ -14,8 +14,8 @@ namespace openmanip {
     triplets.reserve(rows*cols);
     for (int i=0; i<rows; ++i){
       for (int j=0; j<cols; ++j){
-	double val = dense(i, j);
-	triplets.emplace_back(i, j, val == 0.0 ? 1e-20 : val);
+        double val = dense(i, j);
+        triplets.emplace_back(i, j, val == 0.0 ? 1e-20 : val);
       }
     }
     sparse.setFromTriplets(triplets.begin(), triplets.end());

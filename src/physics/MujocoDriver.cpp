@@ -89,11 +89,12 @@ namespace openmanip {
 
     void MujocoDriver::setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
         if (!model_ || !data_) return;
-        if (q.size() != model_->nu){
-            logger.error() << "[MujocoDriver] Size mismatch. " << "Expected nu = " << model_->nu << ", got " << q.size();
+	int n = static_cast<int>(q.size());
+	if (n > model_->nu){
+            logger.error() << "[MujocoDriver] Size mismatch. " << "Expected nu <= " << model_->nu << ", got " << n;
             return; 
         }
-        Eigen::Map<Eigen::VectorXd>(data_->ctrl, model_->nu) = q;
+        Eigen::Map<Eigen::VectorXd>(data_->ctrl, model_->nu).head(n) = q;
     }
     
     void MujocoDriver::setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qdot){

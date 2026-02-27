@@ -40,7 +40,7 @@ namespace openmanip{
     ~InverseKinematics() = default;
 
     /*
-     Build the IK quadratic program from tasks and limits. 
+     Build the IK quadratic program from current configuration and tasks. 
      */
     QPProblem buildIK(const Configuration& config,
 		      const std::vector<Task*>& tasks,

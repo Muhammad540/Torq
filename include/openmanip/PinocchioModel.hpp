@@ -15,7 +15,9 @@
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
-
+#include <pinocchio/algorithm/model.hpp>
+#include "pinocchio/parsers/urdf.hpp"
+ 
 namespace openmanip {
     /*
         Configuration of a robot model.
@@ -94,6 +96,9 @@ namespace openmanip {
     /*
         KinematicsEngine loads and owns the pinocchio model.
         Use makeConfiguration() to create Configuration objects from it.
+	
+	If the urdf contains a joint named "gripper", it is automatically locked via 
+	pinocchio::buildReducedModel so that IK only operate on the arm DOF's 
     */
     class KinematicsEngine {
         public:
@@ -106,17 +111,25 @@ namespace openmanip {
             /* True if the model has been loaded successfully */
             bool isReady() const { return model_ != nullptr; }
 
-            /* Create a configuration from this engine's model at joint config q */
+            /* Create a configuration from this engine's model at joint config q (reduced model) */
             Configuration makeConfiguration(const Eigen::VectorXd& q) const;
 
-            /* Read only access to the underlying pinocchio model. */
+            /* Read only access to the underlying Reduced pinocchio model (gripper joint frozen) */
             const pinocchio::Model& model() const { return *model_; }
+
+            /* Read only access to the underlying full pinocchio model */
+            const pinocchio::Model& fullModel() const { return *full_model_; }
+
+	    /*strips the locked joints to return a reduced model, if no locked joints provided it returns the full model */
+	    Eigen::VectorXd fullToReducedQ(const Eigen::VectorXd& q_full) const;
 
             /* Print all the frame names */
             void printFrames() const;
         private:
             mutable Logger log_;
             std::unique_ptr<pinocchio::Model> model_ = nullptr;
+	    std::unique_ptr<pinocchio::Model> full_model_ = nullptr;
+	    std::vector<pinocchio::JointIndex> locked_joint_ids_;
     };
 }
 

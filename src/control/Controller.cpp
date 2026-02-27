@@ -19,8 +19,10 @@ namespace openmanip{
       posture_task_ = std::make_unique<PostureTask>(1e-3);
       damping_task_ = std::make_unique<DampingTask>(1e-4);
 
-      // Set neutral posture as the regularization target
-      Eigen::VectorXd q0 = hardware_->getJointPositions();
+      // TODO(Ahmed) this should be set by the user (neutral posture as the regularization target)
+      Eigen::VectorXd q0_full = hardware_->getJointPositions();
+      Eigen::VectorXd q0 = kinematics_->fullToReducedQ(q0_full);
+      // NOTE: we make config from the reduced model
       auto config = kinematics_->makeConfiguration(q0);
       posture_task_->setTargetFromConfiguration(config);
 
@@ -58,8 +60,9 @@ namespace openmanip{
         if (!ik_ready_ || !frame_task_) return;
 
         double dt = hardware_->getTimestep();
-        Eigen::VectorXd q = hardware_->getJointPositions();
-        auto config = kinematics_->makeConfiguration(q);
+        Eigen::VectorXd q_full = hardware_->getJointPositions();
+	Eigen::VectorXd q = kinematics_->fullToReducedQ(q_full);
+	auto config = kinematics_->makeConfiguration(q);
 
         std::vector<Task*> tasks = {
             frame_task_.get(),
@@ -70,9 +73,9 @@ namespace openmanip{
             vel_limit_.get(),
             cfg_limit_.get()
         };
-
-        Eigen::VectorXd velocity = ik_solver_.solve(
-            config, tasks, dt, /*damping=*/1e-12, limits);
+	
+	//TODO (damping should be configurable)
+        Eigen::VectorXd velocity = ik_solver_.solve(config, tasks, dt, /*damping=*/1e-12, limits);
 
         config.integrateInplace(velocity, dt);
         hardware_->setJointPositions(config.q());

@@ -119,14 +119,32 @@ namespace openmanip {
     bool KinematicsEngine::initialize(const std::string& urdf_path) {
         try {
             log_.info() << "[KinematicsEngine] Loading URDF: " << urdf_path;
-            model_ = std::make_unique<pinocchio::Model>();
-            pinocchio::urdf::buildModel(urdf_path, *model_);
-            log_.info() << "[KinematicsEngine] Model loaded: "
-                        << model_->nq << " config dims, "
-                        << model_->nv << " tangent dims";
+            full_model_ = std::make_unique<pinocchio::Model>();
+            pinocchio::urdf::buildModel(urdf_path, *full_model_);
+            log_.info() << "[KinematicsEngine] Full model loaded: "
+                        << full_model_->nq << " config dims, "
+                        << full_model_->nv << " tangent dims";
+
+            if (full_model_->existJointName("gripper")) {
+                auto gripper_jid = full_model_->getJointId("gripper");
+                locked_joint_ids_.push_back(gripper_jid);
+
+                Eigen::VectorXd q_ref = pinocchio::neutral(*full_model_);
+                model_ = std::make_unique<pinocchio::Model>(
+                    pinocchio::buildReducedModel(*full_model_, locked_joint_ids_, q_ref)
+                );
+                log_.info() << "[KinematicsEngine] Reduced model (gripper locked): "
+                            << model_->nq << " config dims, "
+                            << model_->nv << " tangent dims";
+            } else {
+                model_ = std::make_unique<pinocchio::Model>(*full_model_);
+                log_.info() << "[KinematicsEngine] No gripper joint found, using full model";
+            }
+
             return true;
         } catch(const std::exception & e) {
             log_.error() << "[KinematicsEngine] Error loading URDF: " << e.what();
+            full_model_.reset();
             model_.reset();
             return false;
         }
@@ -135,6 +153,12 @@ namespace openmanip {
     Configuration KinematicsEngine::makeConfiguration(const Eigen::VectorXd& q) const {
         pinocchio::Data data(*model_);
         return Configuration(*model_, data, q);
+    }
+
+    Eigen::VectorXd KinematicsEngine::fullToReducedQ(const Eigen::VectorXd& q_full) const {
+      if (locked_joint_ids_.empty()) return q_full;
+      // NOTE: fo the so101 arm the gripper is the last joint in the kinematic chain
+      return q_full.head(model_->nq);
     }
 
     void KinematicsEngine::printFrames() const {

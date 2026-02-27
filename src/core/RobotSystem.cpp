@@ -61,8 +61,10 @@ namespace openmanip {
         return dynamic_cast<MujocoDriver*>(hardware_.get());
     }
 
-      Eigen::Matrix4d RobotSystem::getFramePose(std::string frame_name){
-      Eigen::VectorXd q = hardware_->getJointPositions();
+
+    Eigen::Matrix4d RobotSystem::getFramePose(std::string frame_name){
+      Eigen::VectorXd q_full = hardware_->getJointPositions();
+      Eigen::VectorXd q = kinematics_->fullToReducedQ(q_full);
       auto config = kinematics_->makeConfiguration(q);
       return config.getTransformFrameToWorld(frame_name).toHomogeneousMatrix();
     }
