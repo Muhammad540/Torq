@@ -14,8 +14,10 @@ namespace openmanip{
 
       const auto& model = kinematics_->model();
 
+      // LIMITS FOR QP OBJECTIVE 
       vel_limit_ = std::make_unique<VelocityLimit>(model);
       cfg_limit_ = std::make_unique<ConfigurationLimit>(model);
+      // TASKS FOR QP OBJECTIVE
       posture_task_ = std::make_unique<PostureTask>(1e-3);
       damping_task_ = std::make_unique<DampingTask>(1e-4);
 

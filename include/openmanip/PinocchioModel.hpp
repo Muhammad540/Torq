@@ -120,16 +120,16 @@ namespace openmanip {
             /* Read only access to the underlying full pinocchio model */
             const pinocchio::Model& fullModel() const { return *full_model_; }
 
-	    /*strips the locked joints to return a reduced model, if no locked joints provided it returns the full model */
-	    Eigen::VectorXd fullToReducedQ(const Eigen::VectorXd& q_full) const;
+            /*strips the locked joints to return a reduced model, if no locked joints provided it returns the full model */
+            Eigen::VectorXd fullToReducedQ(const Eigen::VectorXd& q_full) const;
 
             /* Print all the frame names */
             void printFrames() const;
         private:
             mutable Logger log_;
             std::unique_ptr<pinocchio::Model> model_ = nullptr;
-	    std::unique_ptr<pinocchio::Model> full_model_ = nullptr;
-	    std::vector<pinocchio::JointIndex> locked_joint_ids_;
+            std::unique_ptr<pinocchio::Model> full_model_ = nullptr;
+            std::vector<pinocchio::JointIndex> locked_joint_ids_;
     };
 }
 

@@ -10,7 +10,7 @@ namespace openmanip {
     RobotSystem::RobotSystem() {
         hardware_ = std::make_unique<MujocoDriver>();
         kinematics_ = std::make_unique<KinematicsEngine>();
-	controller_ = std::make_unique<Controller>(kinematics_.get(), hardware_.get());
+        controller_ = std::make_unique<Controller>(kinematics_.get(), hardware_.get());
     }
     RobotSystem::~RobotSystem() {
         log.info() << "[RobotSystem] cleaned up";

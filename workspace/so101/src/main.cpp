@@ -18,12 +18,6 @@ int main(int argc, char** argv){
     openmanip::Gui gui;
     gui.initialize(&robot, "Robot Gui");
 
-    // TEST: IK
-    // Eigen::Matrix4d target = Eigen::Matrix4d::Identity();
-    // target.block<3,1>(0,3) << 0.5, 0.3, 0.5;
-    
-    // robot.setTaskSpaceTarget(target, "gripper_frame_link");
-
     while (gui.windowIsOpen()){
         for (int i=0; i<10; ++i){
             robot.update();

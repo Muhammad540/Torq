@@ -98,11 +98,11 @@ namespace openmanip {
         auto transform_source_to_world = getTransformFrameToWorld(source);
         auto transform_dest_to_world = getTransformFrameToWorld(dest);
 
-	if (last_error_ != ErrorCode::None){
-	    return pinocchio::SE3::Identity();
-	}
+        if (last_error_ != ErrorCode::None){
+            return pinocchio::SE3::Identity();
+        }
 
-	return transform_dest_to_world.actInv(transform_source_to_world);    
+        return transform_dest_to_world.actInv(transform_source_to_world);    
 
     }
   
