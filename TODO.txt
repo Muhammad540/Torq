@@ -1,4 +1,6 @@
-# HIGH
+# CORE  
+
+## HIGH
 [] Pinocchio integration
 [] IK solver
 [] YAML config loader
@@ -18,8 +20,9 @@
 [] define velocity limits so that the qp objective is minimized respecting the velocity limits (i observed that at the singularities (fully stretched) the robot shakes alot)
 [] define/configure the freq at which high/low level controller runs
 [] make the tasks weights configurable
+[] fix gripper after joint control, it stops working
 
-# MEDIUM 
+## MEDIUM 
 [] Dynamixel Driver
 [] Fix the duplicate URDF/XML input to the RobotSystem (for mujoco and Pinocchio) i think both can work with either one of the them.
 [] caching to reuse pose estiamtes btw frames
@@ -28,10 +31,12 @@
 [] Plot out the lowest singular value of J (to identify the singularities)
 [] verify the warmstarting of the QP solver (to avoid recomputation every time)
 
-# LOW
+## LOW
 [] startup is a bit slow, debug this.
 [] add doxygen docs
 
-# Done
+## Done
 [x] Fix the viewport position and size, currently it is not properly centered.
 [x] Lock gripper before IK computation (gripper toggled separately)
+
+# AI

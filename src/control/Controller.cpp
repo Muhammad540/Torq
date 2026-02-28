@@ -63,8 +63,8 @@ namespace openmanip{
 
         double dt = hardware_->getTimestep();
         Eigen::VectorXd q_full = hardware_->getJointPositions();
-	Eigen::VectorXd q = kinematics_->fullToReducedQ(q_full);
-	auto config = kinematics_->makeConfiguration(q);
+        Eigen::VectorXd q = kinematics_->fullToReducedQ(q_full);
+        auto config = kinematics_->makeConfiguration(q);
 
         std::vector<Task*> tasks = {
             frame_task_.get(),

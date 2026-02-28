@@ -50,8 +50,10 @@ namespace openmanip {
 
     void RobotSystem::update() {
        if (hardware_ && kinematics_) {
+          // Stepping Simulation
           hardware_->step();
           if (controller_) {
+            // updating physics 
             controller_->update();
           }
        }
