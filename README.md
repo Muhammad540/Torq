@@ -82,3 +82,14 @@ Planning/control code targets a driver interface; the driver decides where comma
 
 - `MujocoDriver`: simulation backend
 - `DynamixelDriver`: hardware backend
+
+## Documentation
+
+Docs are built with [MkDocs](https://www.mkdocs.org/) and live in the `docs/` folder. To serve them locally:
+
+```bash
+uv sync
+uv run mkdocs serve
+```
+
+Then open [http://127.0.0.1:8000](http://127.0.0.1:8000).
