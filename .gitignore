@@ -1,3 +1,10 @@
+# ImGui layout
+imgui.ini
+
+# Python / uv
+.venv/
+site/
+
 # Build Artifcats
 build/
 .vscode/
@@ -7,3 +14,5 @@ compile_commands.json
 # my notes
 OpenManip.md
 *.txt
+
+workspace/imgui.ini

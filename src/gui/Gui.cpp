@@ -7,8 +7,13 @@
 #include "openmanip/logger.hpp"
 
 #include <GL/glew.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
+#endif
 #include <mujoco/mujoco.h>
 #include <GLFW/glfw3.h>
 
@@ -49,11 +54,12 @@ namespace openmanip {
 
         if (!glfwInit()) return false;
         // Valid on GLFW 3.3+ only
-        float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); 
+        float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
         window_ = glfwCreateWindow((int)(1280 * main_scale), (int)(800 * main_scale), title.c_str(), nullptr, nullptr);
         if (!window_) { glfwTerminate(); return false; }
 
         glfwMakeContextCurrent(window_);
+        glewExperimental = GL_TRUE;
         glewInit();
         glfwSwapInterval(1); // to enable vsync
         glfwSetWindowUserPointer(window_, this);
@@ -78,7 +84,11 @@ namespace openmanip {
         ImGui::StyleColorsDark();
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window_, true);
+#ifdef __APPLE__
+        ImGui_ImplOpenGL3_Init("#version 120");
+#else
         ImGui_ImplOpenGL3_Init("#version 330");
+#endif
         
         int nj = model_->nu;
         joint_targets_.resize(nj, 0.0f);
