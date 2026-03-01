@@ -13,22 +13,32 @@ namespace openmanip {
         controller_ = std::make_unique<Controller>(kinematics_.get(), hardware_.get());
     }
     RobotSystem::~RobotSystem() {
-        log.info() << "[RobotSystem] cleaned up";
+        log_.info() << "[RobotSystem] cleaned up";
     }
 
     bool RobotSystem::initialize(const std::string& model_path_xml, std::string& model_path_urdf) {
         if (!hardware_) {
-            log.error() << "[RobotSystem] Hardware abstraction not initialized";
+            log_.error() << "[RobotSystem] Hardware abstraction not initialized";
             return false;
         }
         if (!hardware_->connect(model_path_xml)) {
-            log.error() << "[RobotSystem] Failed to connect Hardware";
+            log_.error() << "[RobotSystem] Failed to connect Hardware";
             return false;
         }
         if (!kinematics_->initialize(model_path_urdf)) {
-            log.error() << "[RobotSystem] Failed to initialize the Kinematics Engine";
+            log_.error() << "[RobotSystem] Failed to initialize the Kinematics Engine";
             return false;
         }
+        
+        // setup gripper state
+        auto* physics = getPhysics();
+        mjModel* m = physics->getModel();
+        //NOTE: open chain robots usually have the last joint as the gripper
+        int gripper_idx = m->nu - 1;
+        // low=close, high=open
+        double low = m->actuator_ctrlrange[2*gripper_idx];
+        double high = m->actuator_ctrlrange[2*gripper_idx+1];
+        controller_->setGripperConfig(gripper_idx, high, low);
         return true;
     }
 
@@ -36,7 +46,7 @@ namespace openmanip {
       if (controller_){
 	    controller_->setTaskSpaceTarget(target_pose, frame_name);
       } else {
-	    log.error() << "[RobotSystem] Failed to initialize the Controller";
+	    log_.error() << "[RobotSystem] Failed to initialize the Controller";
       }
     }
 
@@ -44,7 +54,7 @@ namespace openmanip {
       if (controller_){
 	      controller_->setJointSpaceTarget(target_pose);
       } else {
-        log.error() << "[RobotSystem] Failed to initialize the Controller";
+        log_.error() << "[RobotSystem] Failed to initialize the Controller";
       }
     }
 
@@ -75,13 +85,13 @@ namespace openmanip {
       if (hardware_){
         home_position_ = hardware_->getJointPositions();
         home_set_ = true;
-        log.info() << "[RobotSystem] Home position saved (" << home_position_.transpose() << ")";
+        log_.info() << "[RobotSystem] Home position saved (" << home_position_.transpose() << ")";
       }
     }
 
     void RobotSystem::moveToHome() {
       if (!home_set_) {
-        log.warning() << "[RobotSystem] Home position not set";
+        log_.warning() << "[RobotSystem] Home position not set";
         return;
       }
       if (controller_) {
@@ -113,27 +123,14 @@ namespace openmanip {
       setTaskSpaceTarget(pose, frame_name);
     }
 
-    void RobotSystem::setGripperActuator(int actuator_idx) {
-      gripper_actuator_idx_ = actuator_idx;
+    void RobotSystem::toggleGripper(){
+      if (controller_) controller_->toggleGripper();
     }
 
-    void RobotSystem::toggleGripper(){
-      auto* physics = getPhysics();
-      if (!physics) return;
-
-      mjModel* m = physics->getModel();
-      mjData* d = physics->getData();
-      if (!m || !d || m->nu == 0) return;
-
-      if (gripper_actuator_idx_ < 0) {
-        gripper_actuator_idx_ = m->nu - 1;
-      }
-
-      gripper_open_ = !gripper_open_;
-
-      double low  = m->actuator_ctrlrange[2 * gripper_actuator_idx_];
-      double high = m->actuator_ctrlrange[2 * gripper_actuator_idx_ + 1];
-      d->ctrl[gripper_actuator_idx_] = gripper_open_ ? high : low;
+    bool RobotSystem::isGripperOpen() const {
+      if (controller_) return controller_->isGripperOpen();
+      log_.warning() << "[RobotSystem] controller not set up properly";
+      return true;
     }
 
     Eigen::VectorXd RobotSystem::getJointPositions(){

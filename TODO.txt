@@ -20,7 +20,9 @@
 [] define velocity limits so that the qp objective is minimized respecting the velocity limits (i observed that at the singularities (fully stretched) the robot shakes alot)
 [] define/configure the freq at which high/low level controller runs
 [] make the tasks weights configurable
-[] fix gripper after joint control, it stops working
+[] Add more robot form factors (currently s0101 only) like franka, humanoids, spot
+[] Add cam sensors (also incorporate into gui)
+[] pybindings
 
 ## MEDIUM 
 [] Dynamixel Driver
@@ -30,7 +32,7 @@
 [] Display force contacts
 [] Plot out the lowest singular value of J (to identify the singularities)
 [] verify the warmstarting of the QP solver (to avoid recomputation every time)
-
+[] return proper error codes from all cirtical methods (create a struct of all possible error codes, should be documented)
 ## LOW
 [] startup is a bit slow, debug this.
 [] add doxygen docs
@@ -38,5 +40,6 @@
 ## Done
 [x] Fix the viewport position and size, currently it is not properly centered.
 [x] Lock gripper before IK computation (gripper toggled separately)
+[x] fix gripper after joint control, it stops working
 
 # AI

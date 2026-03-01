@@ -27,6 +27,13 @@ namespace openmanip{
 
     /* Direct joint space target. Bypasses IK entirely. */
     void setJointSpaceTarget(const Eigen::VectorXd& target_joints);
+    
+    /* Initialize gripper state*/
+    void setGripperConfig(int actuator_idx, double open_val, double close_val);
+    bool isGripperOpen() const { return gripper_open_; }
+    
+    /* Binary gripper control*/
+    void toggleGripper();
 
     /* Called every control tick by RobotSystem. */
     void update();
@@ -47,6 +54,10 @@ namespace openmanip{
     ControlMode mode_ = ControlMode::IDLE;
     Eigen::VectorXd target_joints_;
     bool ik_ready_ = false;
+    double gripper_open_val_ = 0.0;
+    double gripper_close_val_ = 0.0;
+    bool gripper_open_ = true;
+    int gripper_actuator_idx_ = 0;
 
     Logger log_;
   };

@@ -52,6 +52,25 @@ namespace openmanip{
     mode_ = ControlMode::JOINT_SPACE;
   }
 
+  void Controller::setGripperConfig(int actuator_idx, double open_val, double close_val){
+    gripper_actuator_idx_ = actuator_idx;
+    gripper_open_val_ = open_val;
+    gripper_close_val_ = close_val;
+  }
+
+  void Controller::toggleGripper(){
+      if (gripper_actuator_idx_ < 0) {
+        log_.warning() << "[Controller] gripper index is not correctly setup";
+      }
+      
+      gripper_open_ = !gripper_open_;
+      double val = gripper_open_ ? gripper_open_val_ : gripper_close_val_;
+
+      if (static_cast<int>(target_joints_.size()) > gripper_actuator_idx_){
+        target_joints_[gripper_actuator_idx_] = val;
+      }
+  }
+
   void Controller::update(){
     if (!hardware_ || !kinematics_ || !kinematics_->isReady()) {
         log_.error() << "[Controller] Hardware or kinematics not ready";
@@ -76,12 +95,19 @@ namespace openmanip{
             cfg_limit_.get()
         };
 	
-	//TODO (damping should be configurable)
+        //TODO (damping should be configurable)
         Eigen::VectorXd velocity = ik_solver_.solve(config, tasks, dt, /*damping=*/1e-12, limits);
 
         config.integrateInplace(velocity, dt);
-        hardware_->setJointPositions(config.q());
-
+        Eigen::VectorXd q_cmd = config.q();
+        if (gripper_actuator_idx_ >= static_cast<int>(q_cmd.size())) {
+          Eigen::VectorXd q_full(gripper_actuator_idx_ + 1);
+          q_full.head(q_cmd.size()) = q_cmd;
+          q_full[gripper_actuator_idx_] = gripper_open_ ? gripper_open_val_ : gripper_close_val_;
+          hardware_->setJointPositions(q_full);
+        } else {
+          hardware_->setJointPositions(q_cmd);
+        }
     } else if (mode_ == ControlMode::JOINT_SPACE) {
         hardware_->setJointPositions(target_joints_);
     }

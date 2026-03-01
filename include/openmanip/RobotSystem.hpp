@@ -34,14 +34,13 @@ namespace openmanip {
             double jogLinearStep() const { return jog_linear_step_; }
             double jogAngularStep() const { return jog_angular_step_; }
             void toggleGripper();
-            bool isGripperOpen() const { return gripper_open_; }
-            void setGripperActuator(int actuator_idx);
+            bool isGripperOpen() const;
             // Common Getters
             Eigen::Matrix4d getFramePose(std::string frame_name);
             Eigen::VectorXd getJointPositions();
 
         private:
-            Logger log;
+            mutable Logger log_;
             std::unique_ptr<HardwareInterface> hardware_;
             std::unique_ptr<KinematicsEngine> kinematics_;
             std::unique_ptr<Controller> controller_;
@@ -49,8 +48,6 @@ namespace openmanip {
             bool home_set_ = false;
             double jog_linear_step_ = 0.01; // meter
             double jog_angular_step_ = 0.05; // rad
-            bool gripper_open_ = true;
-            int gripper_actuator_idx_ = -1;
     };
 }
 
