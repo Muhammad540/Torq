@@ -117,4 +117,16 @@ namespace openmanip {
         if (!model_) return 0;
         return model_->njnt;
     }
+
+    int MujocoDriver::numActuators() const{
+        if (!model_) return 0;
+        return model_->nu;
+    }
+
+    Eigen::VectorXd MujocoDriver::getCtrl() const{
+        if (!model_ || !data_){
+            return Eigen::VectorXd::Zero(0);
+        }
+        return Eigen::Map<const Eigen::VectorXd>(data_->ctrl, model_->nu);
+    }
 }

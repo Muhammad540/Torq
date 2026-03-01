@@ -34,11 +34,13 @@ namespace openmanip {
 
         auto* physics = getPhysics();
         mjModel* m = physics->getModel();
+        mjData*  d = physics->getData();
         int gripper_idx = config.gripper_actuator_idx;
         if (gripper_idx < 0) gripper_idx = m->nu - 1;
         double low  = m->actuator_ctrlrange[2 * gripper_idx];
         double high = m->actuator_ctrlrange[2 * gripper_idx + 1];
-        controller_->setGripperConfig(gripper_idx, high, low);
+        double current = d->ctrl[gripper_idx];
+        controller_->setGripperConfig(gripper_idx, high, low, current);
         return true;
     }
 
@@ -83,7 +85,7 @@ namespace openmanip {
 
     void RobotSystem::setHomePosition(){
       if (hardware_){
-        home_position_ = hardware_->getJointPositions();
+        home_position_ = hardware_->getCtrl();
         home_set_ = true;
         log_.info() << "[RobotSystem] Home position saved (" << home_position_.transpose() << ")";
       }

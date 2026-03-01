@@ -1,4 +1,5 @@
 #include "openmanip/Controller.hpp"
+#include <cmath>
 
 namespace openmanip{
   Controller::Controller(KinematicsEngine* kinematics, HardwareInterface* hardware): kinematics_(kinematics), hardware_(hardware){
@@ -52,10 +53,13 @@ namespace openmanip{
     mode_ = ControlMode::JOINT_SPACE;
   }
 
-  void Controller::setGripperConfig(int actuator_idx, double open_val, double close_val){
+  void Controller::setGripperConfig(int actuator_idx, double open_val, double close_val, double current_val){
     gripper_actuator_idx_ = actuator_idx;
     gripper_open_val_ = open_val;
     gripper_close_val_ = close_val;
+    double dist_to_open  = std::abs(current_val - open_val);
+    double dist_to_close = std::abs(current_val - close_val);
+    gripper_open_ = (dist_to_open <= dist_to_close);
   }
 
   void Controller::toggleGripper(){

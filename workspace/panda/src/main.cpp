@@ -11,7 +11,7 @@ int main(int argc, char** argv){
     openmanip::RobotConfig config;
     config.scene_path = (root / "workspace/models/franka_emika_panda/scene.xml").string();
     config.robot_model_path = (root / "workspace/models/franka_emika_panda/panda.xml").string();
-    config.end_effector_frame = "link8";
+    config.end_effector_frame = "hand";
     config.locked_joints = {"finger_joint1", "finger_joint2"};
 
     openmanip::RobotSystem robot;

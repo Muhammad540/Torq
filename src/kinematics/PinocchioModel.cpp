@@ -1,6 +1,7 @@
 #include "openmanip/PinocchioModel.hpp"
 #include "openmanip/utils.hpp"
 
+#include <set>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/mjcf.hpp>
 #include <pinocchio/algorithm/frames.hpp>
@@ -148,6 +149,7 @@ namespace openmanip {
             if (!locked_joint_ids_.empty()) {
                 Eigen::VectorXd q_ref = pinocchio::neutral(*full_model_);
                 model_ = std::make_unique<pinocchio::Model>(pinocchio::buildReducedModel(*full_model_, locked_joint_ids_, q_ref));
+                buildQMapping();
                 log_.info() << "[KinematicsEngine] Reduced model ("
                             << locked_joint_ids_.size() << " joints locked): "
                             << model_->nq << " config dims, "
@@ -171,10 +173,32 @@ namespace openmanip {
         return Configuration(*model_, data, q);
     }
 
+    void KinematicsEngine::buildQMapping() {
+        q_idx_map_.clear();
+        if (!full_model_ || !model_) return;
+        // form a red-black tree (ologn insert/find/erase)
+        std::set<pinocchio::JointIndex> locked_set(locked_joint_ids_.begin(), locked_joint_ids_.end());
+        
+        // njoints -> gives total number of joints    
+        for (pinocchio::JointIndex j = 1; j < static_cast<pinocchio::JointIndex>(full_model_->njoints); ++j) {
+            if (locked_set.count(j)) continue;
+            // idx_q -> gives the starting index in the config vector q of joint j
+            int idx_q  = full_model_->joints[j].idx_q();
+            // number of dof's in cspace for that joint
+            int nq_j   = full_model_->joints[j].nq();
+            for (int k = 0; k < nq_j; ++k)
+                q_idx_map_.push_back(idx_q + k);
+        }
+    }
+
     Eigen::VectorXd KinematicsEngine::fullToReducedQ(const Eigen::VectorXd& q_full) const {
       if (locked_joint_ids_.empty()) return q_full;
-      // NOTE(Ahmed): assumes locked joints are at the tail of the kinematic chain
-      return q_full.head(model_->nq);
+
+      Eigen::VectorXd q_reduced(static_cast<int>(q_idx_map_.size()));
+      for (int i = 0; i < static_cast<int>(q_idx_map_.size()); ++i) {
+          q_reduced[i] = q_full[q_idx_map_[i]];
+      }
+      return q_reduced;
     }
 
     void KinematicsEngine::printFrames() const {

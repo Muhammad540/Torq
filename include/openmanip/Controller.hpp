@@ -28,8 +28,8 @@ namespace openmanip{
     /* Direct joint space target. Bypasses IK entirely. */
     void setJointSpaceTarget(const Eigen::VectorXd& target_joints);
     
-    /* Initialize gripper state*/
-    void setGripperConfig(int actuator_idx, double open_val, double close_val);
+    /* Initialize gripper state */
+    void setGripperConfig(int actuator_idx, double open_val, double close_val, double current_val);
     bool isGripperOpen() const { return gripper_open_; }
     
     /* Binary gripper control*/

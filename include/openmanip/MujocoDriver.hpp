@@ -31,7 +31,8 @@ namespace openmanip {
 
             virtual Eigen::VectorXd getJointPositions() const override;
             virtual Eigen::VectorXd getJointVelocities() const override;
-            
+            virtual Eigen::VectorXd getCtrl() const override;
+
             virtual void overrideJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q);
             virtual void overrideJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd);
             
@@ -42,6 +43,7 @@ namespace openmanip {
             virtual double getTimestep() const override;
 
             virtual int numJoints() const override;
+            virtual int numActuators() const override;
         private:
             ModelPtr model_{nullptr, &mj_deleteModel};
             DataPtr  data_{nullptr,  &mj_deleteData};
