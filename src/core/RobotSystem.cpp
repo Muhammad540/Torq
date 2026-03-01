@@ -16,28 +16,28 @@ namespace openmanip {
         log_.info() << "[RobotSystem] cleaned up";
     }
 
-    bool RobotSystem::initialize(const std::string& model_path_xml, std::string& model_path_urdf) {
+    bool RobotSystem::initialize(const RobotConfig& config) {
         if (!hardware_) {
             log_.error() << "[RobotSystem] Hardware abstraction not initialized";
             return false;
         }
-        if (!hardware_->connect(model_path_xml)) {
+        if (!hardware_->connect(config.scene_path)) {
             log_.error() << "[RobotSystem] Failed to connect Hardware";
             return false;
         }
-        if (!kinematics_->initialize(model_path_urdf)) {
+        if (!kinematics_->initialize(config.robot_model_path, config.locked_joints)) {
             log_.error() << "[RobotSystem] Failed to initialize the Kinematics Engine";
             return false;
         }
-        
-        // setup gripper state
+
+        end_effector_frame_ = config.end_effector_frame;
+
         auto* physics = getPhysics();
         mjModel* m = physics->getModel();
-        //NOTE: open chain robots usually have the last joint as the gripper
-        int gripper_idx = m->nu - 1;
-        // low=close, high=open
-        double low = m->actuator_ctrlrange[2*gripper_idx];
-        double high = m->actuator_ctrlrange[2*gripper_idx+1];
+        int gripper_idx = config.gripper_actuator_idx;
+        if (gripper_idx < 0) gripper_idx = m->nu - 1;
+        double low  = m->actuator_ctrlrange[2 * gripper_idx];
+        double high = m->actuator_ctrlrange[2 * gripper_idx + 1];
         controller_->setGripperConfig(gripper_idx, high, low);
         return true;
     }

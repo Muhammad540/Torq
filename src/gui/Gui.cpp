@@ -5,6 +5,7 @@
 #include "openmanip/RobotSystem.hpp"
 #include "openmanip/MujocoDriver.hpp"
 #include "openmanip/logger.hpp"
+#include <cstring>
 
 #include <GL/glew.h>
 #ifdef __APPLE__
@@ -314,7 +315,12 @@ namespace openmanip {
         ImGui::Text("Inverse Kinematics - Task Space Jog");
         ImGui::Separator();
 
-        static char frame_buf[128] = "gripper_frame_link";
+        static bool frame_initialized = false;
+        static char frame_buf[128] = {};
+        if (!frame_initialized) {
+            std::strncpy(frame_buf, robot_->endEffectorFrame().c_str(), sizeof(frame_buf) - 1);
+            frame_initialized = true;
+        }
         ImGui::InputText("Frame", frame_buf, sizeof(frame_buf));
         std::string frame(frame_buf);
 

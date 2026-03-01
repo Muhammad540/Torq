@@ -9,10 +9,10 @@ int main(int argc, char** argv){
     std::filesystem::path root(PROJECT_ROOT);
 
     openmanip::RobotConfig config;
-    config.scene_path = (root / "workspace/models/SO101/scene.xml").string();
-    config.robot_model_path = (root / "workspace/models/SO101/so101_new_calib.urdf").string();
-    config.end_effector_frame = "gripper_frame_link";
-    config.locked_joints = {"gripper"};
+    config.scene_path = (root / "workspace/models/franka_emika_panda/scene.xml").string();
+    config.robot_model_path = (root / "workspace/models/franka_emika_panda/panda.xml").string();
+    config.end_effector_frame = "link8";
+    config.locked_joints = {"finger_joint1", "finger_joint2"};
 
     openmanip::RobotSystem robot;
     if (!robot.initialize(config)){
@@ -21,7 +21,7 @@ int main(int argc, char** argv){
     }
 
     openmanip::Gui gui;
-    gui.initialize(&robot, "SO101 Arm");
+    gui.initialize(&robot, "Franka Panda");
 
     while (gui.windowIsOpen()){
         for (int i=0; i<10; ++i){

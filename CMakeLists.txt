@@ -103,5 +103,6 @@ set_target_properties(openmanip PROPERTIES NO_SYSTEM_FROM_IMPORTED ON)
 # Application
 # ===========
 add_subdirectory(workspace/so101)
+add_subdirectory(workspace/panda)
 
 message(STATUS "--- Configuration Done ---")

@@ -8,15 +8,28 @@
 #include "Controller.hpp"
 
 #include <string>
+#include <vector>
 #include <memory>
 namespace openmanip {
+
+    struct RobotConfig {
+        // MuJoCo scene (floor, lights, robot include)
+        std::string scene_path;
+        // robot only URDF or MJCF for pinocchio kinematics        
+        std::string robot_model_path;  
+        std::string end_effector_frame;
+        std::vector<std::string> locked_joints;
+        // -1 = last actuator
+        int gripper_actuator_idx = -1; 
+    };
+
     class HardwareInterface;
     class RobotSystem {
         public:
             RobotSystem();
             ~RobotSystem();
 
-            bool initialize(const std::string& model_path_xml, std::string& model_path_urdf);
+            bool initialize(const RobotConfig& config);
 
             void update();
             
@@ -35,6 +48,7 @@ namespace openmanip {
             double jogAngularStep() const { return jog_angular_step_; }
             void toggleGripper();
             bool isGripperOpen() const;
+            const std::string& endEffectorFrame() const { return end_effector_frame_; }
             // Common Getters
             Eigen::Matrix4d getFramePose(std::string frame_name);
             Eigen::VectorXd getJointPositions();
@@ -48,6 +62,7 @@ namespace openmanip {
             bool home_set_ = false;
             double jog_linear_step_ = 0.01; // meter
             double jog_angular_step_ = 0.05; // rad
+            std::string end_effector_frame_;
     };
 }
 

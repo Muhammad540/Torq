@@ -2,6 +2,7 @@
 #include "openmanip/utils.hpp"
 
 #include <pinocchio/parsers/urdf.hpp>
+#include <pinocchio/parsers/mjcf.hpp>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/algorithm/geometry.hpp>
@@ -116,34 +117,49 @@ namespace openmanip {
         this->update(q_new);
     }
     
-    bool KinematicsEngine::initialize(const std::string& urdf_path) {
+    bool KinematicsEngine::initialize(const std::string& model_path,
+                                      const std::vector<std::string>& locked_joint_names) {
         try {
-            log_.info() << "[KinematicsEngine] Loading URDF: " << urdf_path;
+            log_.info() << "[KinematicsEngine] Loading model: " << model_path;
             full_model_ = std::make_unique<pinocchio::Model>();
-            pinocchio::urdf::buildModel(urdf_path, *full_model_);
+
+            bool is_urdf = (model_path.rfind(".urdf") != std::string::npos);
+
+            if (is_urdf) {
+                pinocchio::urdf::buildModel(model_path, *full_model_);
+            } else {
+                pinocchio::mjcf::buildModel(model_path, *full_model_);
+            }
+
             log_.info() << "[KinematicsEngine] Full model loaded: "
                         << full_model_->nq << " config dims, "
                         << full_model_->nv << " tangent dims";
 
-            if (full_model_->existJointName("gripper")) {
-                auto gripper_jid = full_model_->getJointId("gripper");
-                locked_joint_ids_.push_back(gripper_jid);
+            locked_joint_ids_.clear();
+            for (const auto& name : locked_joint_names) {
+                if (full_model_->existJointName(name)) {
+                    locked_joint_ids_.push_back(full_model_->getJointId(name));
+                    log_.info() << "[KinematicsEngine] Locking joint: " << name;
+                } else {
+                    log_.warning() << "[KinematicsEngine] Joint to lock not found: " << name;
+                }
+            }
 
+            if (!locked_joint_ids_.empty()) {
                 Eigen::VectorXd q_ref = pinocchio::neutral(*full_model_);
-                model_ = std::make_unique<pinocchio::Model>(
-                    pinocchio::buildReducedModel(*full_model_, locked_joint_ids_, q_ref)
-                );
-                log_.info() << "[KinematicsEngine] Reduced model (gripper locked): "
+                model_ = std::make_unique<pinocchio::Model>(pinocchio::buildReducedModel(*full_model_, locked_joint_ids_, q_ref));
+                log_.info() << "[KinematicsEngine] Reduced model ("
+                            << locked_joint_ids_.size() << " joints locked): "
                             << model_->nq << " config dims, "
                             << model_->nv << " tangent dims";
             } else {
                 model_ = std::make_unique<pinocchio::Model>(*full_model_);
-                log_.info() << "[KinematicsEngine] No gripper joint found, using full model";
+                log_.info() << "[KinematicsEngine] No joints locked, using full model";
             }
 
             return true;
         } catch(const std::exception & e) {
-            log_.error() << "[KinematicsEngine] Error loading URDF: " << e.what();
+            log_.error() << "[KinematicsEngine] Error loading model: " << e.what();
             full_model_.reset();
             model_.reset();
             return false;
@@ -157,7 +173,7 @@ namespace openmanip {
 
     Eigen::VectorXd KinematicsEngine::fullToReducedQ(const Eigen::VectorXd& q_full) const {
       if (locked_joint_ids_.empty()) return q_full;
-      // NOTE: fo the so101 arm the gripper is the last joint in the kinematic chain
+      // NOTE(Ahmed): assumes locked joints are at the tail of the kinematic chain
       return q_full.head(model_->nq);
     }
 

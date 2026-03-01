@@ -16,7 +16,8 @@
 #include <pinocchio/algorithm/joint-configuration.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/model.hpp>
-#include "pinocchio/parsers/urdf.hpp"
+#include <pinocchio/parsers/urdf.hpp>
+#include <pinocchio/parsers/mjcf.hpp>
  
 namespace openmanip {
     /*
@@ -96,17 +97,18 @@ namespace openmanip {
     /*
         KinematicsEngine loads and owns the pinocchio model.
         Use makeConfiguration() to create Configuration objects from it.
-	
-	If the urdf contains a joint named "gripper", it is automatically locked via 
-	pinocchio::buildReducedModel so that IK only operate on the arm DOF's 
+
+        Supports loading from both URDF (.urdf) and MJCF (.xml) files.
+        Joints listed in locked_joint_names are frozen via
+        pinocchio::buildReducedModel so that IK only operates on the remaining DOFs.
     */
     class KinematicsEngine {
         public:
             KinematicsEngine() = default;
             ~KinematicsEngine() = default;
 
-            /* Load the urdf and build the pinocchio model */
-            bool initialize(const std::string& urdf_path);
+            /* Load model (URDF or MJCF) and optionally lock the named joints */
+            bool initialize(const std::string& model_path, const std::vector<std::string>& locked_joint_names = {});
 
             /* True if the model has been loaded successfully */
             bool isReady() const { return model_ != nullptr; }
@@ -114,13 +116,13 @@ namespace openmanip {
             /* Create a configuration from this engine's model at joint config q (reduced model) */
             Configuration makeConfiguration(const Eigen::VectorXd& q) const;
 
-            /* Read only access to the underlying Reduced pinocchio model (gripper joint frozen) */
+            /* Read only access to the underlying reduced pinocchio model (locked joints frozen) */
             const pinocchio::Model& model() const { return *model_; }
 
             /* Read only access to the underlying full pinocchio model */
             const pinocchio::Model& fullModel() const { return *full_model_; }
 
-            /*strips the locked joints to return a reduced model, if no locked joints provided it returns the full model */
+            /* Strips the locked joints to return a reduced model q vector */
             Eigen::VectorXd fullToReducedQ(const Eigen::VectorXd& q_full) const;
 
             /* Print all the frame names */
