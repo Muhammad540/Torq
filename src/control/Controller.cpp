@@ -15,17 +15,13 @@ namespace openmanip{
 
       const auto& model = kinematics_->model();
 
-      // LIMITS FOR QP OBJECTIVE 
       vel_limit_ = std::make_unique<VelocityLimit>(model);
-      cfg_limit_ = std::make_unique<ConfigurationLimit>(model);
-      // TASKS FOR QP OBJECTIVE
-      posture_task_ = std::make_unique<PostureTask>(1e-3);
-      damping_task_ = std::make_unique<DampingTask>(1e-4);
+      cfg_limit_ = std::make_unique<ConfigurationLimit>(model, ik_config_.config_limit_gain);
+      posture_task_ = std::make_unique<PostureTask>(ik_config_.posture_cost, ik_config_.posture_lm_damping, ik_config_.posture_gain);
+      damping_task_ = std::make_unique<DampingTask>(ik_config_.damping_cost);
 
-      // TODO(Ahmed) this should be set by the user (neutral posture as the regularization target)
       Eigen::VectorXd q0_full = hardware_->getJointPositions();
       Eigen::VectorXd q0 = kinematics_->fullToReducedQ(q0_full);
-      // NOTE: we make config from the reduced model
       auto config = kinematics_->makeConfiguration(q0);
       posture_task_->setTargetFromConfiguration(config);
 
@@ -37,7 +33,12 @@ namespace openmanip{
     initIK();
 
     if (!frame_task_ || frame_task_->frame() != frame_name) {
-        frame_task_ = std::make_unique<FrameTask>(frame_name, 1.0, 1.0);
+        frame_task_ = std::make_unique<FrameTask>(
+            frame_name,
+            ik_config_.frame_position_cost,
+            ik_config_.frame_orientation_cost,
+            ik_config_.frame_lm_damping,
+            ik_config_.frame_gain);
     }
 
     pinocchio::SE3 se3_target(
@@ -99,8 +100,7 @@ namespace openmanip{
             cfg_limit_.get()
         };
 	
-        //TODO (damping should be configurable)
-        Eigen::VectorXd velocity = ik_solver_.solve(config, tasks, dt, /*damping=*/1e-12, limits);
+        Eigen::VectorXd velocity = ik_solver_.solve(config, tasks, dt, ik_config_.solver_damping, limits);
 
         config.integrateInplace(velocity, dt);
         Eigen::VectorXd q_cmd = config.q();
@@ -115,5 +115,54 @@ namespace openmanip{
     } else if (mode_ == ControlMode::JOINT_SPACE) {
         hardware_->setJointPositions(target_joints_);
     }
+  }
+
+  void Controller::setFrameTaskPositionCost(double cost) {
+    ik_config_.frame_position_cost = cost;
+    if (frame_task_) frame_task_->setPositionCost(cost);
+  }
+
+  void Controller::setFrameTaskOrientationCost(double cost) {
+    ik_config_.frame_orientation_cost = cost;
+    if (frame_task_) frame_task_->setOrientationCost(cost);
+  }
+
+  void Controller::setFrameTaskGain(double gain) {
+    ik_config_.frame_gain = gain;
+    if (frame_task_) frame_task_->setGain(gain);
+  }
+
+  void Controller::setFrameTaskLMDamping(double lm_damping) {
+    ik_config_.frame_lm_damping = lm_damping;
+    if (frame_task_) frame_task_->setLMDamping(lm_damping);
+  }
+
+  void Controller::setPostureTaskCost(double cost) {
+    ik_config_.posture_cost = cost;
+    if (posture_task_) posture_task_->setCost(cost);
+  }
+
+  void Controller::setPostureTaskGain(double gain) {
+    ik_config_.posture_gain = gain;
+    if (posture_task_) posture_task_->setGain(gain);
+  }
+
+  void Controller::setPostureTaskLMDamping(double lm_damping) {
+    ik_config_.posture_lm_damping = lm_damping;
+    if (posture_task_) posture_task_->setLMDamping(lm_damping);
+  }
+
+  void Controller::setDampingTaskCost(double cost) {
+    ik_config_.damping_cost = cost;
+    if (damping_task_) damping_task_->setCost(cost);
+  }
+
+  void Controller::setSolverDamping(double damping) {
+    ik_config_.solver_damping = damping;
+  }
+
+  void Controller::setConfigLimitGain(double gain) {
+    ik_config_.config_limit_gain = gain;
+    if (cfg_limit_) cfg_limit_->setConfigLimitGain(gain);
   }
 }

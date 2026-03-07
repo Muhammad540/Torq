@@ -135,6 +135,54 @@ namespace openmanip {
       return true;
     }
 
+    void RobotSystem::setFrameTaskPositionCost(double cost) {
+      if (controller_) controller_->setFrameTaskPositionCost(cost);
+    }
+
+    void RobotSystem::setFrameTaskOrientationCost(double cost) {
+      if (controller_) controller_->setFrameTaskOrientationCost(cost);
+    }
+
+    void RobotSystem::setFrameTaskGain(double gain) {
+      if (controller_) controller_->setFrameTaskGain(gain);
+    }
+
+    void RobotSystem::setFrameTaskLMDamping(double lm_damping) {
+      if (controller_) controller_->setFrameTaskLMDamping(lm_damping);
+    }
+
+    void RobotSystem::setPostureTaskCost(double cost) {
+      if (controller_) controller_->setPostureTaskCost(cost);
+    }
+
+    void RobotSystem::setPostureTaskGain(double gain) {
+      if (controller_) controller_->setPostureTaskGain(gain);
+    }
+
+    void RobotSystem::setPostureTaskLMDamping(double lm_damping) {
+      if (controller_) controller_->setPostureTaskLMDamping(lm_damping);
+    }
+
+    void RobotSystem::setDampingTaskCost(double cost) {
+      if (controller_) controller_->setDampingTaskCost(cost);
+    }
+
+    void RobotSystem::setSolverDamping(double damping) {
+      if (controller_) controller_->setSolverDamping(damping);
+    }
+
+    void RobotSystem::setConfigLimitGain(double gain) {
+      if (controller_) controller_->setConfigLimitGain(gain);
+    }
+
+    const IKConfig& RobotSystem::ikConfig() const {
+      return controller_->ikConfig();
+    }
+
+    bool RobotSystem::ikReady() const {
+      return controller_ && controller_->ikReady();
+    }
+
     Eigen::VectorXd RobotSystem::getJointPositions(){
       return hardware_->getJointPositions();
     }

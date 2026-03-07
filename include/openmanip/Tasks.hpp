@@ -55,12 +55,16 @@ namespace openmanip{
             */
             std::pair<Eigen::MatrixXd, Eigen::VectorXd> computeQPObjective(const Configuration& config) const;
 
-            void setGain(double gain) {gain_ = gain; }
-            void setLMDamping(double lm_damping) {lm_damping_ = lm_damping; }
+            void setCost(const Eigen::VectorXd& cost) { cost_ = cost; scalar_cost_ = false; }
+            void setCost(double cost) { cost_ = Eigen::VectorXd::Constant(1, cost); scalar_cost_ = true; }
+            void setGain(double gain) { gain_ = gain; }
+            void setLMDamping(double lm_damping) { lm_damping_ = lm_damping; }
 
             double gain() const { return gain_; }
             double lmDamping() const { return lm_damping_; }
             const Eigen::VectorXd& cost() const { return cost_; }
+            bool isScalarCost() const { return scalar_cost_; }
+            double scalarCost() const { return cost_(0); }
 
         protected:
             Eigen::VectorXd cost_;
@@ -93,6 +97,8 @@ namespace openmanip{
 
         bool hasTarget() const { return target_.has_value(); }
         const std::string& frame() const { return frame_; }
+        double positionCost() const { return cost_(0); }
+        double orientationCost() const { return cost_(3); }
 
         Eigen::VectorXd computeError(const Configuration& config) const override;
         Eigen::MatrixXd computeJacobian(const Configuration& config) const override;

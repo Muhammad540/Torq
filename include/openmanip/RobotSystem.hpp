@@ -49,6 +49,21 @@ namespace openmanip {
             void toggleGripper();
             bool isGripperOpen() const;
             const std::string& endEffectorFrame() const { return end_effector_frame_; }
+
+            // IK parameter tuning
+            void setFrameTaskPositionCost(double cost);
+            void setFrameTaskOrientationCost(double cost);
+            void setFrameTaskGain(double gain);
+            void setFrameTaskLMDamping(double lm_damping);
+            void setPostureTaskCost(double cost);
+            void setPostureTaskGain(double gain);
+            void setPostureTaskLMDamping(double lm_damping);
+            void setDampingTaskCost(double cost);
+            void setSolverDamping(double damping);
+            void setConfigLimitGain(double gain);
+            const IKConfig& ikConfig() const;
+            bool ikReady() const;
+
             // Common Getters
             Eigen::Matrix4d getFramePose(std::string frame_name);
             Eigen::VectorXd getJointPositions();

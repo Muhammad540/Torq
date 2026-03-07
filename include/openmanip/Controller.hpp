@@ -15,28 +15,56 @@
 namespace openmanip{
   enum class ControlMode{IDLE, JOINT_SPACE, TASK_SPACE};
   
+  struct IKConfig {
+    double frame_position_cost = 1.0;
+    double frame_orientation_cost = 1.0;
+    double frame_gain = 1.0;
+    double frame_lm_damping = 0.0;
+    double posture_cost = 1e-3;
+    double posture_gain = 1.0;
+    double posture_lm_damping = 0.0;
+    double damping_cost = 1e-4;
+    double solver_damping = 1e-12;
+    double config_limit_gain = 0.5;
+  };
+
   class Controller {
   
   public:
     Controller(KinematicsEngine* kinematics, HardwareInterface* hardware);
     ~Controller();
     
-    /* Set an SE3 target for the end effector frame. Creates/updates the FrameTask and switches to TASK_SPACE mode. */
     void setTaskSpaceTarget(const Eigen::Matrix4d& target_pose,
                             const std::string& frame_name);
-
-    /* Direct joint space target. Bypasses IK entirely. */
     void setJointSpaceTarget(const Eigen::VectorXd& target_joints);
     
-    /* Initialize gripper state */
     void setGripperConfig(int actuator_idx, double open_val, double close_val, double current_val);
     bool isGripperOpen() const { return gripper_open_; }
-    
-    /* Binary gripper control*/
     void toggleGripper();
 
-    /* Called every control tick by RobotSystem. */
     void update();
+
+    /* Runtime IK parameter tuning - applies immediately to live tasks/limits */
+    void setFrameTaskPositionCost(double cost);
+    void setFrameTaskOrientationCost(double cost);
+    void setFrameTaskGain(double gain);
+    void setFrameTaskLMDamping(double lm_damping);
+    void setPostureTaskCost(double cost);
+    void setPostureTaskGain(double gain);
+    void setPostureTaskLMDamping(double lm_damping);
+    void setDampingTaskCost(double cost);
+    void setSolverDamping(double damping);
+    void setConfigLimitGain(double gain);
+
+    const IKConfig& ikConfig() const { return ik_config_; }
+    bool ikReady() const { return ik_ready_; }
+
+    FrameTask* frameTask() { return frame_task_.get(); }
+    PostureTask* postureTask() { return posture_task_.get(); }
+    DampingTask* dampingTask() { return damping_task_.get(); }
+    VelocityLimit* velLimit() { return vel_limit_.get(); }
+    ConfigurationLimit* cfgLimit() { return cfg_limit_.get(); }
+
   private:
     void initIK();
 
@@ -44,6 +72,7 @@ namespace openmanip{
     HardwareInterface* hardware_;
 
     InverseKinematics ik_solver_;
+    IKConfig ik_config_;
 
     std::unique_ptr<FrameTask> frame_task_;
     std::unique_ptr<PostureTask> posture_task_;

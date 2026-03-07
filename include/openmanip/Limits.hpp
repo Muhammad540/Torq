@@ -46,6 +46,9 @@ namespace openmanip {
     public:
       explicit ConfigurationLimit(const pinocchio::Model& model, double config_limit_gain = 0.5);
       std::optional<std::pair<Eigen::MatrixXd, Eigen::VectorXd>> computeQPInequalities(const Configuration& config, double dt) const override;
+
+      void setConfigLimitGain(double gain) { config_limit_gain_ = gain; }
+      double configLimitGain() const { return config_limit_gain_; }
       
     private:
       const pinocchio::Model& model_;

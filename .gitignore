@@ -14,5 +14,6 @@ compile_commands.json
 # my notes
 OpenManip.md
 *.txt
+pink/
 
 workspace/imgui.ini

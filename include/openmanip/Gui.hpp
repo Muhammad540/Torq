@@ -80,6 +80,7 @@ namespace openmanip {
             void drawViewport();
             void drawJointControlPanel();
             void drawCartesianPanel();
+            void drawIKTuningPanel();
             // void drawInfoPanel();
 
             std::vector<float> joint_targets_;
@@ -87,6 +88,19 @@ namespace openmanip {
             int selected_frame_idx_ = 0;
             float lin_step_;
             float ang_step_;
+
+            // IK tuning panel state (synced from IKConfig on first frame)
+            bool ik_panel_initialized_ = false;
+            float ik_frame_pos_cost_ = 1.0f;
+            float ik_frame_ori_cost_ = 1.0f;
+            float ik_frame_gain_ = 1.0f;
+            float ik_frame_lm_damping_ = 0.0f;
+            float ik_posture_cost_ = 1e-3f;
+            float ik_posture_gain_ = 1.0f;
+            float ik_posture_lm_damping_ = 0.0f;
+            float ik_damping_cost_ = 1e-4f;
+            float ik_solver_damping_ = 1e-12f;
+            float ik_config_limit_gain_ = 0.5f;
 	
             static Gui* getGui(GLFWwindow* window);
 

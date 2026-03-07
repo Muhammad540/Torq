@@ -3,9 +3,11 @@
 #include "mujoco/mjrender.h"
 #include "mujoco/mjvisualize.h"
 #include "openmanip/RobotSystem.hpp"
+#include "openmanip/Controller.hpp"
 #include "openmanip/MujocoDriver.hpp"
 #include "openmanip/logger.hpp"
 #include <cstring>
+#include <cmath>
 
 #include <GL/glew.h>
 #ifdef __APPLE__
@@ -151,6 +153,7 @@ namespace openmanip {
         drawViewport();
         drawJointControlPanel();
         drawCartesianPanel();
+        drawIKTuningPanel();
         // drawInfoPanel();    
         
         ImGui::Render();
@@ -202,9 +205,13 @@ namespace openmanip {
         ImGui::DockBuilderSplitNode(dockerspace_id, ImGuiDir_Left, 0.25f, &dock_left, &dock_center);
         ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Right, 0.33f, &dock_right, &dock_center);
 
+        ImGuiID dock_right_top, dock_right_bottom;
+        ImGui::DockBuilderSplitNode(dock_right, ImGuiDir_Down, 0.55f, &dock_right_bottom, &dock_right_top);
+
         ImGui::DockBuilderDockWindow("Viewport", dock_center);
         ImGui::DockBuilderDockWindow("Joint Control", dock_left);
-        ImGui::DockBuilderDockWindow("Cartesian Control", dock_right);
+        ImGui::DockBuilderDockWindow("Cartesian Control", dock_right_top);
+        ImGui::DockBuilderDockWindow("IK Tuning", dock_right_bottom);
         ImGui::DockBuilderFinish(dockerspace_id);
     }
 
@@ -366,6 +373,73 @@ namespace openmanip {
         }
         ImGui::End();
     }
+    void Gui::drawIKTuningPanel() {
+        ImGui::Begin("IK Tuning");
+
+        if (!robot_->ikReady()) {
+            ImGui::TextColored(ImVec4(1, 1, 0, 1), "IK not active (use Cartesian jog to initialize)");
+            ImGui::End();
+            return;
+        }
+
+        if (!ik_panel_initialized_) {
+            const auto& cfg = robot_->ikConfig();
+            ik_frame_pos_cost_     = static_cast<float>(cfg.frame_position_cost);
+            ik_frame_ori_cost_     = static_cast<float>(cfg.frame_orientation_cost);
+            ik_frame_gain_         = static_cast<float>(cfg.frame_gain);
+            ik_frame_lm_damping_   = static_cast<float>(cfg.frame_lm_damping);
+            ik_posture_cost_       = static_cast<float>(cfg.posture_cost);
+            ik_posture_gain_       = static_cast<float>(cfg.posture_gain);
+            ik_posture_lm_damping_ = static_cast<float>(cfg.posture_lm_damping);
+            ik_damping_cost_       = static_cast<float>(cfg.damping_cost);
+            ik_solver_damping_     = static_cast<float>(cfg.solver_damping);
+            ik_config_limit_gain_  = static_cast<float>(cfg.config_limit_gain);
+            ik_panel_initialized_ = true;
+        }
+
+        if (ImGui::CollapsingHeader("Frame Task", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::DragFloat("Position Cost##frame", &ik_frame_pos_cost_, 0.01f, 0.0f, 100.0f, "%.4f"))
+                robot_->setFrameTaskPositionCost(ik_frame_pos_cost_);
+            if (ImGui::DragFloat("Orientation Cost##frame", &ik_frame_ori_cost_, 0.01f, 0.0f, 100.0f, "%.4f"))
+                robot_->setFrameTaskOrientationCost(ik_frame_ori_cost_);
+            if (ImGui::SliderFloat("Gain##frame", &ik_frame_gain_, 0.0f, 1.0f, "%.3f"))
+                robot_->setFrameTaskGain(ik_frame_gain_);
+            if (ImGui::DragFloat("LM Damping##frame", &ik_frame_lm_damping_, 0.001f, 0.0f, 10.0f, "%.4f"))
+                robot_->setFrameTaskLMDamping(ik_frame_lm_damping_);
+        }
+
+        if (ImGui::CollapsingHeader("Posture Task", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::DragFloat("Cost##posture", &ik_posture_cost_, 0.0001f, 0.0f, 1.0f, "%.6f"))
+                robot_->setPostureTaskCost(ik_posture_cost_);
+            if (ImGui::SliderFloat("Gain##posture", &ik_posture_gain_, 0.0f, 1.0f, "%.3f"))
+                robot_->setPostureTaskGain(ik_posture_gain_);
+            if (ImGui::DragFloat("LM Damping##posture", &ik_posture_lm_damping_, 0.001f, 0.0f, 10.0f, "%.4f"))
+                robot_->setPostureTaskLMDamping(ik_posture_lm_damping_);
+        }
+
+        if (ImGui::CollapsingHeader("Damping Task", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::DragFloat("Cost##damping", &ik_damping_cost_, 0.00001f, 0.0f, 0.1f, "%.6f"))
+                robot_->setDampingTaskCost(ik_damping_cost_);
+        }
+
+        if (ImGui::CollapsingHeader("Solver", ImGuiTreeNodeFlags_DefaultOpen)) {
+            float log_damping = std::log10(std::max(ik_solver_damping_, 1e-20f));
+            if (ImGui::SliderFloat("Tikhonov Damping (log10)", &log_damping, -15.0f, -3.0f, "%.1f")) {
+                ik_solver_damping_ = std::pow(10.0f, log_damping);
+                robot_->setSolverDamping(ik_solver_damping_);
+            }
+            ImGui::SameLine();
+            ImGui::Text("= %.2e", static_cast<double>(ik_solver_damping_));
+        }
+
+        if (ImGui::CollapsingHeader("Limits", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::SliderFloat("Config Limit Gain", &ik_config_limit_gain_, 0.01f, 1.0f, "%.3f"))
+                robot_->setConfigLimitGain(ik_config_limit_gain_);
+        }
+
+        ImGui::End();
+    }
+
     void Gui::destroyFBO(){ 
         if (texture_color_){
             glDeleteTextures(1, &texture_color_);
