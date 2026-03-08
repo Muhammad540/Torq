@@ -96,10 +96,10 @@ $(document).ready(function(){initNavTree('limits_page.html',''); initResizable()
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md_doc_limits"></a> Limits define <b>inequality</b> constraints <b>in</b> the QP. They ensure the solved \(\Delta q\) respects the physical bounds of the robot. Each limit produces rows \((G, h)\) such that \(G\,\Delta q \le h\) — see <a class="el" href="qp_formulation.html">QP Formulation</a> for how constraints compose.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md25"></a>
+<h1><a class="anchor" id="autotoc_md26"></a>
 VelocityLimit</h1>
 <p><b>Purpose:</b> <b>bound</b> joint displacements so that the implied velocity does not exceed hardware limits.</p>
-<h2><a class="anchor" id="autotoc_md26"></a>
+<h2><a class="anchor" id="autotoc_md27"></a>
 Formulation</h2>
 <p>Given the maximum velocity vector \(\dot{q}_{\max} \in \mathbb{R}^{n_v}\) (from <code>model.velocityLimit</code>) and the integration timestep \(\Delta t\):</p>
 <p class="formulaDsp">
@@ -110,14 +110,14 @@ Formulation</h2>
 \[ \begin{bmatrix} +S \\ -S \end{bmatrix} \Delta q \;\le\; \begin{bmatrix} \Delta t\;\dot{q}_{\max}^{(k)} \\ \Delta t\;\dot{q}_{\max}^{(k)} \end{bmatrix} \]
 </p>
 <p>where \(S \in \mathbb{R}^{k \times n_v}\) is a selection matrix that picks out the \(k\) joints with finite velocity bounds. Joints without a finite <code>velocityLimit</code> in the URDF/MJCF are excluded.</p>
-<h2><a class="anchor" id="autotoc_md27"></a>
+<h2><a class="anchor" id="autotoc_md28"></a>
 Parameters</h2>
 <p>None — limits are read directly from the Pinocchio model.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md29"></a>
+<h1><a class="anchor" id="autotoc_md30"></a>
 ConfigurationLimit</h1>
 <p><b>Purpose:</b> <b>keep</b> \(q + \Delta q\) within the joint position bounds \([q_{\min}, q_{\max}]\), using a proportional gain to steer away from limits before they are hit.</p>
-<h2><a class="anchor" id="autotoc_md30"></a>
+<h2><a class="anchor" id="autotoc_md31"></a>
 Formulation</h2>
 <p>For each bounded joint \(j\) with current position \(q_j\) and limits \(q_j^{\min}, q_j^{\max}\):</p>
 <p class="formulaDsp">
@@ -131,7 +131,7 @@ Formulation</h2>
 <p class="formulaDsp">
 \[ \begin{bmatrix} +S \\ -S \end{bmatrix} \Delta q \;\le\; \begin{bmatrix} \gamma\,(q^{\max}_{(k)} - q_{(k)}) \\ \gamma\,(q_{(k)} - q^{\min}_{(k)}) \end{bmatrix} \]
 </p>
-<h2><a class="anchor" id="autotoc_md31"></a>
+<h2><a class="anchor" id="autotoc_md32"></a>
 Effect of &lt;tt&gt;config_limit_gain&lt;/tt&gt;</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -144,7 +144,7 @@ Effect of &lt;tt&gt;config_limit_gain&lt;/tt&gt;</h2>
 <td class="markdownTableBodyNone">0.1   </td><td class="markdownTableBodyNone">Very conservative — robot slows down far from limits.   </td></tr>
 </table>
 <p>Lower gain → earlier and smoother deceleration as the robot approaches a limit.</p>
-<h2><a class="anchor" id="autotoc_md32"></a>
+<h2><a class="anchor" id="autotoc_md33"></a>
 Parameters</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -153,7 +153,7 @@ Parameters</h2>
 <td class="markdownTableBodyNone"><code>config_limit_gain</code>   </td><td class="markdownTableBodyNone">\(\gamma\)   </td><td class="markdownTableBodyNone">0.5   </td><td class="markdownTableBodyNone"><code>setConfigLimitGain(double)</code>   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md34"></a>
+<h1><a class="anchor" id="autotoc_md35"></a>
 How limits stack</h1>
 <p>All limit types produce rows in the same inequality:</p>
 <p class="formulaDsp">
@@ -162,7 +162,7 @@ How limits stack</h1>
 <p>A limit may return <code>std::nullopt</code> if it has no active constraints (e.g. no finite bounds in the model), in which case it contributes zero rows.</p>
 <p>The OSQP solver handles the full stacked system simultaneously.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md36"></a>
+<h1><a class="anchor" id="autotoc_md37"></a>
 Planned: equality constraints</h1>
 <p>Some tasks may in the future act as hard equality constraints rather than soft objectives:</p>
 <p class="formulaDsp">

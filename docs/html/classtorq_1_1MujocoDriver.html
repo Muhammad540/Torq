@@ -155,10 +155,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a2e2aaa3d19a881dbefba8ad3d61f925f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send velocity commands through the actuator interface.  <a href="classtorq_1_1MujocoDriver.html#a2e2aaa3d19a881dbefba8ad3d61f925f">More...</a><br /></td></tr>
 <tr class="separator:a2e2aaa3d19a881dbefba8ad3d61f925f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8393d73ea73facd1507db8c92aaf8e6c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1MujocoDriver.html#a8393d73ea73facd1507db8c92aaf8e6c">step</a> () override</td></tr>
-<tr class="memdesc:a8393d73ea73facd1507db8c92aaf8e6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance the simulation / hardware by one timestep.  <a href="classtorq_1_1MujocoDriver.html#a8393d73ea73facd1507db8c92aaf8e6c">More...</a><br /></td></tr>
+<tr class="memdesc:a8393d73ea73facd1507db8c92aaf8e6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance simulation by one physics step.  <a href="classtorq_1_1MujocoDriver.html#a8393d73ea73facd1507db8c92aaf8e6c">More...</a><br /></td></tr>
 <tr class="separator:a8393d73ea73facd1507db8c92aaf8e6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1db70ad77e651c5144f72e036ed8cb7"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1MujocoDriver.html#aa1db70ad77e651c5144f72e036ed8cb7">getTimestep</a> () const override</td></tr>
-<tr class="memdesc:aa1db70ad77e651c5144f72e036ed8cb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integration timestep [s].  <a href="classtorq_1_1MujocoDriver.html#aa1db70ad77e651c5144f72e036ed8cb7">More...</a><br /></td></tr>
+<tr class="memdesc:aa1db70ad77e651c5144f72e036ed8cb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Physics integration timestep [s] from the model (frequency = 1/getTimestep()).  <a href="classtorq_1_1MujocoDriver.html#aa1db70ad77e651c5144f72e036ed8cb7">More...</a><br /></td></tr>
 <tr class="separator:aa1db70ad77e651c5144f72e036ed8cb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70df9a3cc06fec56804ea0395b8fc422"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1MujocoDriver.html#a70df9a3cc06fec56804ea0395b8fc422">numJoints</a> () const override</td></tr>
 <tr class="memdesc:a70df9a3cc06fec56804ea0395b8fc422"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of joints (state-space dimension \(n_q\)).  <a href="classtorq_1_1MujocoDriver.html#a70df9a3cc06fec56804ea0395b8fc422">More...</a><br /></td></tr>
@@ -173,6 +173,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>MuJoCo simulation backend implementing <a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a>. </p>
 <p>Wraps <code>mjModel</code> / <code>mjData</code> with RAII smart pointers. Provides both the actuator-command interface (setJointPositions writes to <code>ctrl</code>) and direct state overrides (overrideJointPositions writes to <code>qpos</code>).</p>
+<p>Step frequency: <a class="el" href="classtorq_1_1MujocoDriver.html#a8393d73ea73facd1507db8c92aaf8e6c" title="Advance simulation by one physics step.">step()</a> is called from <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">RobotSystem::update()</a> at the application control frequency (see <a class="el" href="classtorq_1_1RobotSystem.html#a389b81123356f7349711522f9987913b" title="Current target control frequency [Hz].">RobotSystem::controlFrequencyHz()</a>). The physics timestep (<a class="el" href="classtorq_1_1MujocoDriver.html#aa1db70ad77e651c5144f72e036ed8cb7" title="Physics integration timestep [s] from the model (frequency = 1/getTimestep()).">getTimestep()</a>) is set in the MJCF/XML model; typical values yield 500–2000 Hz physics. The control loop usually runs one physics step per update() call.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a98e2aae7b4043b669714e090c8d32e37"></a>
@@ -633,7 +634,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Advance the simulation / hardware by one timestep. </p>
+<p>Advance simulation by one physics step. </p>
+<p>Called at control loop frequency from <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">RobotSystem::update()</a>. </p>
 
 <p>Implements <a class="el" href="classtorq_1_1HardwareInterface.html#a9cccf23d2f10619223ff2b0007dced46">torq::HardwareInterface</a>.</p>
 
@@ -662,7 +664,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Integration timestep [s]. </p>
+<p>Physics integration timestep [s] from the model (frequency = 1/getTimestep()). </p>
 
 <p>Implements <a class="el" href="classtorq_1_1HardwareInterface.html#a7ec890a858f4b2af7096ad877d099108">torq::HardwareInterface</a>.</p>
 

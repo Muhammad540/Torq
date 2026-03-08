@@ -22,6 +22,9 @@
 [] Add more robot form factors (currently s0101 only) like franka, humanoids, spot
 [] Add cam sensors (also incorporate into gui)
 [] pybindings
+[] velocity clamping 
+[] in configuration check_limits() before
+[] add more tasks/limits/barriers
 
 ## MEDIUM 
 [] Dynamixel Driver

@@ -155,16 +155,27 @@ Ownership diagram</h1>
 <iframe scrolling="no" frameborder="0" src="dot_ownership_diagram.svg" width="1175" height="310"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </p>
 <h1><a class="anchor" id="autotoc_md9"></a>
+Control loop frequencies</h1>
+<p>Typical frequencies (configurable where noted):</p>
+<ul>
+<li><b>Task planner / user input</b> (e.g. GUI jog, programmatic setTaskSpaceTarget): ~60 Hz or event-driven. Target and jog step are set here.</li>
+<li><b>RobotSystem::update()</b> and <b>Controller::update()</b> (IK layer): 200–1000 Hz. Configure via RobotConfig::control_frequency_hz or setControlFrequencyHz(); the application must call update() at this rate (e.g. using controlPeriodSec() for rate limiting).</li>
+<li><b>Physics step</b> (MujocoDriver::step()): same as the control loop (one step per update()). Physics timestep is set in the MJCF/XML (getTimestep()); frequency = 1 / timestep.</li>
+<li><b>Joint controller</b>: In simulation, MuJoCo’s position actuators act as the joint layer (typically 1 kHz+ internally). On real hardware, the joint controller runs at 1–4 kHz.</li>
+</ul>
+<p>Max Cartesian tracking error for jog safety is configurable via RobotConfig::max_tracking_error or setMaxTrackingError() (default 0.05 m).</p>
+<h1><a class="anchor" id="autotoc_md10"></a>
 Data flow per tick</h1>
 <ol type="1">
-<li><code>RobotSystem::update()</code> reads joint state from <code>HardwareInterface</code>.</li>
-<li>The controller builds a <code>Configuration</code> from the current \(q\).</li>
-<li>Each <b>Task</b> <b>computes</b> its error and Jacobian from the <code>Configuration</code>.</li>
+<li>The application calls <code>RobotSystem::update()</code> at the configured control frequency.</li>
+<li><code>MujocoDriver::step()</code> advances the physics by one timestep (applying the previous tick’s commands).</li>
+<li>In TASK_SPACE, the Controller uses its <b>internal kinematic state</b> (not the physics state) to build a <code>Configuration</code>.</li>
+<li>Each <b>Task</b> <b>computes</b> its error and Jacobian from that <code>Configuration</code>.</li>
 <li>Each <b>Limit</b> <b>computes</b> its inequality rows from the <code>Configuration</code>.</li>
 <li><code>InverseKinematics::solve()</code> assembles the QP and calls OSQP.</li>
-<li>The resulting \(\Delta q\) is integrated on the manifold, and the new \(q\) is written back to the hardware interface.</li>
+<li>The resulting \(\Delta q\) is integrated on the manifold; the new \(q\) is stored as the internal kinematic state and written to the hardware interface.</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md10"></a>
+<h1><a class="anchor" id="autotoc_md11"></a>
 Adding a new robot</h1>
 <ol type="1">
 <li>Place model files (URDF/MJCF + meshes) under <code>workspace/models/</code>.</li>

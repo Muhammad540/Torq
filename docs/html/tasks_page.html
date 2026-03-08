@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('tasks_page.html',''); initResizable();
 <div class="textblock"><p><a class="anchor" id="md_doc_tasks"></a> Tasks define the <b>objective</b> <b></b>(cost) of the QP problem. Each task contributes a Hessian block \(H_i\) and a gradient vector \(c_i\) — see <a class="el" href="qp_formulation.html">QP Formulation</a> for how they compose.</p>
 <p>This page derives the error and Jacobian for every concrete task type.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md61"></a>
+<h1><a class="anchor" id="autotoc_md62"></a>
 Common parameters</h1>
 <p>Every task inherits from <code><a class="el" href="classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective.">torq::Task</a></code> and exposes:</p>
 <table class="markdownTable">
@@ -112,10 +112,10 @@ Common parameters</h1>
 </table>
 <p>All three are adjustable at runtime via setters on the task and via <code>RobotSystem</code>'s IK tuning API.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md63"></a>
+<h1><a class="anchor" id="autotoc_md64"></a>
 FrameTask</h1>
 <p><b>Purpose:</b> <b>regulate</b> the SE(3) pose of a named robot frame (typically the end-effector) to a desired target \(T_{\text{des}} \in SE(3)\).</p>
-<h2><a class="anchor" id="autotoc_md64"></a>
+<h2><a class="anchor" id="autotoc_md65"></a>
 Error (6-D)</h2>
 <p>The 6-D error is computed using the <b>logarithmic</b> map <b>of</b> the relative transform:</p>
 <p class="formulaDsp">
@@ -123,17 +123,17 @@ Error (6-D)</h2>
 </p>
 <p>where \(\log_6 : SE(3) \to \mathfrak{se}(3)\) maps the relative transform into a twist in the <b>local</b> (body) frame.</p>
 <p>This is a manifold-aware error: it correctly handles the topology of rotations without gimbal lock or discontinuities.</p>
-<h2><a class="anchor" id="autotoc_md65"></a>
+<h2><a class="anchor" id="autotoc_md66"></a>
 Jacobian (6×n_v)</h2>
 <p>The frame Jacobian in the <b>LOCAL</b> <b>reference</b> frame:</p>
 <p class="formulaDsp">
 \[ J = {}^{\text{local}}J_{\text{frame}}(q) \]
 </p>
 <p>computed by <code>pinocchio::computeFrameJacobian</code> with <code>LOCAL</code> reference frame. Using the local frame ensures consistency with the \(\log_6\) error.</p>
-<h2><a class="anchor" id="autotoc_md66"></a>
+<h2><a class="anchor" id="autotoc_md67"></a>
 Weight vector</h2>
 <p>The 6-D cost vector is \(w = [w_{\text{pos}}^{(3)},\; w_{\text{ori}}^{(3)}]\) where the first three components weight translational error and the last three weight rotational error. This allows independent prioritisation of position vs orientation tracking.</p>
-<h2><a class="anchor" id="autotoc_md67"></a>
+<h2><a class="anchor" id="autotoc_md68"></a>
 QP contribution</h2>
 <p class="formulaDsp">
 \[ W = \operatorname{diag}(w), \quad \bar{J} = W J, \quad \bar{e} = W(-\alpha\, e) \]
@@ -141,7 +141,7 @@ QP contribution</h2>
  <p class="formulaDsp">
 \[ H_{\text{frame}} = \bar{J}^\top \bar{J} + \mu\,(\bar{e}^\top\bar{e})\,I_{n_v}, \quad c_{\text{frame}} = -\bar{J}^\top \bar{e} \]
 </p>
-<h2><a class="anchor" id="autotoc_md68"></a>
+<h2><a class="anchor" id="autotoc_md69"></a>
 Setters</h2>
 <ul>
 <li><code>setPositionCost(double)</code> / <code>setPositionCost(Eigen::Vector3d)</code></li>
@@ -151,48 +151,48 @@ Setters</h2>
 </ul>
 <p>When no target is set the task is <b>inert</b> <b>—</b> it contributes zero to the QP.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md70"></a>
+<h1><a class="anchor" id="autotoc_md71"></a>
 PostureTask</h1>
 <p><b>Purpose:</b> <b>regulate</b> all actuated joint angles toward a reference posture \(q_{\text{ref}}\).</p>
-<h2><a class="anchor" id="autotoc_md71"></a>
+<h2><a class="anchor" id="autotoc_md72"></a>
 Error (n_v-D)</h2>
 <p class="formulaDsp">
 \[ e = q_{\text{ref}} \ominus q_{\text{cur}} \]
 </p>
 <p>where \(\ominus\) is <code>pinocchio::difference</code> — the manifold-aware subtraction that produces a tangent vector. For revolute/prismatic joints this reduces to \(q_{\text{ref}} - q_{\text{cur}}\).</p>
 <p>Floating-base root coordinates are excluded; only actuated joints contribute.</p>
-<h2><a class="anchor" id="autotoc_md72"></a>
+<h2><a class="anchor" id="autotoc_md73"></a>
 Jacobian (n_v×n_v)</h2>
 <p>The posture Jacobian is the identity matrix (after excluding root DOFs):</p>
 <p class="formulaDsp">
 \[ J_{\text{posture}} = I_{n_v} \]
 </p>
 <p>(More precisely, it is the identity on actuated DOFs and zero on root DOFs.)</p>
-<h2><a class="anchor" id="autotoc_md73"></a>
+<h2><a class="anchor" id="autotoc_md74"></a>
 Weight</h2>
 <p>A single scalar cost \(w_p\) is broadcast to all actuated joints: \(W = w_p\, I\). Typical value: \(10^{-3}\) — low priority regularisation.</p>
-<h2><a class="anchor" id="autotoc_md74"></a>
+<h2><a class="anchor" id="autotoc_md75"></a>
 QP contribution</h2>
 <p class="formulaDsp">
 \[ H_{\text{posture}} = w_p^2\, I_{n_v} + \mu\,(\bar{e}^\top\bar{e})\,I_{n_v}, \quad c_{\text{posture}} = -w_p^2\,\alpha\, e \]
 </p>
 <p>When no target is set the task is <b>inert</b> <b></b>.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md76"></a>
+<h1><a class="anchor" id="autotoc_md77"></a>
 DampingTask</h1>
 <p><b>Purpose:</b> <b>penalise</b> all joint velocities equally, acting as viscous damping that brings the robot to rest.</p>
-<h2><a class="anchor" id="autotoc_md77"></a>
+<h2><a class="anchor" id="autotoc_md78"></a>
 Error</h2>
 <p class="formulaDsp">
 \[ e_{\text{damp}} = \mathbf{0} \in \mathbb{R}^{n_v} \]
 </p>
 <p>The error is always zero — this task only contributes through its Jacobian.</p>
-<h2><a class="anchor" id="autotoc_md78"></a>
+<h2><a class="anchor" id="autotoc_md79"></a>
 Jacobian</h2>
 <p class="formulaDsp">
 \[ J_{\text{damp}} = I_{n_v} \]
 </p>
-<h2><a class="anchor" id="autotoc_md79"></a>
+<h2><a class="anchor" id="autotoc_md80"></a>
 QP contribution</h2>
 <p>With scalar cost \(w_d\) and zero error the LM term vanishes:</p>
 <p class="formulaDsp">
@@ -201,7 +201,7 @@ QP contribution</h2>
 <p>This adds a quadratic penalty on \(\|\Delta q\|^2\) — the solver will minimise unnecessary motion. Typical cost: \(10^{-4}\).</p>
 <p>No target needed; always active once constructed.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md81"></a>
+<h1><a class="anchor" id="autotoc_md82"></a>
 How tasks compose</h1>
 <p>The QP Hessian and gradient are the element-wise sum of all task contributions:</p>
 <p class="formulaDsp">

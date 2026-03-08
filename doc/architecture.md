@@ -51,15 +51,26 @@ The following diagram shows ownership relations: RobotSystem owns the main subsy
 
 \dotfile ownership_diagram.dot
 
+## Control loop frequencies
+
+Typical frequencies (configurable where noted):
+
+- **Task planner / user input** (e.g. GUI jog, programmatic setTaskSpaceTarget): ~60 Hz or event-driven. Target and jog step are set here.
+- **RobotSystem::update()** and **Controller::update()** (IK layer): 200–1000 Hz. Configure via RobotConfig::control_frequency_hz or setControlFrequencyHz(); the application must call update() at this rate (e.g. using controlPeriodSec() for rate limiting).
+- **Physics step** (MujocoDriver::step()): same as the control loop (one step per update()). Physics timestep is set in the MJCF/XML (getTimestep()); frequency = 1 / timestep.
+- **Joint controller**: In simulation, MuJoCo’s position actuators act as the joint layer (typically 1 kHz+ internally). On real hardware, the joint controller runs at 1–4 kHz.
+
+Max Cartesian tracking error for jog safety is configurable via RobotConfig::max_tracking_error or setMaxTrackingError() (default 0.05 m).
+
 ## Data flow per tick
 
-1. `RobotSystem::update()` reads joint state from `HardwareInterface`.
-2. The controller builds a `Configuration` from the current \f$q\f$.
-3. Each @b Task @b computes its error and Jacobian from the `Configuration`.
-4. Each @b Limit @b computes its inequality rows from the `Configuration`.
-5. `InverseKinematics::solve()` assembles the QP and calls OSQP.
-6. The resulting \f$\Delta q\f$ is integrated on the manifold, and the new \f$q\f$
-   is written back to the hardware interface.
+1. The application calls `RobotSystem::update()` at the configured control frequency.
+2. `MujocoDriver::step()` advances the physics by one timestep (applying the previous tick’s commands).
+3. In TASK_SPACE, the Controller uses its **internal kinematic state** (not the physics state) to build a `Configuration`.
+4. Each @b Task @b computes its error and Jacobian from that `Configuration`.
+5. Each @b Limit @b computes its inequality rows from the `Configuration`.
+6. `InverseKinematics::solve()` assembles the QP and calls OSQP.
+7. The resulting \f$\Delta q\f$ is integrated on the manifold; the new \f$q\f$ is stored as the internal kinematic state and written to the hardware interface.
 
 ## Adding a new robot
 

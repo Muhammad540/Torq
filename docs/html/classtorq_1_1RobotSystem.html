@@ -140,12 +140,30 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a851d78b8976b912814279eb50b995b8e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a851d78b8976b912814279eb50b995b8e">jogCartesian</a> (int axis, double sign, const std::string &amp;frame_name)</td></tr>
 <tr class="memdesc:a851d78b8976b912814279eb50b995b8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Jog the end-effector in Cartesian space.  <a href="classtorq_1_1RobotSystem.html#a851d78b8976b912814279eb50b995b8e">More...</a><br /></td></tr>
 <tr class="separator:a851d78b8976b912814279eb50b995b8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ad3d32b45eb52f5de839ae99310e9ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a7ad3d32b45eb52f5de839ae99310e9ba">resetTaskSpaceTargetToCurrentPose</a> (const std::string &amp;frame_name)</td></tr>
+<tr class="memdesc:a7ad3d32b45eb52f5de839ae99310e9ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sync the persistent task-space target to the current end-effector pose.  <a href="classtorq_1_1RobotSystem.html#a7ad3d32b45eb52f5de839ae99310e9ba">More...</a><br /></td></tr>
+<tr class="separator:a7ad3d32b45eb52f5de839ae99310e9ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6396ce606954226a089fc5157b792ad4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a6396ce606954226a089fc5157b792ad4">jogLinearStep</a> () const</td></tr>
 <tr class="memdesc:a6396ce606954226a089fc5157b792ad4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current linear jog step [m].  <a href="classtorq_1_1RobotSystem.html#a6396ce606954226a089fc5157b792ad4">More...</a><br /></td></tr>
 <tr class="separator:a6396ce606954226a089fc5157b792ad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad32d3f42be00936ff6f3f7f70cd7a37c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#ad32d3f42be00936ff6f3f7f70cd7a37c">jogAngularStep</a> () const</td></tr>
 <tr class="memdesc:ad32d3f42be00936ff6f3f7f70cd7a37c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current angular jog step [rad].  <a href="classtorq_1_1RobotSystem.html#ad32d3f42be00936ff6f3f7f70cd7a37c">More...</a><br /></td></tr>
 <tr class="separator:ad32d3f42be00936ff6f3f7f70cd7a37c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9efec60ca0f1c145bcca30b771172440"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a9efec60ca0f1c145bcca30b771172440">setMaxTrackingError</a> (double max_error)</td></tr>
+<tr class="memdesc:a9efec60ca0f1c145bcca30b771172440"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set max Cartesian tracking error [m] for jog safety clamp.  <a href="classtorq_1_1RobotSystem.html#a9efec60ca0f1c145bcca30b771172440">More...</a><br /></td></tr>
+<tr class="separator:a9efec60ca0f1c145bcca30b771172440"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66dbdd0cd85f050a1206c53e63d045f9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a66dbdd0cd85f050a1206c53e63d045f9">maxTrackingError</a> () const</td></tr>
+<tr class="memdesc:a66dbdd0cd85f050a1206c53e63d045f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current max tracking error [m].  <a href="classtorq_1_1RobotSystem.html#a66dbdd0cd85f050a1206c53e63d045f9">More...</a><br /></td></tr>
+<tr class="separator:a66dbdd0cd85f050a1206c53e63d045f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28a7dd9bc32a883dd2a897a8d2d92443"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a28a7dd9bc32a883dd2a897a8d2d92443">setControlFrequencyHz</a> (double hz)</td></tr>
+<tr class="memdesc:a28a7dd9bc32a883dd2a897a8d2d92443"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set target control loop frequency [Hz] (caller should call <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">update()</a> at this rate).  <a href="classtorq_1_1RobotSystem.html#a28a7dd9bc32a883dd2a897a8d2d92443">More...</a><br /></td></tr>
+<tr class="separator:a28a7dd9bc32a883dd2a897a8d2d92443"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a389b81123356f7349711522f9987913b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a389b81123356f7349711522f9987913b">controlFrequencyHz</a> () const</td></tr>
+<tr class="memdesc:a389b81123356f7349711522f9987913b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current target control frequency [Hz].  <a href="classtorq_1_1RobotSystem.html#a389b81123356f7349711522f9987913b">More...</a><br /></td></tr>
+<tr class="separator:a389b81123356f7349711522f9987913b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2932689573b7b7b108ac5d722c2fef8c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a2932689573b7b7b108ac5d722c2fef8c">controlPeriodSec</a> () const</td></tr>
+<tr class="memdesc:a2932689573b7b7b108ac5d722c2fef8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control period [s] = 1 / <a class="el" href="classtorq_1_1RobotSystem.html#a389b81123356f7349711522f9987913b" title="Current target control frequency [Hz].">controlFrequencyHz()</a>, for rate limiting.  <a href="classtorq_1_1RobotSystem.html#a2932689573b7b7b108ac5d722c2fef8c">More...</a><br /></td></tr>
+<tr class="separator:a2932689573b7b7b108ac5d722c2fef8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76d181b2c219cf01c7dd0526eaa16ed5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a76d181b2c219cf01c7dd0526eaa16ed5">toggleGripper</a> ()</td></tr>
 <tr class="memdesc:a76d181b2c219cf01c7dd0526eaa16ed5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle gripper between open and closed.  <a href="classtorq_1_1RobotSystem.html#a76d181b2c219cf01c7dd0526eaa16ed5">More...</a><br /></td></tr>
 <tr class="separator:a76d181b2c219cf01c7dd0526eaa16ed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -196,6 +214,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Top-level user-facing API that owns every subsystem. </p>
 <p><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a> is the single entry point for all robot operations: physics simulation, kinematics, IK-based control, and GUI interaction. It owns the <a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a> (simulation or real), <a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">KinematicsEngine</a>, and <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>.</p>
+<p>Control loop frequency: <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">update()</a> should be called at the configured control_frequency_hz (see setControlFrequencyHz, <a class="el" href="structtorq_1_1RobotConfig.html" title="Configuration for initialising a RobotSystem.">RobotConfig</a>). Typical range is 200–1000 Hz for the combined physics + IK loop. The actual rate is determined by the caller (e.g. main loop with a rate limiter).</p>
 <p>Typical usage: </p><div class="fragment"><div class="line"><a class="code" href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a> cfg;</div>
 <div class="line">cfg.<a class="code" href="structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7">scene_path</a>         = <span class="stringliteral">&quot;scene.xml&quot;</span>;</div>
 <div class="line">cfg.<a class="code" href="structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd">robot_model_path</a>   = <span class="stringliteral">&quot;robot.urdf&quot;</span>;</div>
@@ -206,8 +225,9 @@ Public Member Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">while</span> (running) {</div>
 <div class="line">    robot.<a class="code" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638">update</a>();</div>
+<div class="line">    rate_limiter.sleep();  <span class="comment">// e.g. at robot.getControlPeriodSec()</span></div>
 <div class="line">}</div>
-<div class="ttc" id="aclasstorq_1_1RobotSystem_html"><div class="ttname"><a href="classtorq_1_1RobotSystem.html">torq::RobotSystem</a></div><div class="ttdoc">Top-level user-facing API that owns every subsystem.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:55</div></div>
+<div class="ttc" id="aclasstorq_1_1RobotSystem_html"><div class="ttname"><a href="classtorq_1_1RobotSystem.html">torq::RobotSystem</a></div><div class="ttdoc">Top-level user-facing API that owns every subsystem.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:65</div></div>
 <div class="ttc" id="aclasstorq_1_1RobotSystem_html_a47c6dd4b4562e2adee434ab424a95638"><div class="ttname"><a href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638">torq::RobotSystem::update</a></div><div class="ttdeci">void update()</div><div class="ttdoc">Execute one control + physics tick.</div></div>
 <div class="ttc" id="aclasstorq_1_1RobotSystem_html_af3c29b688692d2c5f96da67a0a6a8555"><div class="ttname"><a href="classtorq_1_1RobotSystem.html#af3c29b688692d2c5f96da67a0a6a8555">torq::RobotSystem::initialize</a></div><div class="ttdeci">bool initialize(const RobotConfig &amp;config)</div><div class="ttdoc">Initialise the robot from a configuration.</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html"><div class="ttname"><a href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a></div><div class="ttdoc">Configuration for initialising a RobotSystem.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:21</div></div>
@@ -295,7 +315,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Execute one control + physics tick. </p>
-<p>Delegates to <a class="el" href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec" title="Execute one control tick.">Controller::update()</a> then steps the physics engine. </p>
+<p>Runs at the rate of the caller; typically invoked at control_frequency_hz (200–1000 Hz). Performs: physics step, then <a class="el" href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec" title="Execute one control tick.">Controller::update()</a> (IK solve and joint command). Call at a fixed rate for deterministic behaviour. </p>
 
 </div>
 </div>
@@ -346,6 +366,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Set a Cartesian target and activate task-space IK. </p>
+<p>Also updates the persistent target used by jogCartesian, so programmatic moves and jog stay in sync.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">target_pose</td><td>Desired SE(3) as a 4×4 homogeneous matrix. </td></tr>
@@ -520,6 +541,33 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a7ad3d32b45eb52f5de839ae99310e9ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ad3d32b45eb52f5de839ae99310e9ba">&#9670;&nbsp;</a></span>resetTaskSpaceTargetToCurrentPose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::resetTaskSpaceTargetToCurrentPose </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>frame_name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sync the persistent task-space target to the current end-effector pose. </p>
+<p>Call after the robot has been moved outside task-space IK (e.g. Move to Home, joint sliders, or external motion) so that the next jog does not see a huge error and command a velocity spike. <a class="el" href="classtorq_1_1RobotSystem.html#aaef8fe8a5f0d5c4c2e1073e0b1a4934e" title="Command the robot to move to the stored home position.">moveToHome()</a> already resets target via <a class="el" href="classtorq_1_1RobotSystem.html#aac8013155e09b55ce8ea945ae2a0b601" title="Set a joint-space target (direct position command).">setJointSpaceTarget()</a>; use this when the robot was moved by other means.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">frame_name</td><td>Frame whose current pose becomes the new persistent target. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a6396ce606954226a089fc5157b792ad4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6396ce606954226a089fc5157b792ad4">&#9670;&nbsp;</a></span>jogLinearStep()</h2>
 
@@ -571,6 +619,127 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Current angular jog step [rad]. </p>
+
+</div>
+</div>
+<a id="a9efec60ca0f1c145bcca30b771172440"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9efec60ca0f1c145bcca30b771172440">&#9670;&nbsp;</a></span>setMaxTrackingError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::setMaxTrackingError </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>max_error</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set max Cartesian tracking error [m] for jog safety clamp. </p>
+
+</div>
+</div>
+<a id="a66dbdd0cd85f050a1206c53e63d045f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66dbdd0cd85f050a1206c53e63d045f9">&#9670;&nbsp;</a></span>maxTrackingError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double torq::RobotSystem::maxTrackingError </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current max tracking error [m]. </p>
+
+</div>
+</div>
+<a id="a28a7dd9bc32a883dd2a897a8d2d92443"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28a7dd9bc32a883dd2a897a8d2d92443">&#9670;&nbsp;</a></span>setControlFrequencyHz()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::setControlFrequencyHz </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>hz</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set target control loop frequency [Hz] (caller should call <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">update()</a> at this rate). </p>
+
+</div>
+</div>
+<a id="a389b81123356f7349711522f9987913b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a389b81123356f7349711522f9987913b">&#9670;&nbsp;</a></span>controlFrequencyHz()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double torq::RobotSystem::controlFrequencyHz </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current target control frequency [Hz]. </p>
+
+</div>
+</div>
+<a id="a2932689573b7b7b108ac5d722c2fef8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2932689573b7b7b108ac5d722c2fef8c">&#9670;&nbsp;</a></span>controlPeriodSec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double torq::RobotSystem::controlPeriodSec </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Control period [s] = 1 / <a class="el" href="classtorq_1_1RobotSystem.html#a389b81123356f7349711522f9987913b" title="Current target control frequency [Hz].">controlFrequencyHz()</a>, for rate limiting. </p>
 
 </div>
 </div>
