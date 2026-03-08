@@ -55,11 +55,11 @@ namespace torq {
              * @param qd  Target velocities (size \f$n_u\f$).
              */
             virtual void setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd) = 0;
-            
-            /** @brief Advance the simulation / hardware by one timestep. */
+
+            /** @brief Advance the simulation / hardware by one timestep. Called at the control loop frequency. */
             virtual void step() = 0;
 
-            /** @brief Integration timestep [s]. */
+            /** @brief Integration timestep [s]. Physics rate is 1/getTimestep() Hz. */
             virtual double getTimestep() const = 0;
 
             /** @brief Number of joints (state-space dimension \f$n_q\f$). */

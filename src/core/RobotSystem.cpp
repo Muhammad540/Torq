@@ -6,6 +6,9 @@
 #include <iostream>
 #include <memory>
 
+// Set to true to print actual end-effector displacement after each physics step.
+static constexpr bool IK_ACTUAL_MOTION_DIAGNOSTICS = true;
+
 namespace torq {
     RobotSystem::RobotSystem() {
         hardware_ = std::make_unique<MujocoDriver>();
@@ -31,6 +34,8 @@ namespace torq {
         }
 
         end_effector_frame_ = config.end_effector_frame;
+        max_tracking_error_ = config.max_tracking_error;
+        control_frequency_hz_ = config.control_frequency_hz;
 
         auto* physics = getPhysics();
         mjModel* m = physics->getModel();
@@ -45,16 +50,20 @@ namespace torq {
     }
 
     void RobotSystem::setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, std::string frame_name) {
-      if (controller_){
-	    controller_->setTaskSpaceTarget(target_pose, frame_name);
+      if (controller_) {
+        persistent_target_pose_ = target_pose;
+        target_initialized_ = true;
+        controller_->setTaskSpaceTarget(target_pose, frame_name);
       } else {
-	    log_.error() << "[RobotSystem] Failed to initialize the Controller";
+        log_.error() << "[RobotSystem] Failed to initialize the Controller";
       }
     }
 
-    void RobotSystem::setJointSpaceTarget(const Eigen::VectorXd& target_pose){
-      if (controller_){
-	      controller_->setJointSpaceTarget(target_pose);
+    void RobotSystem::setJointSpaceTarget(const Eigen::VectorXd& target_pose) {
+      if (controller_) {
+        controller_->resetIKState();
+        target_initialized_ = false;
+        controller_->setJointSpaceTarget(target_pose);
       } else {
         log_.error() << "[RobotSystem] Failed to initialize the Controller";
       }
@@ -62,10 +71,28 @@ namespace torq {
 
     void RobotSystem::update() {
        if (hardware_ && kinematics_) {
-          // Stepping Simulation
+          Eigen::Vector3d pos_before;
+          Eigen::Vector3d pos_after;
+          std::string diag_frame;
+          bool capture_actual = false;
+          if (IK_ACTUAL_MOTION_DIAGNOSTICS && controller_ && controller_->ikReady() && controller_->frameTask()) {
+             diag_frame = controller_->frameTask()->frame();
+             pos_before = getFramePose(diag_frame).block<3, 1>(0, 3);
+             capture_actual = true;
+          }
+
+          // Stepping Simulation (applies ctrl set in previous update)
           hardware_->step();
+
+          if (capture_actual) {
+             pos_after = getFramePose(diag_frame).block<3, 1>(0, 3);
+             Eigen::Vector3d actual_dp = pos_after - pos_before;
+             std::cout << "[IK diag] actual world dp (from prev cmd): ["
+                       << actual_dp.transpose() << "] dz=" << actual_dp(2) << std::endl;
+          }
+
           if (controller_) {
-            // updating physics 
+            // updating physics
             controller_->update();
           }
        }
@@ -97,7 +124,7 @@ namespace torq {
         return;
       }
       if (controller_) {
-	      controller_->setJointSpaceTarget(home_position_);
+        setJointSpaceTarget(home_position_);
       }
     }
 
@@ -105,24 +132,56 @@ namespace torq {
       return home_set_;
     }
 
-    void RobotSystem::setJogStep(double linear_step, double angular_step){
+    void RobotSystem::setJogStep(double linear_step, double angular_step) {
       jog_linear_step_ = linear_step;
       jog_angular_step_ = angular_step;
     }
 
-    void RobotSystem::jogCartesian(int axis, double sign, const std::string& frame_name) {
-      Eigen::Matrix4d pose = getFramePose(frame_name);
+    void RobotSystem::setMaxTrackingError(double max_error) {
+      max_tracking_error_ = max_error;
+    }
 
-      if (axis < 3) {
-          pose(axis, 3) += sign * jog_linear_step_;
-      } else {
-          Eigen::Vector3d rot_axis = Eigen::Vector3d::Zero();
-          rot_axis(axis - 3) = 1.0;
-          Eigen::AngleAxisd delta(sign * jog_angular_step_, rot_axis);
-          pose.block<3,3>(0,0) = delta.toRotationMatrix() * pose.block<3,3>(0,0);
+    void RobotSystem::setControlFrequencyHz(double hz) {
+      if (hz > 0.0) control_frequency_hz_ = hz;
+    }
+
+    void RobotSystem::jogCartesian(int axis, double sign, const std::string& frame_name) {
+      if (frame_name != last_jog_frame_) {
+        target_initialized_ = false;
+        last_jog_frame_ = frame_name;
+      }
+      if (!target_initialized_) {
+        persistent_target_pose_ = getFramePose(frame_name);
+        target_initialized_ = true;
       }
 
-      setTaskSpaceTarget(pose, frame_name);
+      Eigen::Matrix4d candidate = persistent_target_pose_;
+      if (axis < 3) {
+        candidate(axis, 3) += sign * jog_linear_step_;
+      } else {
+        Eigen::Vector3d rot_axis = Eigen::Vector3d::Zero();
+        rot_axis(axis - 3) = 1.0;
+        Eigen::AngleAxisd delta(sign * jog_angular_step_, rot_axis);
+        candidate.block<3, 3>(0, 0) =
+            delta.toRotationMatrix() * candidate.block<3, 3>(0, 0);
+      }
+
+      Eigen::Vector3d actual_pos = getFramePose(frame_name).block<3, 1>(0, 3);
+      Eigen::Vector3d target_pos = candidate.block<3, 1>(0, 3);
+      if ((target_pos - actual_pos).norm() < max_tracking_error_) {
+        persistent_target_pose_ = candidate;
+      }
+
+      setTaskSpaceTarget(persistent_target_pose_, frame_name);
+    }
+
+    void RobotSystem::resetTaskSpaceTargetToCurrentPose(const std::string& frame_name) {
+      persistent_target_pose_ = getFramePose(frame_name);
+      target_initialized_ = true;
+      last_jog_frame_ = frame_name;
+      if (controller_) {
+        controller_->setTaskSpaceTarget(persistent_target_pose_, frame_name);
+      }
     }
 
     void RobotSystem::toggleGripper(){
