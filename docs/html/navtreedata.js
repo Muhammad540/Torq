@@ -25,9 +25,9 @@
 var NAVTREE =
 [
   [ "Torq", "index.html", [
-    [ "Quick start", "index.html#autotoc_md38", null ],
-    [ "Documentation topics", "index.html#autotoc_md39", null ],
-    [ "Key design choices", "index.html#autotoc_md40", null ],
+    [ "Quick start", "index.html#autotoc_md39", null ],
+    [ "Documentation topics", "index.html#autotoc_md40", null ],
+    [ "Key design choices", "index.html#autotoc_md41", null ],
     [ "Architecture", "architecture.html", [
       [ "System diagram", "architecture.html#autotoc_md0", null ],
       [ "Class hierarchy", "architecture.html#autotoc_md1", [
@@ -39,94 +39,95 @@ var NAVTREE =
         [ "GUI", "architecture.html#autotoc_md7", null ]
       ] ],
       [ "Ownership diagram", "architecture.html#autotoc_md8", null ],
-      [ "Data flow per tick", "architecture.html#autotoc_md9", null ],
-      [ "Adding a new robot", "architecture.html#autotoc_md10", null ]
+      [ "Control loop frequencies", "architecture.html#autotoc_md9", null ],
+      [ "Data flow per tick", "architecture.html#autotoc_md10", null ],
+      [ "Adding a new robot", "architecture.html#autotoc_md11", null ]
     ] ],
     [ "QP Formulation", "qp_formulation.html", [
-      [ "Overview", "qp_formulation.html#autotoc_md41", null ],
-      [ "Per-task contribution", "qp_formulation.html#autotoc_md43", [
-        [ "Weight matrix", "qp_formulation.html#autotoc_md44", null ],
-        [ "Weighted quantities", "qp_formulation.html#autotoc_md45", null ],
-        [ "Levenberg–Marquardt damping", "qp_formulation.html#autotoc_md46", null ],
-        [ "Per-task Hessian and gradient", "qp_formulation.html#autotoc_md47", null ]
+      [ "Overview", "qp_formulation.html#autotoc_md42", null ],
+      [ "Per-task contribution", "qp_formulation.html#autotoc_md44", [
+        [ "Weight matrix", "qp_formulation.html#autotoc_md45", null ],
+        [ "Weighted quantities", "qp_formulation.html#autotoc_md46", null ],
+        [ "Levenberg–Marquardt damping", "qp_formulation.html#autotoc_md47", null ],
+        [ "Per-task Hessian and gradient", "qp_formulation.html#autotoc_md48", null ]
       ] ],
-      [ "Composing multiple tasks", "qp_formulation.html#autotoc_md49", null ],
-      [ "Tikhonov (solver) damping", "qp_formulation.html#autotoc_md51", null ],
-      [ "Inequality constraints from limits", "qp_formulation.html#autotoc_md53", null ],
-      [ "The complete QP", "qp_formulation.html#autotoc_md55", null ],
-      [ "OSQP solver", "qp_formulation.html#autotoc_md57", null ],
-      [ "Manifold-aware integration", "qp_formulation.html#autotoc_md59", null ]
+      [ "Composing multiple tasks", "qp_formulation.html#autotoc_md50", null ],
+      [ "Tikhonov (solver) damping", "qp_formulation.html#autotoc_md52", null ],
+      [ "Inequality constraints from limits", "qp_formulation.html#autotoc_md54", null ],
+      [ "The complete QP", "qp_formulation.html#autotoc_md56", null ],
+      [ "OSQP solver", "qp_formulation.html#autotoc_md58", null ],
+      [ "Manifold-aware integration", "qp_formulation.html#autotoc_md60", null ]
     ] ],
     [ "Tasks", "tasks_page.html", [
-      [ "Common parameters", "tasks_page.html#autotoc_md61", null ],
-      [ "FrameTask", "tasks_page.html#autotoc_md63", [
-        [ "Error (6-D)", "tasks_page.html#autotoc_md64", null ],
-        [ "Jacobian (6×n_v)", "tasks_page.html#autotoc_md65", null ],
-        [ "Weight vector", "tasks_page.html#autotoc_md66", null ],
-        [ "QP contribution", "tasks_page.html#autotoc_md67", null ],
-        [ "Setters", "tasks_page.html#autotoc_md68", null ]
+      [ "Common parameters", "tasks_page.html#autotoc_md62", null ],
+      [ "FrameTask", "tasks_page.html#autotoc_md64", [
+        [ "Error (6-D)", "tasks_page.html#autotoc_md65", null ],
+        [ "Jacobian (6×n_v)", "tasks_page.html#autotoc_md66", null ],
+        [ "Weight vector", "tasks_page.html#autotoc_md67", null ],
+        [ "QP contribution", "tasks_page.html#autotoc_md68", null ],
+        [ "Setters", "tasks_page.html#autotoc_md69", null ]
       ] ],
-      [ "PostureTask", "tasks_page.html#autotoc_md70", [
-        [ "Error (n_v-D)", "tasks_page.html#autotoc_md71", null ],
-        [ "Jacobian (n_v×n_v)", "tasks_page.html#autotoc_md72", null ],
-        [ "Weight", "tasks_page.html#autotoc_md73", null ],
-        [ "QP contribution", "tasks_page.html#autotoc_md74", null ]
+      [ "PostureTask", "tasks_page.html#autotoc_md71", [
+        [ "Error (n_v-D)", "tasks_page.html#autotoc_md72", null ],
+        [ "Jacobian (n_v×n_v)", "tasks_page.html#autotoc_md73", null ],
+        [ "Weight", "tasks_page.html#autotoc_md74", null ],
+        [ "QP contribution", "tasks_page.html#autotoc_md75", null ]
       ] ],
-      [ "DampingTask", "tasks_page.html#autotoc_md76", [
-        [ "Error", "tasks_page.html#autotoc_md77", null ],
-        [ "Jacobian", "tasks_page.html#autotoc_md78", null ],
-        [ "QP contribution", "tasks_page.html#autotoc_md79", null ]
+      [ "DampingTask", "tasks_page.html#autotoc_md77", [
+        [ "Error", "tasks_page.html#autotoc_md78", null ],
+        [ "Jacobian", "tasks_page.html#autotoc_md79", null ],
+        [ "QP contribution", "tasks_page.html#autotoc_md80", null ]
       ] ],
-      [ "How tasks compose", "tasks_page.html#autotoc_md81", null ]
+      [ "How tasks compose", "tasks_page.html#autotoc_md82", null ]
     ] ],
     [ "Limits", "limits_page.html", [
-      [ "VelocityLimit", "limits_page.html#autotoc_md25", [
-        [ "Formulation", "limits_page.html#autotoc_md26", null ],
-        [ "Parameters", "limits_page.html#autotoc_md27", null ]
+      [ "VelocityLimit", "limits_page.html#autotoc_md26", [
+        [ "Formulation", "limits_page.html#autotoc_md27", null ],
+        [ "Parameters", "limits_page.html#autotoc_md28", null ]
       ] ],
-      [ "ConfigurationLimit", "limits_page.html#autotoc_md29", [
-        [ "Formulation", "limits_page.html#autotoc_md30", null ],
-        [ "Effect of <tt>config_limit_gain</tt>", "limits_page.html#autotoc_md31", null ],
-        [ "Parameters", "limits_page.html#autotoc_md32", null ]
+      [ "ConfigurationLimit", "limits_page.html#autotoc_md30", [
+        [ "Formulation", "limits_page.html#autotoc_md31", null ],
+        [ "Effect of <tt>config_limit_gain</tt>", "limits_page.html#autotoc_md32", null ],
+        [ "Parameters", "limits_page.html#autotoc_md33", null ]
       ] ],
-      [ "How limits stack", "limits_page.html#autotoc_md34", null ],
-      [ "Planned: equality constraints", "limits_page.html#autotoc_md36", null ]
+      [ "How limits stack", "limits_page.html#autotoc_md35", null ],
+      [ "Planned: equality constraints", "limits_page.html#autotoc_md37", null ]
     ] ],
     [ "Barriers", "barriers_page.html", [
-      [ "</blockquote>", "barriers_page.html#autotoc_md11", null ],
-      [ "Control Barrier Functions (CBFs)", "barriers_page.html#autotoc_md12", [
-        [ "CBF inequality", "barriers_page.html#autotoc_md13", null ],
-        [ "Safe displacement objective", "barriers_page.html#autotoc_md14", null ]
+      [ "</blockquote>", "barriers_page.html#autotoc_md12", null ],
+      [ "Control Barrier Functions (CBFs)", "barriers_page.html#autotoc_md13", [
+        [ "CBF inequality", "barriers_page.html#autotoc_md14", null ],
+        [ "Safe displacement objective", "barriers_page.html#autotoc_md15", null ]
       ] ],
-      [ "Planned barrier types", "barriers_page.html#autotoc_md16", [
-        [ "PositionBarrier", "barriers_page.html#autotoc_md17", null ],
-        [ "BodySphericalBarrier", "barriers_page.html#autotoc_md18", null ],
-        [ "SelfCollisionBarrier", "barriers_page.html#autotoc_md19", null ]
+      [ "Planned barrier types", "barriers_page.html#autotoc_md17", [
+        [ "PositionBarrier", "barriers_page.html#autotoc_md18", null ],
+        [ "BodySphericalBarrier", "barriers_page.html#autotoc_md19", null ],
+        [ "SelfCollisionBarrier", "barriers_page.html#autotoc_md20", null ]
       ] ],
-      [ "How barriers fit into the QP", "barriers_page.html#autotoc_md21", null ],
-      [ "Common barrier parameters", "barriers_page.html#autotoc_md23", null ]
+      [ "How barriers fit into the QP", "barriers_page.html#autotoc_md22", null ],
+      [ "Common barrier parameters", "barriers_page.html#autotoc_md24", null ]
     ] ],
     [ "Parameter Tuning Guide", "tuning_guide.html", [
-      [ "Quick reference", "tuning_guide.html#autotoc_md83", null ],
-      [ "The IKConfig struct", "tuning_guide.html#autotoc_md85", null ],
-      [ "Parameter details", "tuning_guide.html#autotoc_md87", [
-        [ "Frame task costs", "tuning_guide.html#autotoc_md88", null ],
-        [ "Frame gain (α)", "tuning_guide.html#autotoc_md89", null ],
-        [ "Frame LM damping (μ)", "tuning_guide.html#autotoc_md90", null ],
-        [ "Posture cost", "tuning_guide.html#autotoc_md91", null ],
-        [ "Posture gain and LM damping", "tuning_guide.html#autotoc_md92", null ],
-        [ "Damping cost", "tuning_guide.html#autotoc_md93", null ],
-        [ "Solver (Tikhonov) damping (λ)", "tuning_guide.html#autotoc_md94", null ],
-        [ "Configuration limit gain (γ)", "tuning_guide.html#autotoc_md95", null ]
+      [ "Quick reference", "tuning_guide.html#autotoc_md84", null ],
+      [ "The IKConfig struct", "tuning_guide.html#autotoc_md86", null ],
+      [ "Parameter details", "tuning_guide.html#autotoc_md88", [
+        [ "Frame task costs", "tuning_guide.html#autotoc_md89", null ],
+        [ "Frame gain (α)", "tuning_guide.html#autotoc_md90", null ],
+        [ "Frame LM damping (μ)", "tuning_guide.html#autotoc_md91", null ],
+        [ "Posture cost", "tuning_guide.html#autotoc_md92", null ],
+        [ "Posture gain and LM damping", "tuning_guide.html#autotoc_md93", null ],
+        [ "Damping cost", "tuning_guide.html#autotoc_md94", null ],
+        [ "Solver (Tikhonov) damping (λ)", "tuning_guide.html#autotoc_md95", null ],
+        [ "Configuration limit gain (γ)", "tuning_guide.html#autotoc_md96", null ]
       ] ],
-      [ "Tuning recipes", "tuning_guide.html#autotoc_md97", [
-        [ "Robot oscillates near target", "tuning_guide.html#autotoc_md98", null ],
-        [ "Arm barely moves", "tuning_guide.html#autotoc_md99", null ],
-        [ "Weird elbow configurations", "tuning_guide.html#autotoc_md100", null ],
-        [ "Jerky motions", "tuning_guide.html#autotoc_md101", null ],
-        [ "Solver reports infeasible", "tuning_guide.html#autotoc_md102", null ]
+      [ "Tuning recipes", "tuning_guide.html#autotoc_md98", [
+        [ "Robot oscillates near target", "tuning_guide.html#autotoc_md99", null ],
+        [ "Arm barely moves", "tuning_guide.html#autotoc_md100", null ],
+        [ "Weird elbow configurations", "tuning_guide.html#autotoc_md101", null ],
+        [ "Jerky motions", "tuning_guide.html#autotoc_md102", null ],
+        [ "Solver reports infeasible", "tuning_guide.html#autotoc_md103", null ]
       ] ],
-      [ "GUI: IK Tuning panel", "tuning_guide.html#autotoc_md104", null ]
+      [ "GUI: IK Tuning panel", "tuning_guide.html#autotoc_md105", null ]
     ] ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
@@ -161,7 +162,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "Controller_8hpp.html",
-"classtorq_1_1Task.html#afcf05451ce4d0b2002d481682b848f12"
+"classtorq_1_1Task.html#abb180306359c84b1662677be458236cc"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

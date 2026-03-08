@@ -24,6 +24,10 @@ namespace torq {
         std::string end_effector_frame;      ///< Name of the end-effector frame in the Pinocchio model.
         std::vector<std::string> locked_joints; ///< Joint names to freeze (removed from the reduced model).
         int gripper_actuator_idx = -1;       ///< MuJoCo actuator index for the gripper (-1 = last actuator).
+        /** Max Cartesian tracking error [m] for jog safety; target is clamped within this distance of actual EE. Default 0.05. */
+        double max_tracking_error = 0.05;
+        /** Target control loop frequency [Hz] for update(); caller should invoke update() at this rate. Typical 200–1000 for IK. Default 500. */
+        double control_frequency_hz = 500.0;
     };
 
     class HardwareInterface;
@@ -34,6 +38,11 @@ namespace torq {
      * RobotSystem is the single entry point for all robot operations: physics
      * simulation, kinematics, IK-based control, and GUI interaction.  It owns
      * the HardwareInterface (simulation or real), KinematicsEngine, and Controller.
+     *
+     * Control loop frequency: update() should be called at the configured
+     * control_frequency_hz (see setControlFrequencyHz, RobotConfig). Typical
+     * range is 200–1000 Hz for the combined physics + IK loop. The actual rate
+     * is determined by the caller (e.g. main loop with a rate limiter).
      *
      * Typical usage:
      * @code
@@ -47,6 +56,7 @@ namespace torq {
      *
      * while (running) {
      *     robot.update();
+     *     rate_limiter.sleep();  // e.g. at robot.getControlPeriodSec()
      * }
      * @endcode
      *
@@ -71,7 +81,9 @@ namespace torq {
             /**
              * @brief Execute one control + physics tick.
              *
-             * Delegates to Controller::update() then steps the physics engine.
+             * Runs at the rate of the caller; typically invoked at control_frequency_hz
+             * (200–1000 Hz). Performs: physics step, then Controller::update() (IK solve
+             * and joint command). Call at a fixed rate for deterministic behaviour.
              */
             void update();
             
@@ -87,6 +99,10 @@ namespace torq {
 
             /**
              * @brief Set a Cartesian target and activate task-space IK.
+             *
+             * Also updates the persistent target used by jogCartesian, so programmatic
+             * moves and jog stay in sync.
+             *
              * @param target_pose  Desired SE(3) as a 4×4 homogeneous matrix.
              * @param frame_name   Name of the frame to regulate.
              */
@@ -122,10 +138,34 @@ namespace torq {
              */
             void jogCartesian(int axis, double sign, const std::string& frame_name);
 
+            /**
+             * @brief Sync the persistent task-space target to the current end-effector pose.
+             *
+             * Call after the robot has been moved outside task-space IK (e.g. Move to Home,
+             * joint sliders, or external motion) so that the next jog does not see a huge
+             * error and command a velocity spike. moveToHome() already resets target via
+             * setJointSpaceTarget(); use this when the robot was moved by other means.
+             *
+             * @param frame_name Frame whose current pose becomes the new persistent target.
+             */
+            void resetTaskSpaceTargetToCurrentPose(const std::string& frame_name);
+
             /** @brief Current linear jog step [m]. */
             double jogLinearStep() const { return jog_linear_step_; }
             /** @brief Current angular jog step [rad]. */
             double jogAngularStep() const { return jog_angular_step_; }
+
+            /** @brief Set max Cartesian tracking error [m] for jog safety clamp. */
+            void setMaxTrackingError(double max_error);
+            /** @brief Current max tracking error [m]. */
+            double maxTrackingError() const { return max_tracking_error_; }
+
+            /** @brief Set target control loop frequency [Hz] (caller should call update() at this rate). */
+            void setControlFrequencyHz(double hz);
+            /** @brief Current target control frequency [Hz]. */
+            double controlFrequencyHz() const { return control_frequency_hz_; }
+            /** @brief Control period [s] = 1 / controlFrequencyHz(), for rate limiting. */
+            double controlPeriodSec() const { return 1.0 / control_frequency_hz_; }
 
             /** @brief Toggle gripper between open and closed. */
             void toggleGripper();
@@ -184,6 +224,12 @@ namespace torq {
             double jog_linear_step_ = 0.01;
             double jog_angular_step_ = 0.05;
             std::string end_effector_frame_;
+
+            Eigen::Matrix4d persistent_target_pose_;
+            bool target_initialized_ = false;
+            std::string last_jog_frame_;
+            double max_tracking_error_ = 0.05;
+            double control_frequency_hz_ = 500.0;
     };
 }
 

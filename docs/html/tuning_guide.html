@@ -96,7 +96,7 @@ $(document).ready(function(){initNavTree('tuning_guide.html',''); initResizable(
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md_doc_tuning_guide"></a> This page is a practical reference for tuning the IK parameters exposed by <code><a class="el" href="structtorq_1_1IKConfig.html" title="Centralised store for all tunable IK parameters with sensible defaults.">torq::IKConfig</a></code> and the runtime setters on <code><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">torq::RobotSystem</a></code>.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md83"></a>
+<h1><a class="anchor" id="autotoc_md84"></a>
 Quick reference</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -123,7 +123,7 @@ Quick reference</h1>
 <td class="markdownTableBodyNone">Configuration limit gain   </td><td class="markdownTableBodyNone">0.5   </td><td class="markdownTableBodyNone">0.1 – 1.0   </td><td class="markdownTableBodyNone"><code>setConfigLimitGain()</code>   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md85"></a>
+<h1><a class="anchor" id="autotoc_md86"></a>
 The IKConfig struct</h1>
 <p>All parameters are stored in <code><a class="el" href="structtorq_1_1IKConfig.html" title="Centralised store for all tunable IK parameters with sensible defaults.">torq::IKConfig</a></code> (defined in <code><a class="el" href="Controller_8hpp.html">torq/Controller.hpp</a></code>) with sensible defaults. The struct is owned by the <code>Controller</code>; <code>RobotSystem</code> provides pass-through setters.</p>
 <div class="fragment"><div class="line"><span class="keyword">struct </span>IKConfig {</div>
@@ -139,9 +139,9 @@ The IKConfig struct</h1>
 <div class="line">    <span class="keywordtype">double</span> config_limit_gain     = 0.5;</div>
 <div class="line">};</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md87"></a>
+<h1><a class="anchor" id="autotoc_md88"></a>
 Parameter details</h1>
-<h2><a class="anchor" id="autotoc_md88"></a>
+<h2><a class="anchor" id="autotoc_md89"></a>
 Frame task costs</h2>
 <p><b>frame_position_cost</b> <b>and</b> <b>frame_orientation_cost</b> <b>control</b> how aggressively the solver tracks the Cartesian target.</p>
 <ul>
@@ -149,7 +149,7 @@ Frame task costs</h2>
 <li>Increase orientation cost to prioritise correct end-effector alignment.</li>
 <li>Set one to 0 to disable that component entirely (e.g. position-only tracking).</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md89"></a>
+<h2><a class="anchor" id="autotoc_md90"></a>
 Frame gain (α)</h2>
 <p>Controls convergence speed:</p>
 <table class="markdownTable">
@@ -162,7 +162,7 @@ Frame gain (α)</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">0.1   </td><td class="markdownTableBodyNone">Very slow convergence. Useful for teleoperation or gentle motions.   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md90"></a>
+<h2><a class="anchor" id="autotoc_md91"></a>
 Frame LM damping (μ)</h2>
 <p>Levenberg–Marquardt regularisation for the frame task:</p>
 <ul>
@@ -171,19 +171,19 @@ Frame LM damping (μ)</h2>
 <li><b>&gt;</b> 0.5 <b>—</b> heavy damping. The arm will move slowly but safely toward unreachable targets.</li>
 </ul>
 <p>The effective damping scales with the squared residual ( \(\mu \cdot \|We\|^2\)), so it only activates when the error is non-trivial.</p>
-<h2><a class="anchor" id="autotoc_md91"></a>
+<h2><a class="anchor" id="autotoc_md92"></a>
 Posture cost</h2>
 <p>Weight of the posture regularisation task. Typical values are 2–3 orders of magnitude below the frame cost. If set too high, the arm will resist moving from its reference posture; if too low, it may adopt awkward configurations.</p>
-<h2><a class="anchor" id="autotoc_md92"></a>
+<h2><a class="anchor" id="autotoc_md93"></a>
 Posture gain and LM damping</h2>
 <p>Same semantics as the frame task variants, but applied to the posture regularisation. Usually left at defaults (gain=1, lm_damping=0).</p>
-<h2><a class="anchor" id="autotoc_md93"></a>
+<h2><a class="anchor" id="autotoc_md94"></a>
 Damping cost</h2>
 <p>Weight of the <code>DampingTask</code> which penalises all joint velocity. Increase this to smooth out jerky motions; decrease to allow faster response.</p>
-<h2><a class="anchor" id="autotoc_md94"></a>
+<h2><a class="anchor" id="autotoc_md95"></a>
 Solver (Tikhonov) damping (λ)</h2>
 <p>A tiny constant added to the QP Hessian diagonal to ensure positive definiteness. Should almost never need changing. Increase to \(10^{-6}\) or higher only if the solver reports numerical issues.</p>
-<h2><a class="anchor" id="autotoc_md95"></a>
+<h2><a class="anchor" id="autotoc_md96"></a>
 Configuration limit gain (γ)</h2>
 <p>Controls how early the robot starts decelerating as it approaches joint limits:</p>
 <table class="markdownTable">
@@ -197,9 +197,9 @@ Configuration limit gain (γ)</h2>
 <td class="markdownTableBodyNone">0.1   </td><td class="markdownTableBodyNone">Very conservative — slow down far from limits.   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md97"></a>
+<h1><a class="anchor" id="autotoc_md98"></a>
 Tuning recipes</h1>
-<h2><a class="anchor" id="autotoc_md98"></a>
+<h2><a class="anchor" id="autotoc_md99"></a>
 Robot oscillates near target</h2>
 <p>The frame gain is too high or the frame task cost is too large relative to the damping cost.</p>
 <ol type="1">
@@ -207,7 +207,7 @@ Robot oscillates near target</h2>
 <li>Increase <code>damping_cost</code> by 10×.</li>
 <li>Add a small <code>frame_lm_damping</code> (e.g. 0.01).</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md99"></a>
+<h2><a class="anchor" id="autotoc_md100"></a>
 Arm barely moves</h2>
 <p>The posture or damping cost is too high relative to the frame cost.</p>
 <ol type="1">
@@ -215,20 +215,20 @@ Arm barely moves</h2>
 <li>Decrease <code>damping_cost</code> (e.g. from 1e-4 to 1e-6).</li>
 <li>Increase <code>frame_position_cost</code>.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md100"></a>
+<h2><a class="anchor" id="autotoc_md101"></a>
 Weird elbow configurations</h2>
 <p>The posture task is too weak or has no useful reference.</p>
 <ol type="1">
 <li>Set a sensible home posture via <code>setHomePosition()</code>.</li>
 <li>Increase <code>posture_cost</code> to 1e-2.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md101"></a>
+<h2><a class="anchor" id="autotoc_md102"></a>
 Jerky motions</h2>
 <ol type="1">
 <li>Increase <code>damping_cost</code>.</li>
 <li>Lower <code>frame_gain</code>.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md102"></a>
+<h2><a class="anchor" id="autotoc_md103"></a>
 Solver reports infeasible</h2>
 <p>The constraints (limits) are contradictory or the target forces violations.</p>
 <ol type="1">
@@ -237,7 +237,7 @@ Solver reports infeasible</h2>
 <li>Check that the velocity limits in the URDF are not too restrictive.</li>
 </ol>
 <hr  />
-<h1><a class="anchor" id="autotoc_md104"></a>
+<h1><a class="anchor" id="autotoc_md105"></a>
 GUI: IK Tuning panel</h1>
 <p>All parameters above are exposed in the built-in ImGui <b>IK</b> Tuning <b>panel</b>. The panel appears when the IK subsystem is active (after the first Cartesian jog command).</p>
 <ul>

@@ -1,5 +1,10 @@
 #include "torq/Controller.hpp"
+#include "torq/PinocchioModel.hpp"
 #include <cmath>
+#include <iostream>
+
+// Set to true to print IK diagnostics (dq norm, expected body twist, dz).
+static constexpr bool IK_DIAGNOSTICS = true;
 
 namespace torq{
   Controller::Controller(KinematicsEngine* kinematics, HardwareInterface* hardware): kinematics_(kinematics), hardware_(hardware){
@@ -49,9 +54,13 @@ namespace torq{
     mode_ = ControlMode::TASK_SPACE;
   }
 
-  void Controller::setJointSpaceTarget(const Eigen::VectorXd& target_joints){
+  void Controller::setJointSpaceTarget(const Eigen::VectorXd& target_joints) {
     target_joints_ = target_joints;
     mode_ = ControlMode::JOINT_SPACE;
+  }
+
+  void Controller::resetIKState() {
+    ik_config_initialized_ = false;
   }
 
   void Controller::setGripperConfig(int actuator_idx, double open_val, double close_val, double current_val){
@@ -86,9 +95,14 @@ namespace torq{
         if (!ik_ready_ || !frame_task_) return;
 
         double dt = hardware_->getTimestep();
-        Eigen::VectorXd q_full = hardware_->getJointPositions();
-        Eigen::VectorXd q = kinematics_->fullToReducedQ(q_full);
-        auto config = kinematics_->makeConfiguration(q);
+
+        if (!ik_config_initialized_) {
+          Eigen::VectorXd q_full = hardware_->getJointPositions();
+          ik_configuration_ = kinematics_->fullToReducedQ(q_full);
+          ik_config_initialized_ = true;
+        }
+
+        auto config = kinematics_->makeConfiguration(ik_configuration_);
 
         std::vector<Task*> tasks = {
             frame_task_.get(),
@@ -99,11 +113,37 @@ namespace torq{
             vel_limit_.get(),
             cfg_limit_.get()
         };
-	
+
         Eigen::VectorXd velocity = ik_solver_.solve(config, tasks, dt, ik_config_.solver_damping, limits);
 
+        if (IK_DIAGNOSTICS) {
+            const std::string& frame_name = frame_task_->frame();
+            Eigen::MatrixXd J = config.getFrameJacobian(frame_name);
+            Eigen::VectorXd body_twist = J * velocity;
+            std::cout << "[IK diag] frame=" << frame_name
+                      << " dt=" << dt
+                      << " |dq|=" << velocity.norm()
+                      << " dq=[" << velocity.transpose() << "]"
+                      << " body_vel_xyz=[" << body_twist.head<3>().transpose() << "]"
+                      << " body_dz=" << body_twist(2)
+                      << std::endl;
+        }
+
         config.integrateInplace(velocity, dt);
-        Eigen::VectorXd q_cmd = config.q();
+        ik_configuration_ = config.q();
+
+        // Optional: slow re-sync to prevent kinematic/physics drift over long runs
+        constexpr bool IK_ENABLE_SLOW_RESYNC = false;
+        constexpr double IK_RESYNC_ALPHA = 0.01;
+        if (IK_ENABLE_SLOW_RESYNC) {
+          Eigen::VectorXd q_mujoco =
+              kinematics_->fullToReducedQ(hardware_->getJointPositions());
+          ik_configuration_ =
+              (1.0 - IK_RESYNC_ALPHA) * ik_configuration_ +
+              IK_RESYNC_ALPHA * q_mujoco;
+        }
+
+        Eigen::VectorXd q_cmd = ik_configuration_;
         if (gripper_actuator_idx_ >= static_cast<int>(q_cmd.size())) {
           Eigen::VectorXd q_full(gripper_actuator_idx_ + 1);
           q_full.head(q_cmd.size()) = q_cmd;

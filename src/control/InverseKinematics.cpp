@@ -80,8 +80,8 @@ namespace torq {
 					 const Eigen::VectorXd& upper){
     solver_.settings()->setVerbosity(false);
     solver_.settings()->setWarmStart(true);
-    solver_.settings()->setAbsoluteTolerance(1e-5);
-    solver_.settings()->setRelativeTolerance(1e-5);
+    solver_.settings()->setAbsoluteTolerance(1e-8);
+    solver_.settings()->setRelativeTolerance(1e-8);
     solver_.settings()->setMaxIteration(200);
     solver_.settings()->setPolish(false);
 

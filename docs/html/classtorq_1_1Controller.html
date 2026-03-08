@@ -116,6 +116,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa7639e9d8aa33178df6ab8dfd7104d26"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#aa7639e9d8aa33178df6ab8dfd7104d26">setJointSpaceTarget</a> (const Eigen::VectorXd &amp;target_joints)</td></tr>
 <tr class="memdesc:aa7639e9d8aa33178df6ab8dfd7104d26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a joint-angle target and switch to JOINT_SPACE mode.  <a href="classtorq_1_1Controller.html#aa7639e9d8aa33178df6ab8dfd7104d26">More...</a><br /></td></tr>
 <tr class="separator:aa7639e9d8aa33178df6ab8dfd7104d26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f2581f133f32fdc836b09c9a79e8629"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a6f2581f133f32fdc836b09c9a79e8629">resetIKState</a> ()</td></tr>
+<tr class="memdesc:a6f2581f133f32fdc836b09c9a79e8629"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset IK kinematic state (call when leaving TASK_SPACE).  <a href="classtorq_1_1Controller.html#a6f2581f133f32fdc836b09c9a79e8629">More...</a><br /></td></tr>
+<tr class="separator:a6f2581f133f32fdc836b09c9a79e8629"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a780659bd5da8c16e5ac82e882642c697"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a780659bd5da8c16e5ac82e882642c697">setGripperConfig</a> (int actuator_idx, double open_val, double close_val, double current_val)</td></tr>
 <tr class="memdesc:a780659bd5da8c16e5ac82e882642c697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the gripper actuator.  <a href="classtorq_1_1Controller.html#a780659bd5da8c16e5ac82e882642c697">More...</a><br /></td></tr>
 <tr class="separator:a780659bd5da8c16e5ac82e882642c697"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -176,6 +179,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Manages control modes, IK tasks/limits, and the QP solver. </p>
 <p>The <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a> owns the <a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">InverseKinematics</a> solver and all task/limit instances. It switches between IDLE, JOINT_SPACE, and TASK_SPACE modes. In TASK_SPACE mode it builds and solves the QP every tick via <a class="el" href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec" title="Execute one control tick.">update()</a>.</p>
+<p>Control loop frequency: <a class="el" href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec" title="Execute one control tick.">update()</a> is invoked at the rate of the caller (typically <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">RobotSystem::update()</a>). For stable IK, call at 200–1000 Hz. The kinematic state is integrated internally; no physics feedback is fed into the IK (Pink-aligned architecture).</p>
 <p>IK tasks and limits are lazily initialised on the first call to <a class="el" href="classtorq_1_1Controller.html#a29033b11c98cf307313dc7c7e375a6be" title="Set a Cartesian target and switch to TASK_SPACE mode.">setTaskSpaceTarget()</a>. Parameters from <a class="el" href="structtorq_1_1IKConfig.html" title="Centralised store for all tunable IK parameters with sensible defaults.">IKConfig</a> are applied both at construction time and via the runtime setters (which update the live task/limit objects immediately).</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a> (user-facing wrapper), <a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">InverseKinematics</a>, <a class="el" href="classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective.">Task</a>, <a class="el" href="classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints).">Limit</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -298,6 +302,25 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a6f2581f133f32fdc836b09c9a79e8629"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f2581f133f32fdc836b09c9a79e8629">&#9670;&nbsp;</a></span>resetIKState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::Controller::resetIKState </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reset IK kinematic state (call when leaving TASK_SPACE). </p>
+
+</div>
+</div>
 <a id="a780659bd5da8c16e5ac82e882642c697"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a780659bd5da8c16e5ac82e882642c697">&#9670;&nbsp;</a></span>setGripperConfig()</h2>
 
@@ -411,7 +434,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Execute one control tick. </p>
-<p>In TASK_SPACE mode: builds a <a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a>, solves the QP, integrates the result, and writes the new joint positions to hardware. In JOINT_SPACE mode: writes target_joints_ directly. In IDLE mode: does nothing. </p>
+<p>Runs at the rate of the caller; typical frequency 200–1000 Hz for the IK layer. In TASK_SPACE mode: builds a <a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a> from the internal kinematic state, solves the QP, integrates the result, and writes the new joint positions to hardware. In JOINT_SPACE mode: writes target_joints_ directly. In IDLE mode: does nothing. </p>
 
 </div>
 </div>

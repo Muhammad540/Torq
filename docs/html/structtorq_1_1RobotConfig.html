@@ -120,6 +120,12 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a44a180e01fafeab6e8285fe892e9a2cd"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a44a180e01fafeab6e8285fe892e9a2cd">gripper_actuator_idx</a> = -1</td></tr>
 <tr class="memdesc:a44a180e01fafeab6e8285fe892e9a2cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">MuJoCo actuator index for the gripper (-1 = last actuator).  <a href="structtorq_1_1RobotConfig.html#a44a180e01fafeab6e8285fe892e9a2cd">More...</a><br /></td></tr>
 <tr class="separator:a44a180e01fafeab6e8285fe892e9a2cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a635a9f31ebfc286b2eb3bb79d5eb29cc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a635a9f31ebfc286b2eb3bb79d5eb29cc">max_tracking_error</a> = 0.05</td></tr>
+<tr class="memdesc:a635a9f31ebfc286b2eb3bb79d5eb29cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max Cartesian tracking error [m] for jog safety; target is clamped within this distance of actual EE.  <a href="structtorq_1_1RobotConfig.html#a635a9f31ebfc286b2eb3bb79d5eb29cc">More...</a><br /></td></tr>
+<tr class="separator:a635a9f31ebfc286b2eb3bb79d5eb29cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66a577a23d2d038dceb4390cbd49a3ac"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac">control_frequency_hz</a> = 500.0</td></tr>
+<tr class="memdesc:a66a577a23d2d038dceb4390cbd49a3ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target control loop frequency [Hz] for update(); caller should invoke update() at this rate.  <a href="structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac">More...</a><br /></td></tr>
+<tr class="separator:a66a577a23d2d038dceb4390cbd49a3ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a> for initialising a <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a>. </p>
@@ -202,6 +208,40 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>MuJoCo actuator index for the gripper (-1 = last actuator). </p>
+
+</div>
+</div>
+<a id="a635a9f31ebfc286b2eb3bb79d5eb29cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a635a9f31ebfc286b2eb3bb79d5eb29cc">&#9670;&nbsp;</a></span>max_tracking_error</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double torq::RobotConfig::max_tracking_error = 0.05</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Max Cartesian tracking error [m] for jog safety; target is clamped within this distance of actual EE. </p>
+<p>Default 0.05. </p>
+
+</div>
+</div>
+<a id="a66a577a23d2d038dceb4390cbd49a3ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66a577a23d2d038dceb4390cbd49a3ac">&#9670;&nbsp;</a></span>control_frequency_hz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double torq::RobotConfig::control_frequency_hz = 500.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Target control loop frequency [Hz] for update(); caller should invoke update() at this rate. </p>
+<p>Typical 200–1000 for IK. Default 500. </p>
 
 </div>
 </div>

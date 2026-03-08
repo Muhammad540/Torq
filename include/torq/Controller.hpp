@@ -52,6 +52,11 @@ namespace torq{
    * It switches between IDLE, JOINT_SPACE, and TASK_SPACE modes.  In TASK_SPACE
    * mode it builds and solves the QP every tick via update().
    *
+   * Control loop frequency: update() is invoked at the rate of the caller
+   * (typically RobotSystem::update()). For stable IK, call at 200–1000 Hz.
+   * The kinematic state is integrated internally; no physics feedback is fed
+   * into the IK.
+   *
    * IK tasks and limits are lazily initialised on the first call to
    * setTaskSpaceTarget().  Parameters from IKConfig are applied both at
    * construction time and via the runtime setters (which update the live
@@ -86,7 +91,10 @@ namespace torq{
      * @param target_joints  Desired joint positions (reduced model nq).
      */
     void setJointSpaceTarget(const Eigen::VectorXd& target_joints);
-    
+
+    /** @brief Reset IK kinematic state (call when leaving TASK_SPACE). */
+    void resetIKState();
+
     /**
      * @brief Configure the gripper actuator.
      * @param actuator_idx  Index into the MuJoCo actuator array.
@@ -105,10 +113,11 @@ namespace torq{
     /**
      * @brief Execute one control tick.
      *
-     * In TASK_SPACE mode: builds a Configuration, solves the QP, integrates
-     * the result, and writes the new joint positions to hardware.
-     * In JOINT_SPACE mode: writes target_joints_ directly.
-     * In IDLE mode: does nothing.
+     * Runs at the rate of the caller; typical frequency 200–1000 Hz for the
+     * IK layer. In TASK_SPACE mode: builds a Configuration from the internal
+     * kinematic state, solves the QP, integrates the result, and writes the
+     * new joint positions to hardware. In JOINT_SPACE mode: writes
+     * target_joints_ directly. In IDLE mode: does nothing.
      */
     void update();
 
@@ -164,6 +173,9 @@ namespace torq{
     ControlMode mode_ = ControlMode::IDLE;
     Eigen::VectorXd target_joints_;
     bool ik_ready_ = false;
+
+    Eigen::VectorXd ik_configuration_;
+    bool ik_config_initialized_ = false;
     double gripper_open_val_ = 0.0;
     double gripper_close_val_ = 0.0;
     bool gripper_open_ = true;

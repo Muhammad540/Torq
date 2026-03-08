@@ -26,6 +26,12 @@ namespace torq {
      * actuator-command interface (setJointPositions writes to `ctrl`) and
      * direct state overrides (overrideJointPositions writes to `qpos`).
      *
+     * Step frequency: step() is called from RobotSystem::update() at the
+     * application control frequency (see RobotSystem::controlFrequencyHz()).
+     * The physics timestep (getTimestep()) is set in the MJCF/XML model;
+     * typical values yield 500–2000 Hz physics. The control loop usually
+     * runs one physics step per update() call.
+     *
      * @see HardwareInterface
      */
     class MujocoDriver : public HardwareInterface {
@@ -68,8 +74,10 @@ namespace torq {
             
             virtual void setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q) override;
             virtual void setJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd) override;
-            
+
+            /** @brief Advance simulation by one physics step. Called at control loop frequency from RobotSystem::update(). */
             virtual void step() override;
+            /** @brief Physics integration timestep [s] from the model (frequency = 1/getTimestep()). */
             virtual double getTimestep() const override;
 
             virtual int numJoints() const override;

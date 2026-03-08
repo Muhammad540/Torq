@@ -14,9 +14,12 @@ var searchData=
   ['configuration_16',['Configuration',['../classtorq_1_1Configuration.html#a2b42c089f7b3fe05ea9fbd6ba590cd06',1,'torq::Configuration::Configuration(const pinocchio::Model &amp;model, const pinocchio::Data &amp;data, const Eigen::VectorXd &amp;q, bool forward_kinematics=true, std::shared_ptr&lt; pinocchio::GeometryModel &gt; collision_model=nullptr, std::shared_ptr&lt; pinocchio::GeometryData &gt; collision_data=nullptr)'],['../classtorq_1_1Configuration.html#a1af974c729827441b1b6587c25f3db43',1,'torq::Configuration::Configuration(const Configuration &amp;)=delete'],['../classtorq_1_1Configuration.html#a3c4c10b4c59c56c0b19f39d806c46d7d',1,'torq::Configuration::Configuration(Configuration &amp;&amp;)=default'],['../classtorq_1_1Configuration.html',1,'torq::Configuration']]],
   ['configurationlimit_17',['ConfigurationLimit',['../classtorq_1_1ConfigurationLimit.html#a8fd4a6be104d37037b5dee13a095a8f7',1,'torq::ConfigurationLimit::ConfigurationLimit()'],['../classtorq_1_1ConfigurationLimit.html',1,'torq::ConfigurationLimit']]],
   ['connect_18',['connect',['../classtorq_1_1HardwareInterface.html#a176b03dc7671273eea795de7d6b3ac38',1,'torq::HardwareInterface::connect()'],['../classtorq_1_1MujocoDriver.html#ab49e55d966ec0fae72bbe6fe003685a9',1,'torq::MujocoDriver::connect()']]],
-  ['controller_19',['Controller',['../classtorq_1_1Controller.html#a3a45d9b2cb3fc3af7ffffb9147b64bb2',1,'torq::Controller::Controller()'],['../classtorq_1_1Controller.html',1,'torq::Controller']]],
-  ['controller_2ehpp_20',['Controller.hpp',['../Controller_8hpp.html',1,'']]],
-  ['controlmode_21',['ControlMode',['../namespacetorq.html#aafc88d300c5738ef6e253b67cfb516f4',1,'torq']]],
-  ['cost_22',['cost',['../classtorq_1_1Task.html#ac9631037f91125180c7d12c1eded7aa2',1,'torq::Task']]],
-  ['cost_5f_23',['cost_',['../classtorq_1_1Task.html#a614bbd6d7275232f888983c32ac34873',1,'torq::Task']]]
+  ['control_5ffrequency_5fhz_19',['control_frequency_hz',['../structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac',1,'torq::RobotConfig']]],
+  ['controlfrequencyhz_20',['controlFrequencyHz',['../classtorq_1_1RobotSystem.html#a389b81123356f7349711522f9987913b',1,'torq::RobotSystem']]],
+  ['controller_21',['Controller',['../classtorq_1_1Controller.html#a3a45d9b2cb3fc3af7ffffb9147b64bb2',1,'torq::Controller::Controller()'],['../classtorq_1_1Controller.html',1,'torq::Controller']]],
+  ['controller_2ehpp_22',['Controller.hpp',['../Controller_8hpp.html',1,'']]],
+  ['controlmode_23',['ControlMode',['../namespacetorq.html#aafc88d300c5738ef6e253b67cfb516f4',1,'torq']]],
+  ['controlperiodsec_24',['controlPeriodSec',['../classtorq_1_1RobotSystem.html#a2932689573b7b7b108ac5d722c2fef8c',1,'torq::RobotSystem']]],
+  ['cost_25',['cost',['../classtorq_1_1Task.html#ac9631037f91125180c7d12c1eded7aa2',1,'torq::Task']]],
+  ['cost_5f_26',['cost_',['../classtorq_1_1Task.html#a614bbd6d7275232f888983c32ac34873',1,'torq::Task']]]
 ];
