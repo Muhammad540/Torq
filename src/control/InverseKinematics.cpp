@@ -1,10 +1,10 @@
-#include "openmanip/InverseKinematics.hpp"
-#include "openmanip/PinocchioModel.hpp"
-#include "openmanip/Tasks.hpp"
-#include "openmanip/Limits.hpp"
-#include "openmanip/logger.hpp"
+#include "torq/InverseKinematics.hpp"
+#include "torq/PinocchioModel.hpp"
+#include "torq/Tasks.hpp"
+#include "torq/Limits.hpp"
+#include "torq/logger.hpp"
 
-namespace openmanip {
+namespace torq {
   Eigen::SparseMatrix<double> InverseKinematics::toDenseSparse(const Eigen::MatrixXd& dense){
     int rows = static_cast<int>(dense.rows());
     int cols = static_cast<int>(dense.cols());

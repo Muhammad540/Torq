@@ -1,7 +1,7 @@
-#include "openmanip/Controller.hpp"
+#include "torq/Controller.hpp"
 #include <cmath>
 
-namespace openmanip{
+namespace torq{
   Controller::Controller(KinematicsEngine* kinematics, HardwareInterface* hardware): kinematics_(kinematics), hardware_(hardware){
     log_.info() << "[Controller] Initialized";
   }

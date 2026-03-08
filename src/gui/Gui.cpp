@@ -1,11 +1,11 @@
-#include "openmanip/Gui.hpp"
+#include "torq/Gui.hpp"
 #include "imgui_internal.h"
 #include "mujoco/mjrender.h"
 #include "mujoco/mjvisualize.h"
-#include "openmanip/RobotSystem.hpp"
-#include "openmanip/Controller.hpp"
-#include "openmanip/MujocoDriver.hpp"
-#include "openmanip/logger.hpp"
+#include "torq/RobotSystem.hpp"
+#include "torq/Controller.hpp"
+#include "torq/MujocoDriver.hpp"
+#include "torq/logger.hpp"
 #include <cstring>
 #include <cmath>
 
@@ -24,7 +24,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-namespace openmanip {
+namespace torq {
     Gui::Gui(): 
         cam_(std::make_unique<mjvCamera>()),
         opt_(std::make_unique<mjvOption>()),

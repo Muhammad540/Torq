@@ -1,12 +1,12 @@
-#include "openmanip/RobotSystem.hpp"
-#include "openmanip/MujocoDriver.hpp"
-#include "openmanip/PinocchioModel.hpp"
+#include "torq/RobotSystem.hpp"
+#include "torq/MujocoDriver.hpp"
+#include "torq/PinocchioModel.hpp"
 #include <Eigen/Geometry>
 
 #include <iostream>
 #include <memory>
 
-namespace openmanip {
+namespace torq {
     RobotSystem::RobotSystem() {
         hardware_ = std::make_unique<MujocoDriver>();
         kinematics_ = std::make_unique<KinematicsEngine>();

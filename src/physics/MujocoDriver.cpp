@@ -1,5 +1,5 @@
-#include "openmanip/MujocoDriver.hpp"
-#include "openmanip/logger.hpp"
+#include "torq/MujocoDriver.hpp"
+#include "torq/logger.hpp"
 
 #include "Eigen/src/Core/Matrix.h"
 #include "mujoco/mjdata.h"
@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-namespace openmanip {
+namespace torq {
     MujocoDriver::MujocoDriver() {
         logger.info() << "[MujocoDriver] Initializing  ...";
     }

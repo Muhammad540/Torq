@@ -1,0 +1,86 @@
+// Layered architecture (top to bottom): inputs -> models -> RobotSystem -> subsystems -> output.
+// Styling inspired by clear block-diagram documentation (e.g. MJLab-style).
+digraph SystemDiagram {
+  rankdir=TB;
+  splines=ortho;
+  nodesep=0.4;
+  ranksep=0.5;
+  node [fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9];
+
+  // ─── Input layer (light purple) ─────────────────────────────────────────
+  subgraph cluster_inputs {
+    label="Inputs";
+    labelloc=t;
+    color="#9370DB";
+    penwidth=2;
+    fillcolor="#E6E6FA";
+    style="rounded,filled";
+
+    Scene [label="Scene\n(MJCF)", shape=box, style="rounded,filled", fillcolor="#E6E6FA"];
+    Robot [label="Robot\n(URDF / MJCF)", shape=box, style="rounded,filled", fillcolor="#E6E6FA"];
+    Config [label="RobotConfig\n(frame, joints, paths)", shape=box, style="rounded,filled", fillcolor="#E6E6FA"];
+  }
+
+  // ─── Model layer (light gray) ───────────────────────────────────────────
+  subgraph cluster_models {
+    label="Models";
+    labelloc=t;
+    color="#808080";
+    penwidth=1;
+    fillcolor="#F0F0F0";
+    style="rounded,filled";
+
+    PinocchioModel [label="Pinocchio\nmodel + data", shape=box, style="rounded,filled", fillcolor="#F0F0F0"];
+    MujocoModel [label="MuJoCo\nmjModel / mjData", shape=box, style="rounded,filled", fillcolor="#F0F0F0"];
+  }
+
+  // ─── Core engine (orange) ───────────────────────────────────────────────
+  RobotSystem [label="RobotSystem\nTop-level API\n(targets, jog, gripper, IK tuning)", shape=box, style="rounded,filled", fillcolor="#FFA500", fontcolor="#1a1a1a"];
+
+  // ─── Subsystems container (light gray with green-tinted blocks) ─────────
+  subgraph cluster_subsystems {
+    label="Subsystems";
+    labelloc=t;
+    color="#606060";
+    penwidth=2;
+    fillcolor="#E8E8E8";
+    style="rounded,filled";
+
+    MujocoDriver [label="MujocoDriver\n(HAL)\nq, v sync", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
+    KinematicsEngine [label="KinematicsEngine\nConfiguration\nFK, Jacobians", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
+    Controller [label="Controller\nIK + Tasks + Limits\nOSQP solve", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
+    Gui [label="Gui\nImGui viewport\njoint / cartesian / IK panel", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
+  }
+
+  // ─── Output layer (darker purple) ───────────────────────────────────────
+  subgraph cluster_output {
+    label="Output";
+    labelloc=t;
+    color="#4B0082";
+    penwidth=2;
+    fillcolor="#E8E0F0";
+    style="rounded,filled";
+
+    Commands [label="Joint commands\n(q, v to hardware)", shape=box, style="rounded,filled", fillcolor="#DDA0DD"];
+    Rendered [label="Rendered frame\n(3D viewport)", shape=box, style="rounded,filled", fillcolor="#DDA0DD"];
+  }
+
+  // Edges: flow top to bottom
+  Scene -> PinocchioModel [style=invis, weight=10];
+  Robot -> PinocchioModel;
+  Robot -> MujocoModel;
+  Config -> RobotSystem [style=invis, weight=10];
+
+  PinocchioModel -> RobotSystem;
+  MujocoModel -> RobotSystem;
+
+  RobotSystem -> MujocoDriver;
+  RobotSystem -> KinematicsEngine;
+  RobotSystem -> Controller;
+  RobotSystem -> Gui;
+
+  MujocoDriver -> Commands;
+  Controller -> Commands;
+  Gui -> Rendered;
+}

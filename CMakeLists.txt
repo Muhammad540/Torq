@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
-project(openManip
-        VERSION 0.0
+project(torq
+        VERSION 0.1
         LANGUAGES CXX C
-        DESCRIPTION "Open Source framework for Robot Manipulation")
+        DESCRIPTION "High-performance C++ framework for robot control and training")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,7 +32,7 @@ set(MUJOCO_TEST_PYTHON_UTIL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     mujoco
     GIT_REPOSITORY https://github.com/google-deepmind/mujoco.git
-    GIT_TAG        main
+    GIT_TAG        3.5.0
 )
 FetchContent_MakeAvailable(mujoco) 
 
@@ -81,14 +81,14 @@ set(CORE_SOURCES
     src/control/InverseKinematics.cpp
 )
 
-add_library(openmanip SHARED ${CORE_SOURCES})
+add_library(torq SHARED ${CORE_SOURCES})
 
-target_include_directories(openmanip PUBLIC
+target_include_directories(torq PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(openmanip PUBLIC
+target_link_libraries(torq PUBLIC
   glfw
   OpenGL::GL
   GLEW::GLEW
@@ -98,7 +98,7 @@ target_link_libraries(openmanip PUBLIC
   OsqpEigen::OsqpEigen
 )
 
-set_target_properties(openmanip PROPERTIES NO_SYSTEM_FROM_IMPORTED ON)
+set_target_properties(torq PROPERTIES NO_SYSTEM_FROM_IMPORTED ON)
 # ===========
 # Application
 # ===========

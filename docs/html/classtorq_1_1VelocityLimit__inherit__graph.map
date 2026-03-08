@@ -1,0 +1,4 @@
+<map id="torq::VelocityLimit" name="torq::VelocityLimit">
+<area shape="rect" id="node1" title="Joint velocity limits." alt="" coords="5,80,147,107"/>
+<area shape="rect" id="node2" href="$classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints)." alt="" coords="31,5,121,32"/>
+</map>

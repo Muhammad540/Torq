@@ -1,95 +1,93 @@
-# OpenManip
+# Torq
 
-High performance C++ framework for robot manipulation that combines **MuJoCo** (physics + contacts) and **Pinocchio** (rigid body dynamics + kinematics) behind a concise and easy to use API. Designed for motion planning and control (FK/IK/RRT) with a **HAL** to switch simulation vs real hardware.
+High-performance C++ framework for robot manipulation that combines **MuJoCo** (physics + contacts) and **Pinocchio** (rigid body dynamics + kinematics) behind a concise API. Designed for QP-based inverse kinematics with configurable tasks, limits, and barriers, plus a **HAL** for sim-to-real switching.
 
 ## Dependencies
 
 - Linux (Ubuntu recommended)
-- CMake
-- Pinocchio (system install required)
-- Eigen3 (via Pinocchio on most setups)
+- CMake ≥ 3.22
+- Pinocchio (system install)
+- Eigen3
 - MuJoCo (fetched by CMake)
-- osqp (system install required)
-- osqpEigen (system install required)
+- OSQP + OsqpEigen (system install)
 
 ### Install Pinocchio (Ubuntu)
 
-Follow the official Pinocchio installation instructions for your distro/toolchain:
-- https://stack-of-tasks.github.io/pinocchio/
+Follow the official instructions: https://stack-of-tasks.github.io/pinocchio/
 
 ## Build
 
 ```bash
-git clone <this-repo>
-cd OpenManip
+git clone <this-repo> && cd torq
 mkdir -p build && cd build
 cmake ..
 cmake --build . -j
 ```
 
-### Useful CMake Options
+### CMake Options
 
 | Option | Description | Default |
-|------|-------------|---------|
-| `ENABLE_TRACKING_POINTS` | Visualize user defined tracking points (pos/size/color) | `OFF` |
-
-Example:
-
-```bash
-cmake -DENABLE_TRACKING_POINTS=ON ..
-cmake --build . -j
-```
+|--------|-------------|---------|
+| `ENABLE_TRACKING_POINTS` | Visualize user-defined tracking points | `OFF` |
 
 ## Run (SO-101 example)
 
 ```bash
 cd build/bin
-./so101_robot
+./so101
 ```
 
 ## Project Layout
 
 ```text
-OpenManip/
-├── include/                 # public API headers
-├── src/                     
-│   ├── core/                
-│   ├── physics/             
-│   ├── kinematics/          
-│   └── control/
-│
-└── workspace/
-    ├── models/               
-    ├── so101/               
-    └── <your_robot>/        # add your robot here
+torq/
+├── include/torq/          # Public API headers
+├── src/
+│   ├── core/              # RobotSystem
+│   ├── physics/           # MujocoDriver
+│   ├── kinematics/        # PinocchioModel, Configuration
+│   ├── control/           # Controller, InverseKinematics
+│   ├── tasks/             # Task implementations
+│   ├── limits/            # Limit implementations
+│   └── gui/               # ImGui interface
+├── workspace/
+│   ├── models/            # Robot model files (URDF, MJCF)
+│   ├── so101/             # SO-101 arm example
+│   └── panda/             # Franka Panda example
+└── Doxyfile               # Documentation config
 ```
 
 ## Architecture
 
-- **libopenmanip** (engine): reusable core library
-  - `RobotSystem`: loads config, owns physics + kinematics + control backends
-  - `MujocoDriver`: RAII wrapper around MuJoCo model/data, stepping, state IO
-  - `Visualizer`: passive viewer (render + input)
-  - `Pinocchio`: Handles FK/IK
-  - `Controller`
-  
-- **workspace/** (apps): robot specific code that links against the library
-  - example: `workspace/so101/src/main.cpp`
+- **libtorq** (engine): shared library providing physics, kinematics, QP-based IK, and GUI
+  - `RobotSystem` — top-level API, owns all subsystems
+  - `Controller` — control modes (idle / joint / task-space), IK parameter management
+  - `InverseKinematics` — builds and solves the QP via OSQP
+  - `Task` hierarchy — `FrameTask`, `PostureTask`, `DampingTask`
+  - `Limit` hierarchy — `VelocityLimit`, `ConfigurationLimit`
+  - `MujocoDriver` — RAII simulation backend
+  - `KinematicsEngine` / `Configuration` — Pinocchio wrapper
+  - `Gui` — ImGui docking interface with IK tuning panel
+
+- **workspace/** (apps): robot-specific executables that link against `libtorq`
 
 ## Sim vs Real (HAL)
 
-Planning/control code targets a driver interface; the driver decides where commands go.
+Control code targets `HardwareInterface`; the driver decides where commands go.
 
-- `MujocoDriver`: simulation backend
-- `DynamixelDriver`: hardware backend
+- `MujocoDriver` — simulation backend (included)
+- Hardware drivers — implement the same interface for real robots
 
 ## Documentation
 
-Docs are built with [MkDocs](https://www.mkdocs.org/) and live in the `docs/` folder. To serve them locally:
+API reference and topic guides are generated with [Doxygen](https://www.doxygen.nl/). To build:
 
 ```bash
-uv sync
-uv run mkdocs serve
+cd /path/to/torq
+doxygen Doxyfile
+# Open docs/html/index.html in your browser
 ```
 
-Then open [http://127.0.0.1:8000](http://127.0.0.1:8000).
+## Acknowledgements
+
+Torq is a direct port of [Pink](https://github.com/stephane-caron/pink), which uses Pinocchio under the hood. 

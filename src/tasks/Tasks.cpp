@@ -1,12 +1,12 @@
-#include "openmanip/Tasks.hpp"
-#include "openmanip/utils.hpp"
+#include "torq/Tasks.hpp"
+#include "torq/utils.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/spatial/fwd.hpp"
 #include <Eigen/Dense>
-#include "openmanip/PinocchioModel.hpp"
+#include "torq/PinocchioModel.hpp"
 #include <pinocchio/spatial/explog.hpp>
 
-namespace openmanip{
+namespace torq{
     Task::Task(const Eigen::VectorXd& cost, double gain, double lm_damping)
         : cost_(cost)
         , gain_(gain)
@@ -174,4 +174,4 @@ namespace openmanip{
         return Eigen::MatrixXd::Identity(nv, nv).bottomRows(nv - root_nv);
     }  
 
-} // namespace openmanip
+} // namespace torq

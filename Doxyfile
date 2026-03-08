@@ -1,0 +1,131 @@
+# Doxyfile for Torq — High performance C++ robot control and training framework
+# Generate with: doxygen Doxyfile
+
+PROJECT_NAME           = "Torq"
+PROJECT_NUMBER         = "0.1"
+PROJECT_BRIEF          = "High performance C++ robot control and training framework"
+PROJECT_LOGO           =
+OUTPUT_DIRECTORY       = docs
+
+# ---------------------------------------------------------------------------
+# Input
+# ---------------------------------------------------------------------------
+INPUT                  = include/torq \
+                         doc
+FILE_PATTERNS          = *.hpp *.md
+EXAMPLE_PATH           = doc
+DOTFILE_DIRS           = doc
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */build/*
+
+# Use first sentence as brief, rest as detailed
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+MULTILINE_CPP_IS_BRIEF = NO
+
+# ---------------------------------------------------------------------------
+# Extraction
+# ---------------------------------------------------------------------------
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = NO
+
+# ---------------------------------------------------------------------------
+# Build
+# ---------------------------------------------------------------------------
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+HIDE_SCOPE_NAMES       = NO
+SORT_MEMBER_DOCS       = NO
+SORT_BRIEF_DOCS        = NO
+SHOW_INCLUDE_FILES     = YES
+SHOW_GROUPED_MEMB_INC  = YES
+INLINE_INFO            = YES
+SHOW_USED_FILES        = YES
+SHOW_FILES             = YES
+SHOW_NAMESPACES        = YES
+
+# ---------------------------------------------------------------------------
+# Warnings
+# ---------------------------------------------------------------------------
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
+
+# ---------------------------------------------------------------------------
+# Preprocessing
+# ---------------------------------------------------------------------------
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = NO
+SEARCH_INCLUDES        = YES
+INCLUDE_PATH           = include
+
+# ---------------------------------------------------------------------------
+# Source browser
+# ---------------------------------------------------------------------------
+SOURCE_BROWSER         = NO
+INLINE_SOURCES         = NO
+REFERENCED_BY_RELATION = NO
+REFERENCES_RELATION    = NO
+
+# ---------------------------------------------------------------------------
+# HTML output
+# ---------------------------------------------------------------------------
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+HTML_COLORSTYLE        = LIGHT
+HTML_COLORSTYLE_HUE    = 210
+HTML_COLORSTYLE_SAT    = 60
+HTML_COLORSTYLE_GAMMA  = 100
+HTML_DYNAMIC_MENUS     = YES
+HTML_DYNAMIC_SECTIONS  = YES
+GENERATE_TREEVIEW      = YES
+FULL_SIDEBAR           = NO
+TREEVIEW_WIDTH         = 280
+DISABLE_INDEX          = NO
+ENUM_VALUES_PER_LINE   = 1
+
+# Search
+SEARCHENGINE           = YES
+SERVER_BASED_SEARCH    = NO
+
+# ---------------------------------------------------------------------------
+# MathJax (render LaTeX in the browser)
+# Doxygen 1.9.x generates MathJax 2 Hub config; use MathJax_2 so formulas render.
+# ---------------------------------------------------------------------------
+USE_MATHJAX            = YES
+MATHJAX_VERSION        = MathJax_2
+MATHJAX_FORMAT         = HTML-CSS
+MATHJAX_RELPATH        = https://cdn.jsdelivr.net/npm/mathjax@2
+# Required for \operatorname, \tfrac and other amsmath commands in formulas
+MATHJAX_EXTENSIONS     = TeX/AMSmath TeX/AMSsymbols
+
+# ---------------------------------------------------------------------------
+# Diagrams (enable HAVE_DOT and install Graphviz for inheritance diagrams)
+# ---------------------------------------------------------------------------
+HAVE_DOT               = YES
+CLASS_DIAGRAMS         = YES
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = NO
+INCLUDE_GRAPH          = NO
+INCLUDED_BY_GRAPH      = NO
+GRAPHICAL_HIERARCHY    = YES
+DOT_IMAGE_FORMAT       = svg
+
+# ---------------------------------------------------------------------------
+# Other output formats (disabled)
+# ---------------------------------------------------------------------------
+GENERATE_LATEX         = NO
+GENERATE_RTF           = NO
+GENERATE_MAN           = NO
+GENERATE_XML           = NO
+GENERATE_DOCBOOK       = NO
+
+# ---------------------------------------------------------------------------
+# Markdown pages
+# ---------------------------------------------------------------------------
+USE_MDFILE_AS_MAINPAGE = doc/mainpage.md
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES

@@ -1,6 +1,6 @@
-#include "openmanip/RobotSystem.hpp"
-#include "openmanip/Gui.hpp"
-#include "openmanip/logger.hpp"
+#include "torq/RobotSystem.hpp"
+#include "torq/Gui.hpp"
+#include "torq/logger.hpp"
 #include <filesystem>
 
 static Logger logger;
@@ -8,19 +8,19 @@ static Logger logger;
 int main(int argc, char** argv){
     std::filesystem::path root(PROJECT_ROOT);
 
-    openmanip::RobotConfig config;
+    torq::RobotConfig config;
     config.scene_path = (root / "workspace/models/SO101/scene.xml").string();
     config.robot_model_path = (root / "workspace/models/SO101/so101_new_calib.urdf").string();
     config.end_effector_frame = "gripper_frame_link";
     config.locked_joints = {"gripper"};
 
-    openmanip::RobotSystem robot;
+    torq::RobotSystem robot;
     if (!robot.initialize(config)){
         logger.error() << "Failed to load model";
         return 1;
     }
 
-    openmanip::Gui gui;
+    torq::Gui gui;
     gui.initialize(&robot, "SO101 Arm");
 
     while (gui.windowIsOpen()){

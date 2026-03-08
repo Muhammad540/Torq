@@ -1,11 +1,11 @@
-#include "openmanip/Limits.hpp"
-#include "openmanip/PinocchioModel.hpp"
+#include "torq/Limits.hpp"
+#include "torq/PinocchioModel.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/multibody/fwd.hpp"
 #include <optional>
 #include <vector>
 
-namespace openmanip {
+namespace torq {
     VelocityLimit::VelocityLimit(const pinocchio::Model& model)
         : model_(model)
     {

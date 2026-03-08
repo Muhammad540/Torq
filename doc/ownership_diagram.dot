@@ -1,0 +1,35 @@
+// Ownership: RobotSystem owns HAL, KinematicsEngine, Controller; Controller owns IK and task/limit objects.
+digraph OwnershipDiagram {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=9];
+
+  RobotSystem [label="RobotSystem"];
+
+  subgraph cluster_owned {
+    label="unique_ptr<>";
+    HAL [label="HardwareInterface\n(MujocoDriver)"];
+    KinematicsEngine [label="KinematicsEngine"];
+    Controller [label="Controller"];
+  }
+
+  RobotSystem -> HAL;
+  RobotSystem -> KinematicsEngine;
+  RobotSystem -> Controller;
+
+  Controller -> IKConfig [label="value"];
+  Controller -> InverseKinematics [label="value\n(OSQP solver)"];
+  Controller -> FrameTask [label="unique_ptr"];
+  Controller -> PostureTask [label="unique_ptr"];
+  Controller -> DampingTask [label="unique_ptr"];
+  Controller -> VelocityLimit [label="unique_ptr"];
+  Controller -> ConfigurationLimit [label="unique_ptr"];
+
+  IKConfig [label="IKConfig", shape=plaintext];
+  InverseKinematics [label="InverseKinematics", shape=plaintext];
+  FrameTask [label="FrameTask", shape=plaintext];
+  PostureTask [label="PostureTask", shape=plaintext];
+  DampingTask [label="DampingTask", shape=plaintext];
+  VelocityLimit [label="VelocityLimit", shape=plaintext];
+  ConfigurationLimit [label="ConfigurationLimit", shape=plaintext];
+}

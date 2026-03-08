@@ -1,0 +1,6 @@
+<map id="torq::Task" name="torq::Task">
+<area shape="rect" id="node1" title="Abstract base class for kinematic tasks that contribute to the QP objective." alt="" coords="195,5,280,32"/>
+<area shape="rect" id="node2" href="$classtorq_1_1DampingTask.html" title="Minimise joint velocities — viscous damping." alt="" coords="5,80,149,107"/>
+<area shape="rect" id="node3" href="$classtorq_1_1FrameTask.html" title="Regulate the SE(3) pose of a robot frame to a desired target." alt="" coords="174,80,301,107"/>
+<area shape="rect" id="node4" href="$classtorq_1_1PostureTask.html" title="Regulate joint angles toward a desired posture." alt="" coords="325,80,459,107"/>
+</map>

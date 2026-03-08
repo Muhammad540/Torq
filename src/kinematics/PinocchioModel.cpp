@@ -1,5 +1,5 @@
-#include "openmanip/PinocchioModel.hpp"
-#include "openmanip/utils.hpp"
+#include "torq/PinocchioModel.hpp"
+#include "torq/utils.hpp"
 
 #include <set>
 #include <pinocchio/parsers/urdf.hpp>
@@ -10,7 +10,7 @@
 #include <pinocchio/collision/collision.hpp>
 #include <pinocchio/collision/distance.hpp>
 
-namespace openmanip {
+namespace torq {
     Configuration::Configuration(
         const pinocchio::Model& model,
         const pinocchio::Data& data,
@@ -211,4 +211,4 @@ namespace openmanip {
             log_.info() << "  " << frame.name;
         }
     }
-    } // namespace openmanip
+    } // namespace torq
