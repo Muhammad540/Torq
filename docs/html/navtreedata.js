@@ -87,7 +87,7 @@ var NAVTREE =
       ] ],
       [ "ConfigurationLimit", "limits_page.html#autotoc_md30", [
         [ "Formulation", "limits_page.html#autotoc_md31", null ],
-        [ "Effect of <tt>config_limit_gain</tt>", "limits_page.html#autotoc_md32", null ],
+        [ "Effect of config_limit_gain", "limits_page.html#autotoc_md32", null ],
         [ "Parameters", "limits_page.html#autotoc_md33", null ]
       ] ],
       [ "How limits stack", "limits_page.html#autotoc_md35", null ],

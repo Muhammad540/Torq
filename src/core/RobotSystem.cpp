@@ -7,7 +7,7 @@
 #include <memory>
 
 // Set to true to print actual end-effector displacement after each physics step.
-static constexpr bool IK_ACTUAL_MOTION_DIAGNOSTICS = true;
+static constexpr bool IK_ACTUAL_MOTION_DIAGNOSTICS = false;
 
 namespace torq {
     RobotSystem::RobotSystem() {

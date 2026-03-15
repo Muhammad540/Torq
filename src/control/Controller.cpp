@@ -4,7 +4,7 @@
 #include <iostream>
 
 // Set to true to print IK diagnostics (dq norm, expected body twist, dz).
-static constexpr bool IK_DIAGNOSTICS = true;
+static constexpr bool IK_DIAGNOSTICS = false;
 
 namespace torq{
   Controller::Controller(KinematicsEngine* kinematics, HardwareInterface* hardware): kinematics_(kinematics), hardware_(hardware){
