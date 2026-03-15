@@ -110,7 +110,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7573d9d0a62934c886476e92d385bee1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Gui.html#a7573d9d0a62934c886476e92d385bee1">~Gui</a> ()</td></tr>
 <tr class="separator:a7573d9d0a62934c886476e92d385bee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a378d5f8283289d9cb8380f21c1b8317a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Gui.html#a378d5f8283289d9cb8380f21c1b8317a">initialize</a> (<a class="el" href="classtorq_1_1RobotSystem.html">RobotSystem</a> *robot_system, const std::string &amp;title=&quot;Torq GUI&quot;)</td></tr>
-<tr class="memdesc:a378d5f8283289d9cb8380f21c1b8317a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the GUI window and attach to a <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a>.  <a href="classtorq_1_1Gui.html#a378d5f8283289d9cb8380f21c1b8317a">More...</a><br /></td></tr>
+<tr class="memdesc:a378d5f8283289d9cb8380f21c1b8317a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the GUI window and attach to a <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a>.  <a href="classtorq_1_1Gui.html#a378d5f8283289d9cb8380f21c1b8317a">More...</a><br /></td></tr>
 <tr class="separator:a378d5f8283289d9cb8380f21c1b8317a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46252df38fcfe3b6fd1444cf2b3506f9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Gui.html#a46252df38fcfe3b6fd1444cf2b3506f9">windowIsOpen</a> () const</td></tr>
 <tr class="memdesc:a46252df38fcfe3b6fd1444cf2b3506f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">True while the window has not been closed.  <a href="classtorq_1_1Gui.html#a46252df38fcfe3b6fd1444cf2b3506f9">More...</a><br /></td></tr>
@@ -124,8 +124,8 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>ImGui + GLFW + OpenGL3 docking GUI for Torq. </p>
-<p>Provides a 3D MuJoCo viewport, joint-control panel, Cartesian jog panel, and an IK tuning panel. The GUI does not own the <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a> — it only holds a non-owning pointer and reads/writes through the public API.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a> </dd></dl>
+<p>Provides a 3D MuJoCo viewport, joint-control panel, Cartesian jog panel, and an IK tuning panel. The GUI does not own the <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> — it only holds a non-owning pointer and reads/writes through the public API.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae64f1d8960e8215f2f955c006d0207d0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae64f1d8960e8215f2f955c006d0207d0">&#9670;&nbsp;</a></span>Gui()</h2>
@@ -188,7 +188,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initialise the GUI window and attach to a <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a>. </p>
+<p>Initialise the GUI window and attach to a <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">robot_system</td><td>Non-owning pointer to the robot (must outlive the GUI). </td></tr>

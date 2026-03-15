@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['gui_219',['Gui',['../classtorq_1_1Gui.html',1,'torq']]]
+  ['dampingtask_256',['DampingTask',['../classtorq_1_1DampingTask.html',1,'torq']]]
 ];

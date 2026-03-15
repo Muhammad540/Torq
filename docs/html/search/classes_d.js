@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['velocitylimit_233',['VelocityLimit',['../classtorq_1_1VelocityLimit.html',1,'torq']]]
+  ['qpproblem_274',['QPProblem',['../structtorq_1_1QPProblem.html',1,'torq']]]
 ];

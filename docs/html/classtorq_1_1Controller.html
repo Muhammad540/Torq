@@ -98,7 +98,7 @@ $(document).ready(function(){initNavTree('classtorq_1_1Controller.html',''); ini
 </div><!--header-->
 <div class="contents">
 
-<p>Manages control modes, IK tasks/limits, and the QP solver.  
+<p>Internal component: control modes, built-in IK tasks/limits, QP solver.  
  <a href="classtorq_1_1Controller.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="Controller_8hpp_source.html">Controller.hpp</a>&gt;</code></p>
@@ -106,7 +106,7 @@ $(document).ready(function(){initNavTree('classtorq_1_1Controller.html',''); ini
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a3a45d9b2cb3fc3af7ffffb9147b64bb2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a3a45d9b2cb3fc3af7ffffb9147b64bb2">Controller</a> (<a class="el" href="classtorq_1_1KinematicsEngine.html">KinematicsEngine</a> *kinematics, <a class="el" href="classtorq_1_1HardwareInterface.html">HardwareInterface</a> *hardware)</td></tr>
-<tr class="memdesc:a3a45d9b2cb3fc3af7ffffb9147b64bb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>.  <a href="classtorq_1_1Controller.html#a3a45d9b2cb3fc3af7ffffb9147b64bb2">More...</a><br /></td></tr>
+<tr class="memdesc:a3a45d9b2cb3fc3af7ffffb9147b64bb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>.  <a href="classtorq_1_1Controller.html#a3a45d9b2cb3fc3af7ffffb9147b64bb2">More...</a><br /></td></tr>
 <tr class="separator:a3a45d9b2cb3fc3af7ffffb9147b64bb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54d86e1fccecd0b47bd198880da2a886"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a54d86e1fccecd0b47bd198880da2a886">~Controller</a> ()</td></tr>
 <tr class="separator:a54d86e1fccecd0b47bd198880da2a886"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -128,30 +128,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a15f513f4712133008ec1b79302fcd2f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a15f513f4712133008ec1b79302fcd2f4">toggleGripper</a> ()</td></tr>
 <tr class="memdesc:a15f513f4712133008ec1b79302fcd2f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle gripper between open and closed.  <a href="classtorq_1_1Controller.html#a15f513f4712133008ec1b79302fcd2f4">More...</a><br /></td></tr>
 <tr class="separator:a15f513f4712133008ec1b79302fcd2f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a512af835cb935c7d9f28518bf6ecfcec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec">update</a> ()</td></tr>
-<tr class="memdesc:a512af835cb935c7d9f28518bf6ecfcec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute one control tick.  <a href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec">More...</a><br /></td></tr>
-<tr class="separator:a512af835cb935c7d9f28518bf6ecfcec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4effba43bcd315720ec3da23b6c0cfd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a4effba43bcd315720ec3da23b6c0cfd8">update</a> (const std::vector&lt; <a class="el" href="classtorq_1_1Task.html">Task</a> * &gt; &amp;user_tasks={}, const std::vector&lt; <a class="el" href="classtorq_1_1Limit.html">Limit</a> * &gt; &amp;user_limits={}, const std::vector&lt; <a class="el" href="classtorq_1_1Barrier.html">Barrier</a> * &gt; &amp;user_barriers={})</td></tr>
+<tr class="memdesc:a4effba43bcd315720ec3da23b6c0cfd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute one control tick.  <a href="classtorq_1_1Controller.html#a4effba43bcd315720ec3da23b6c0cfd8">More...</a><br /></td></tr>
+<tr class="separator:a4effba43bcd315720ec3da23b6c0cfd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae86f659528a26791c5e5528f89e6a5e0"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structtorq_1_1IKConfig.html">IKConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#ae86f659528a26791c5e5528f89e6a5e0">ikConfig</a> () const</td></tr>
 <tr class="memdesc:ae86f659528a26791c5e5528f89e6a5e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to the current IK parameter set.  <a href="classtorq_1_1Controller.html#ae86f659528a26791c5e5528f89e6a5e0">More...</a><br /></td></tr>
 <tr class="separator:ae86f659528a26791c5e5528f89e6a5e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26f8f9d1f70a5e31acdfdfcf561781ca"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a26f8f9d1f70a5e31acdfdfcf561781ca">ikReady</a> () const</td></tr>
 <tr class="memdesc:a26f8f9d1f70a5e31acdfdfcf561781ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if the IK subsystem has been initialised.  <a href="classtorq_1_1Controller.html#a26f8f9d1f70a5e31acdfdfcf561781ca">More...</a><br /></td></tr>
 <tr class="separator:a26f8f9d1f70a5e31acdfdfcf561781ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a950bf41a0f3dfc62f7fba6ca1a61fae6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtorq_1_1FrameTask.html">FrameTask</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a950bf41a0f3dfc62f7fba6ca1a61fae6">frameTask</a> ()</td></tr>
-<tr class="memdesc:a950bf41a0f3dfc62f7fba6ca1a61fae6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Direct access to the live <a class="el" href="classtorq_1_1FrameTask.html" title="Regulate the SE(3) pose of a robot frame to a desired target.">FrameTask</a> (nullptr before first IK init).  <a href="classtorq_1_1Controller.html#a950bf41a0f3dfc62f7fba6ca1a61fae6">More...</a><br /></td></tr>
-<tr class="separator:a950bf41a0f3dfc62f7fba6ca1a61fae6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aefc3c31f3a6b02043958f8a797c28b96"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtorq_1_1PostureTask.html">PostureTask</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#aefc3c31f3a6b02043958f8a797c28b96">postureTask</a> ()</td></tr>
-<tr class="memdesc:aefc3c31f3a6b02043958f8a797c28b96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Direct access to the live <a class="el" href="classtorq_1_1PostureTask.html" title="Regulate joint angles toward a desired posture.">PostureTask</a>.  <a href="classtorq_1_1Controller.html#aefc3c31f3a6b02043958f8a797c28b96">More...</a><br /></td></tr>
-<tr class="separator:aefc3c31f3a6b02043958f8a797c28b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a025993afa5c4549dbe1316b529348f94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtorq_1_1DampingTask.html">DampingTask</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a025993afa5c4549dbe1316b529348f94">dampingTask</a> ()</td></tr>
-<tr class="memdesc:a025993afa5c4549dbe1316b529348f94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Direct access to the live <a class="el" href="classtorq_1_1DampingTask.html" title="Minimise joint velocities — viscous damping.">DampingTask</a>.  <a href="classtorq_1_1Controller.html#a025993afa5c4549dbe1316b529348f94">More...</a><br /></td></tr>
-<tr class="separator:a025993afa5c4549dbe1316b529348f94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3d1f1bba83f9914d14858a4e363ba06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtorq_1_1VelocityLimit.html">VelocityLimit</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#af3d1f1bba83f9914d14858a4e363ba06">velLimit</a> ()</td></tr>
-<tr class="memdesc:af3d1f1bba83f9914d14858a4e363ba06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Direct access to the live <a class="el" href="classtorq_1_1VelocityLimit.html" title="Joint velocity limits.">VelocityLimit</a>.  <a href="classtorq_1_1Controller.html#af3d1f1bba83f9914d14858a4e363ba06">More...</a><br /></td></tr>
-<tr class="separator:af3d1f1bba83f9914d14858a4e363ba06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a028172ee562603ce6023a35d4dc99e5c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtorq_1_1ConfigurationLimit.html">ConfigurationLimit</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a028172ee562603ce6023a35d4dc99e5c">cfgLimit</a> ()</td></tr>
-<tr class="memdesc:a028172ee562603ce6023a35d4dc99e5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Direct access to the live <a class="el" href="classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits.">ConfigurationLimit</a>.  <a href="classtorq_1_1Controller.html#a028172ee562603ce6023a35d4dc99e5c">More...</a><br /></td></tr>
-<tr class="separator:a028172ee562603ce6023a35d4dc99e5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Runtime IK parameter tuning</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>These apply immediately to the live task/limit objects (if initialised) and update the stored <a class="el" href="structtorq_1_1IKConfig.html" title="Centralised store for all tunable IK parameters with sensible defaults.">IKConfig</a>. </p>
 </div></td></tr>
@@ -177,14 +162,11 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3be9c2570c694d61c9d52d6e64a6dbd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Manages control modes, IK tasks/limits, and the QP solver. </p>
-<p>The <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a> owns the <a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">InverseKinematics</a> solver and all task/limit instances. It switches between IDLE, JOINT_SPACE, and TASK_SPACE modes. In TASK_SPACE mode it builds and solves the QP every tick via <a class="el" href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec" title="Execute one control tick.">update()</a>.</p>
-<<<<<<< Updated upstream
-=======
-<p>Control loop frequency: <a class="el" href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec" title="Execute one control tick.">update()</a> is invoked at the rate of the caller (typically <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">RobotSystem::update()</a>). For stable IK, call at 200–1000 Hz. The kinematic state is integrated internally; no physics feedback is fed into the IK.</p>
->>>>>>> Stashed changes
-<p>IK tasks and limits are lazily initialised on the first call to <a class="el" href="classtorq_1_1Controller.html#a29033b11c98cf307313dc7c7e375a6be" title="Set a Cartesian target and switch to TASK_SPACE mode.">setTaskSpaceTarget()</a>. Parameters from <a class="el" href="structtorq_1_1IKConfig.html" title="Centralised store for all tunable IK parameters with sensible defaults.">IKConfig</a> are applied both at construction time and via the runtime setters (which update the live task/limit objects immediately).</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a> (user-facing wrapper), <a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">InverseKinematics</a>, <a class="el" href="classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective.">Task</a>, <a class="el" href="classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints).">Limit</a> </dd></dl>
+<div class="textblock"><p>Internal component: control modes, built-in IK tasks/limits, QP solver. </p>
+<p><b>Ownership:</b> <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a> owns the <a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">InverseKinematics</a> solver and all <em>built-in</em> tasks and limits (<a class="el" href="classtorq_1_1FrameTask.html" title="Regulate the SE(3) pose of a robot frame to a desired target.">FrameTask</a>, <a class="el" href="classtorq_1_1PostureTask.html" title="Regulate joint angles toward a desired posture.">PostureTask</a>, <a class="el" href="classtorq_1_1DampingTask.html" title="Minimise joint velocities — viscous damping.">DampingTask</a>, <a class="el" href="classtorq_1_1VelocityLimit.html" title="Joint velocity limits.">VelocityLimit</a>, <a class="el" href="classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits.">ConfigurationLimit</a>, optional <a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">FloatingBaseVelocityLimit</a> and <a class="el" href="classtorq_1_1AccelerationLimit.html" title="Joint acceleration limits with braking-distance bounds.">AccelerationLimit</a>). It does <b>not</b> own user-added tasks/limits/barriers; those are owned by <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> and passed into <a class="el" href="classtorq_1_1Controller.html#a4effba43bcd315720ec3da23b6c0cfd8" title="Execute one control tick.">update()</a> each tick.</p>
+<p><b>Separation of concern:</b> Library users interact only with <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a>. <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a> is not part of the public API; <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> forwards setTaskSpaceTarget, setJointSpaceTarget, IK tuning, and <a class="el" href="classtorq_1_1Controller.html#a4effba43bcd315720ec3da23b6c0cfd8" title="Execute one control tick.">update()</a>.</p>
+<p>Control loop: <a class="el" href="classtorq_1_1Controller.html#a4effba43bcd315720ec3da23b6c0cfd8" title="Execute one control tick.">update()</a> is invoked by <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> at the control rate (200–1000 Hz). In TASK_SPACE mode it builds the QP from built-in plus user-provided task/limit/barrier lists and solves via OSQP.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a>, <a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">InverseKinematics</a>, <a class="el" href="classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective.">Task</a>, <a class="el" href="classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints).">Limit</a>, <a class="el" href="classtorq_1_1Barrier.html" title="Abstract base class for Control Barrier Functions (CBFs).">Barrier</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a3a45d9b2cb3fc3af7ffffb9147b64bb2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3a45d9b2cb3fc3af7ffffb9147b64bb2">&#9670;&nbsp;</a></span>Controller()</h2>
@@ -212,11 +194,11 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Construct a <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>. </p>
+<p>Construct a <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">kinematics</td><td>Non-owning pointer to the <a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">KinematicsEngine</a> (must outlive the <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>). </td></tr>
-    <tr><td class="paramname">hardware</td><td>Non-owning pointer to the <a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a> (must outlive the <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>). </td></tr>
+    <tr><td class="paramname">kinematics</td><td>Non-owning pointer to the <a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">KinematicsEngine</a> (must outlive the <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>). </td></tr>
+    <tr><td class="paramname">hardware</td><td>Non-owning pointer to the <a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a> (must outlive the <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>). </td></tr>
   </table>
   </dd>
 </dl>
@@ -421,8 +403,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a512af835cb935c7d9f28518bf6ecfcec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a512af835cb935c7d9f28518bf6ecfcec">&#9670;&nbsp;</a></span>update()</h2>
+<a id="a4effba43bcd315720ec3da23b6c0cfd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4effba43bcd315720ec3da23b6c0cfd8">&#9670;&nbsp;</a></span>update()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -430,14 +412,39 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void torq::Controller::update </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="classtorq_1_1Task.html">Task</a> * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>user_tasks</em> = <code>{}</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="classtorq_1_1Limit.html">Limit</a> * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>user_limits</em> = <code>{}</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="classtorq_1_1Barrier.html">Barrier</a> * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>user_barriers</em> = <code>{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Execute one control tick. </p>
-<p>Runs at the rate of the caller; typical frequency 200–1000 Hz for the IK layer. In TASK_SPACE mode: builds a <a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a> from the internal kinematic state, solves the QP, integrates the result, and writes the new joint positions to hardware. In JOINT_SPACE mode: writes target_joints_ directly. In IDLE mode: does nothing. </p>
+<p>Built-in tasks/limits are always used; user_tasks, user_limits, and user_barriers are appended for this solve only (owned by <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a>).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">user_tasks</td><td>User-added tasks (non-owning; may be empty). </td></tr>
+    <tr><td class="paramname">user_limits</td><td>User-added limits (non-owning; may be empty). </td></tr>
+    <tr><td class="paramname">user_barriers</td><td>User-added barriers (non-owning; may be empty). </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -672,141 +679,6 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>True if the IK subsystem has been initialised. </p>
-
-</div>
-</div>
-<a id="a950bf41a0f3dfc62f7fba6ca1a61fae6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a950bf41a0f3dfc62f7fba6ca1a61fae6">&#9670;&nbsp;</a></span>frameTask()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classtorq_1_1FrameTask.html">FrameTask</a>* torq::Controller::frameTask </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Direct access to the live <a class="el" href="classtorq_1_1FrameTask.html" title="Regulate the SE(3) pose of a robot frame to a desired target.">FrameTask</a> (nullptr before first IK init). </p>
-
-</div>
-</div>
-<a id="aefc3c31f3a6b02043958f8a797c28b96"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aefc3c31f3a6b02043958f8a797c28b96">&#9670;&nbsp;</a></span>postureTask()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classtorq_1_1PostureTask.html">PostureTask</a>* torq::Controller::postureTask </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Direct access to the live <a class="el" href="classtorq_1_1PostureTask.html" title="Regulate joint angles toward a desired posture.">PostureTask</a>. </p>
-
-</div>
-</div>
-<a id="a025993afa5c4549dbe1316b529348f94"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a025993afa5c4549dbe1316b529348f94">&#9670;&nbsp;</a></span>dampingTask()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classtorq_1_1DampingTask.html">DampingTask</a>* torq::Controller::dampingTask </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Direct access to the live <a class="el" href="classtorq_1_1DampingTask.html" title="Minimise joint velocities — viscous damping.">DampingTask</a>. </p>
-
-</div>
-</div>
-<a id="af3d1f1bba83f9914d14858a4e363ba06"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3d1f1bba83f9914d14858a4e363ba06">&#9670;&nbsp;</a></span>velLimit()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classtorq_1_1VelocityLimit.html">VelocityLimit</a>* torq::Controller::velLimit </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Direct access to the live <a class="el" href="classtorq_1_1VelocityLimit.html" title="Joint velocity limits.">VelocityLimit</a>. </p>
-
-</div>
-</div>
-<a id="a028172ee562603ce6023a35d4dc99e5c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a028172ee562603ce6023a35d4dc99e5c">&#9670;&nbsp;</a></span>cfgLimit()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classtorq_1_1ConfigurationLimit.html">ConfigurationLimit</a>* torq::Controller::cfgLimit </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Direct access to the live <a class="el" href="classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits.">ConfigurationLimit</a>. </p>
 
 </div>
 </div>

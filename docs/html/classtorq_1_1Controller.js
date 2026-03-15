@@ -8,7 +8,7 @@ var classtorq_1_1Controller =
     [ "setGripperConfig", "classtorq_1_1Controller.html#a780659bd5da8c16e5ac82e882642c697", null ],
     [ "isGripperOpen", "classtorq_1_1Controller.html#af458fed34e7ca353b5e13df4a1ec00c1", null ],
     [ "toggleGripper", "classtorq_1_1Controller.html#a15f513f4712133008ec1b79302fcd2f4", null ],
-    [ "update", "classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec", null ],
+    [ "update", "classtorq_1_1Controller.html#a4effba43bcd315720ec3da23b6c0cfd8", null ],
     [ "setFrameTaskPositionCost", "classtorq_1_1Controller.html#a528cff2b03e6ea7a8cb40fde999d0291", null ],
     [ "setFrameTaskOrientationCost", "classtorq_1_1Controller.html#a7be14703fdadb26ffa0fddd1e15f2f20", null ],
     [ "setFrameTaskGain", "classtorq_1_1Controller.html#aabf003cbc3d42f865da11570c7a68bf8", null ],
@@ -20,10 +20,5 @@ var classtorq_1_1Controller =
     [ "setSolverDamping", "classtorq_1_1Controller.html#acfa8251f154d91ca6a0064c17358587c", null ],
     [ "setConfigLimitGain", "classtorq_1_1Controller.html#a3be9c2570c694d61c9d52d6e64a6dbd5", null ],
     [ "ikConfig", "classtorq_1_1Controller.html#ae86f659528a26791c5e5528f89e6a5e0", null ],
-    [ "ikReady", "classtorq_1_1Controller.html#a26f8f9d1f70a5e31acdfdfcf561781ca", null ],
-    [ "frameTask", "classtorq_1_1Controller.html#a950bf41a0f3dfc62f7fba6ca1a61fae6", null ],
-    [ "postureTask", "classtorq_1_1Controller.html#aefc3c31f3a6b02043958f8a797c28b96", null ],
-    [ "dampingTask", "classtorq_1_1Controller.html#a025993afa5c4549dbe1316b529348f94", null ],
-    [ "velLimit", "classtorq_1_1Controller.html#af3d1f1bba83f9914d14858a4e363ba06", null ],
-    [ "cfgLimit", "classtorq_1_1Controller.html#a028172ee562603ce6023a35d4dc99e5c", null ]
+    [ "ikReady", "classtorq_1_1Controller.html#a26f8f9d1f70a5e31acdfdfcf561781ca", null ]
 ];

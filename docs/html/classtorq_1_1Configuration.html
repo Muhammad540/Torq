@@ -105,7 +105,7 @@ $(document).ready(function(){initNavTree('classtorq_1_1Configuration.html',''); 
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a2b42c089f7b3fe05ea9fbd6ba590cd06"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#a2b42c089f7b3fe05ea9fbd6ba590cd06">Configuration</a> (const pinocchio::Model &amp;<a class="el" href="classtorq_1_1Configuration.html#aded05c941359c6858f810b4a48ecc1a3">model</a>, const pinocchio::Data &amp;data, const Eigen::VectorXd &amp;<a class="el" href="classtorq_1_1Configuration.html#ac4fd95c91caae08627d4c2646933b80c">q</a>, bool forward_kinematics=true, std::shared_ptr&lt; pinocchio::GeometryModel &gt; collision_model=nullptr, std::shared_ptr&lt; pinocchio::GeometryData &gt; collision_data=nullptr)</td></tr>
+<tr class="memitem:a2b42c089f7b3fe05ea9fbd6ba590cd06"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#a2b42c089f7b3fe05ea9fbd6ba590cd06">Configuration</a> (const pinocchio::Model &amp;<a class="el" href="classtorq_1_1Configuration.html#aded05c941359c6858f810b4a48ecc1a3">model</a>, const pinocchio::Data &amp;<a class="el" href="classtorq_1_1Configuration.html#aa7b04d7e3d3eaedb78b0ac471ca296ee">data</a>, const Eigen::VectorXd &amp;<a class="el" href="classtorq_1_1Configuration.html#ac4fd95c91caae08627d4c2646933b80c">q</a>, bool forward_kinematics=true, std::shared_ptr&lt; pinocchio::GeometryModel &gt; collision_model=nullptr, std::shared_ptr&lt; pinocchio::GeometryData &gt; collision_data=nullptr)</td></tr>
 <tr class="memdesc:a2b42c089f7b3fe05ea9fbd6ba590cd06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a <a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a>.  <a href="classtorq_1_1Configuration.html#a2b42c089f7b3fe05ea9fbd6ba590cd06">More...</a><br /></td></tr>
 <tr class="separator:a2b42c089f7b3fe05ea9fbd6ba590cd06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87f9c4ba603c1883039e948ae9d90b0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#a87f9c4ba603c1883039e948ae9d90b0f">~Configuration</a> ()=default</td></tr>
@@ -127,6 +127,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0e55fffe403c56b36784219ae3130dea"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#a0e55fffe403c56b36784219ae3130dea">getFrameJacobian</a> (const std::string &amp;frame) const</td></tr>
 <tr class="memdesc:a0e55fffe403c56b36784219ae3130dea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frame Jacobian in the LOCAL reference frame.  <a href="classtorq_1_1Configuration.html#a0e55fffe403c56b36784219ae3130dea">More...</a><br /></td></tr>
 <tr class="separator:a0e55fffe403c56b36784219ae3130dea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cba53da27afe032237e6733ac766d1c"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#a6cba53da27afe032237e6733ac766d1c">getFrameJacobianWorldAligned</a> (const std::string &amp;frame) const</td></tr>
+<tr class="memdesc:a6cba53da27afe032237e6733ac766d1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frame Jacobian in the LOCAL_WORLD_ALIGNED reference frame.  <a href="classtorq_1_1Configuration.html#a6cba53da27afe032237e6733ac766d1c">More...</a><br /></td></tr>
+<tr class="separator:a6cba53da27afe032237e6733ac766d1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab97d1cb52b99f773a8726a9c4161c414"><td class="memItemLeft" align="right" valign="top">pinocchio::SE3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#ab97d1cb52b99f773a8726a9c4161c414">getTransformFrameToWorld</a> (const std::string &amp;frame) const</td></tr>
 <tr class="memdesc:ab97d1cb52b99f773a8726a9c4161c414"><td class="mdescLeft">&#160;</td><td class="mdescRight">SE(3) transform of a frame in world coordinates.  <a href="classtorq_1_1Configuration.html#ab97d1cb52b99f773a8726a9c4161c414">More...</a><br /></td></tr>
 <tr class="separator:ab97d1cb52b99f773a8726a9c4161c414"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -151,6 +154,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aded05c941359c6858f810b4a48ecc1a3"><td class="memItemLeft" align="right" valign="top">const pinocchio::Model &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#aded05c941359c6858f810b4a48ecc1a3">model</a> () const</td></tr>
 <tr class="memdesc:aded05c941359c6858f810b4a48ecc1a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to the underlying Pinocchio model.  <a href="classtorq_1_1Configuration.html#aded05c941359c6858f810b4a48ecc1a3">More...</a><br /></td></tr>
 <tr class="separator:aded05c941359c6858f810b4a48ecc1a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7b04d7e3d3eaedb78b0ac471ca296ee"><td class="memItemLeft" align="right" valign="top">const pinocchio::Data &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#aa7b04d7e3d3eaedb78b0ac471ca296ee">data</a> () const</td></tr>
+<tr class="memdesc:aa7b04d7e3d3eaedb78b0ac471ca296ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to the underlying Pinocchio data.  <a href="classtorq_1_1Configuration.html#aa7b04d7e3d3eaedb78b0ac471ca296ee">More...</a><br /></td></tr>
+<tr class="separator:aa7b04d7e3d3eaedb78b0ac471ca296ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad17bd239f0c68cb9f21427eac5734793"><td class="memItemLeft" align="right" valign="top">pinocchio::Data &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#ad17bd239f0c68cb9f21427eac5734793">data</a> ()</td></tr>
+<tr class="memdesc:ad17bd239f0c68cb9f21427eac5734793"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutable access to the underlying Pinocchio data.  <a href="classtorq_1_1Configuration.html#ad17bd239f0c68cb9f21427eac5734793">More...</a><br /></td></tr>
+<tr class="separator:ad17bd239f0c68cb9f21427eac5734793"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29a89a95b8c7b31546fed65bfa57db2c"><td class="memItemLeft" align="right" valign="top">const std::shared_ptr&lt; pinocchio::GeometryModel &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#a29a89a95b8c7b31546fed65bfa57db2c">collisionModel</a> () const</td></tr>
+<tr class="memdesc:a29a89a95b8c7b31546fed65bfa57db2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collision geometry model (nullptr if not loaded).  <a href="classtorq_1_1Configuration.html#a29a89a95b8c7b31546fed65bfa57db2c">More...</a><br /></td></tr>
+<tr class="separator:a29a89a95b8c7b31546fed65bfa57db2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2db8ec6c537b5710016abba2c80e7005"><td class="memItemLeft" align="right" valign="top">const std::shared_ptr&lt; pinocchio::GeometryData &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#a2db8ec6c537b5710016abba2c80e7005">collisionData</a> () const</td></tr>
+<tr class="memdesc:a2db8ec6c537b5710016abba2c80e7005"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collision geometry data (nullptr if not loaded).  <a href="classtorq_1_1Configuration.html#a2db8ec6c537b5710016abba2c80e7005">More...</a><br /></td></tr>
+<tr class="separator:a2db8ec6c537b5710016abba2c80e7005"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af23583755f4111e6405d479dcdd82c6f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#af23583755f4111e6405d479dcdd82c6f">hasCollisionModel</a> () const</td></tr>
+<tr class="memdesc:af23583755f4111e6405d479dcdd82c6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if a collision model is loaded and ready.  <a href="classtorq_1_1Configuration.html#af23583755f4111e6405d479dcdd82c6f">More...</a><br /></td></tr>
+<tr class="separator:af23583755f4111e6405d479dcdd82c6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81bb0ed6c3e78dfb4fb33185fe4ecc9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacetorq.html#ac0aa30996eb2427df3af88aea69373c0">ErrorCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Configuration.html#a81bb0ed6c3e78dfb4fb33185fe4ecc9f">geterror</a> () const</td></tr>
 <tr class="memdesc:a81bb0ed6c3e78dfb4fb33185fe4ecc9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last error code (for non-exception error reporting).  <a href="classtorq_1_1Configuration.html#a81bb0ed6c3e78dfb4fb33185fe4ecc9f">More...</a><br /></td></tr>
 <tr class="separator:a81bb0ed6c3e78dfb4fb33185fe4ecc9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -449,6 +467,33 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a6cba53da27afe032237e6733ac766d1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cba53da27afe032237e6733ac766d1c">&#9670;&nbsp;</a></span>getFrameJacobianWorldAligned()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd torq::Configuration::getFrameJacobianWorldAligned </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>frame</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Frame Jacobian in the LOCAL_WORLD_ALIGNED reference frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">frame</td><td>Frame name in the Pinocchio model. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Jacobian \(J \in \mathbb{R}^{6 \times n_v}\) with columns expressed at the frame origin but aligned with world axes. </dd></dl>
+
+</div>
+</div>
 <a id="ab97d1cb52b99f773a8726a9c4161c414"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab97d1cb52b99f773a8726a9c4161c414">&#9670;&nbsp;</a></span>getTransformFrameToWorld()</h2>
 
@@ -695,6 +740,141 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Read-only access to the underlying Pinocchio model. </p>
+
+</div>
+</div>
+<a id="aa7b04d7e3d3eaedb78b0ac471ca296ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7b04d7e3d3eaedb78b0ac471ca296ee">&#9670;&nbsp;</a></span>data() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const pinocchio::Data&amp; torq::Configuration::data </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read-only access to the underlying Pinocchio data. </p>
+
+</div>
+</div>
+<a id="ad17bd239f0c68cb9f21427eac5734793"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad17bd239f0c68cb9f21427eac5734793">&#9670;&nbsp;</a></span>data() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">pinocchio::Data&amp; torq::Configuration::data </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mutable access to the underlying Pinocchio data. </p>
+
+</div>
+</div>
+<a id="a29a89a95b8c7b31546fed65bfa57db2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29a89a95b8c7b31546fed65bfa57db2c">&#9670;&nbsp;</a></span>collisionModel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::shared_ptr&lt;pinocchio::GeometryModel&gt;&amp; torq::Configuration::collisionModel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Collision geometry model (nullptr if not loaded). </p>
+
+</div>
+</div>
+<a id="a2db8ec6c537b5710016abba2c80e7005"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2db8ec6c537b5710016abba2c80e7005">&#9670;&nbsp;</a></span>collisionData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::shared_ptr&lt;pinocchio::GeometryData&gt;&amp; torq::Configuration::collisionData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Collision geometry data (nullptr if not loaded). </p>
+
+</div>
+</div>
+<a id="af23583755f4111e6405d479dcdd82c6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af23583755f4111e6405d479dcdd82c6f">&#9670;&nbsp;</a></span>hasCollisionModel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool torq::Configuration::hasCollisionModel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>True if a collision model is loaded and ready. </p>
 
 </div>
 </div>

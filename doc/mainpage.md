@@ -50,6 +50,9 @@ int main() {
 
 ## Key design choices
 
+- @b Single entry point @b — Library users interact only with `torq::RobotSystem`.
+  The Controller and IK solver are internal; all control, task/limit/barrier
+  composition, and tuning go through RobotSystem with a clear ownership model.
 - @b Library + workspace @b — `libtorq` is a shared library; robot-specific apps
   in `workspace/` link against it.
 - @b HAL (Hardware Abstraction Layer) @b — control code targets

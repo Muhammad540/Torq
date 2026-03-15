@@ -12,6 +12,7 @@
 #include <Eigen/Dense>
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/multibody/data.hpp>
+#include <pinocchio/multibody/geometry.hpp>
 #include <pinocchio/spatial/se3.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
@@ -77,6 +78,14 @@ namespace torq {
            Eigen::MatrixXd getFrameJacobian(const std::string& frame) const;
 
            /**
+            * @brief Frame Jacobian in the LOCAL_WORLD_ALIGNED reference frame.
+            * @param frame  Frame name in the Pinocchio model.
+            * @return Jacobian \f$J \in \mathbb{R}^{6 \times n_v}\f$ with columns
+            *         expressed at the frame origin but aligned with world axes.
+            */
+           Eigen::MatrixXd getFrameJacobianWorldAligned(const std::string& frame) const;
+
+           /**
             * @brief SE(3) transform of a frame in world coordinates.
             * @param frame  Frame name.
             * @return \f$T_{\text{frame}}^{\text{world}} \in SE(3)\f$.
@@ -121,6 +130,21 @@ namespace torq {
            /** @brief Read-only access to the underlying Pinocchio model. */
            const pinocchio::Model& model() const { return model_; }
 
+           /** @brief Read-only access to the underlying Pinocchio data. */
+           const pinocchio::Data& data() const { return data_; }
+
+           /** @brief Mutable access to the underlying Pinocchio data. */
+           pinocchio::Data& data() { return data_; }
+
+           /** @brief Collision geometry model (nullptr if not loaded). */
+           const std::shared_ptr<pinocchio::GeometryModel>& collisionModel() const { return collision_model_; }
+
+           /** @brief Collision geometry data (nullptr if not loaded). */
+           const std::shared_ptr<pinocchio::GeometryData>& collisionData() const { return collision_data_; }
+
+           /** @brief True if a collision model is loaded and ready. */
+           bool hasCollisionModel() const { return collision_model_ != nullptr; }
+
            /** @brief Last error code (for non-exception error reporting). */
            ErrorCode geterror() const { return last_error_; }
 
@@ -162,8 +186,25 @@ namespace torq {
              */
             bool initialize(const std::string& model_path, const std::vector<std::string>& locked_joint_names = {});
 
+            /**
+             * @brief Load collision geometry from a URDF file.
+             *
+             * Call after initialize().  The geometry model is used by
+             * SelfCollisionBarrier.  Optionally load an SRDF to filter
+             * collision pairs.
+             *
+             * @param urdf_path  Path to the URDF (same as or different from model_path).
+             * @param srdf_path  Optional SRDF file for collision pair filtering. Empty = use all pairs.
+             * @return True on success.
+             */
+            bool loadCollisionModel(const std::string& urdf_path,
+                                    const std::string& srdf_path = "");
+
             /** @brief True if a model has been loaded successfully. */
             bool isReady() const { return model_ != nullptr; }
+
+            /** @brief True if collision geometry is loaded. */
+            bool hasCollisionModel() const { return collision_model_ != nullptr; }
 
             /**
              * @brief Create a Configuration at the given joint angles.
@@ -198,6 +239,7 @@ namespace torq {
             mutable Logger log_;
             std::unique_ptr<pinocchio::Model> model_ = nullptr;
             std::unique_ptr<pinocchio::Model> full_model_ = nullptr;
+            std::shared_ptr<pinocchio::GeometryModel> collision_model_ = nullptr;
             std::vector<pinocchio::JointIndex> locked_joint_ids_;
             std::vector<int> q_idx_map_;
     };

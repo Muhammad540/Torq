@@ -13,6 +13,7 @@ namespace torq{
   class Configuration;
   class Task;
   class Limit;
+  class Barrier;
 
   /**
    * @brief Assembled QP data ready to be passed to the solver.
@@ -54,23 +55,25 @@ namespace torq{
     ~InverseKinematics() = default;
 
     /**
-     * @brief Build the QP from the current configuration and active tasks/limits.
+     * @brief Build the QP from the current configuration and active tasks/limits/barriers.
      *
-     * Sums task Hessians and gradients, adds Tikhonov damping, and stacks
-     * limit inequality rows.
+     * Sums task Hessians and gradients, adds Tikhonov damping, barrier
+     * objective contributions, and stacks limit + barrier inequality rows.
      *
      * @param config   Current robot configuration (FK computed).
      * @param tasks    Active tasks contributing to the objective.
      * @param dt       Integration timestep [s].
      * @param damping  Tikhonov (solver) damping \f$\lambda\f$ added to the Hessian diagonal.
      * @param limits   Active limits contributing inequality constraints.
+     * @param barriers Active barriers contributing both objective and inequality constraints.
      * @return The assembled QPProblem.
      */
     QPProblem buildIK(const Configuration& config,
 		      const std::vector<Task*>& tasks,
 		      double dt,
 		      double damping = 1e-12,
-		      const std::vector<Limit*>& limits = {});
+		      const std::vector<Limit*>& limits = {},
+		      const std::vector<Barrier*>& barriers = {});
 
     /**
      * @brief Build and solve the IK, returning the joint velocity.
@@ -83,6 +86,7 @@ namespace torq{
      * @param dt       Integration timestep [s].
      * @param damping  Tikhonov damping \f$\lambda\f$.
      * @param limits   Active limits.
+     * @param barriers Active barriers.
      * @return Joint velocity \f$v \in \mathbb{R}^{n_v}\f$, or zero on failure.
      */
     Eigen::VectorXd solve(
@@ -90,7 +94,8 @@ namespace torq{
 			  const std::vector<Task*>& tasks,
 			  double dt,
 			  double damping = 1e-12,
-			  const std::vector<Limit*>& limits = {});
+			  const std::vector<Limit*>& limits = {},
+			  const std::vector<Barrier*>& barriers = {});
     
     
   private:

@@ -2,8 +2,8 @@
 #include "torq/PinocchioModel.hpp"
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
-// Set to true to print IK diagnostics (dq norm, expected body twist, dz).
 static constexpr bool IK_DIAGNOSTICS = false;
 
 namespace torq{
@@ -25,10 +25,25 @@ namespace torq{
       posture_task_ = std::make_unique<PostureTask>(ik_config_.posture_cost, ik_config_.posture_lm_damping, ik_config_.posture_gain);
       damping_task_ = std::make_unique<DampingTask>(ik_config_.damping_cost);
 
+      // Auto-detect floating base and create limit if configured
+      if (ik_config_.has_floating_base && model.existJointName("root_joint")) {
+          try {
+              floating_base_limit_ = std::make_unique<FloatingBaseVelocityLimit>(
+                  model, "",
+                  ik_config_.max_base_linear_vel,
+                  ik_config_.max_base_angular_vel);
+              log_.info() << "[Controller] FloatingBaseVelocityLimit created";
+          } catch (const std::exception& e) {
+              log_.warning() << "[Controller] Could not create FloatingBaseVelocityLimit: " << e.what();
+          }
+      }
+
       Eigen::VectorXd q0_full = hardware_->getJointPositions();
       Eigen::VectorXd q0 = kinematics_->fullToReducedQ(q0_full);
       auto config = kinematics_->makeConfiguration(q0);
       posture_task_->setTargetFromConfiguration(config);
+
+      prev_velocity_ = Eigen::VectorXd::Zero(model.nv);
 
       ik_ready_ = true;
       log_.info() << "[Controller] IK tasks and limits initialized";
@@ -85,7 +100,9 @@ namespace torq{
       }
   }
 
-  void Controller::update(){
+  void Controller::update(const std::vector<Task*>& user_tasks,
+                          const std::vector<Limit*>& user_limits,
+                          const std::vector<Barrier*>& user_barriers) {
     if (!hardware_ || !kinematics_ || !kinematics_->isReady()) {
         log_.error() << "[Controller] Hardware or kinematics not ready";
         return;
@@ -104,17 +121,34 @@ namespace torq{
 
         auto config = kinematics_->makeConfiguration(ik_configuration_);
 
+        // Assemble built-in + user tasks
         std::vector<Task*> tasks = {
             frame_task_.get(),
             posture_task_.get(),
             damping_task_.get()
         };
+        tasks.insert(tasks.end(), user_tasks.begin(), user_tasks.end());
+
+        // Assemble built-in + user limits
         std::vector<Limit*> limits = {
             vel_limit_.get(),
             cfg_limit_.get()
         };
+        if (floating_base_limit_)
+            limits.push_back(floating_base_limit_.get());
+        if (accel_limit_)
+            limits.push_back(accel_limit_.get());
+        limits.insert(limits.end(), user_limits.begin(), user_limits.end());
 
-        Eigen::VectorXd velocity = ik_solver_.solve(config, tasks, dt, ik_config_.solver_damping, limits);
+        // Barriers (user-provided only; no built-in barriers)
+        const std::vector<Barrier*>& barriers = user_barriers;
+
+        // Feed previous velocity to acceleration limit
+        if (accel_limit_)
+            accel_limit_->setLastIntegration(prev_velocity_, dt);
+
+        Eigen::VectorXd velocity = ik_solver_.solve(config, tasks, dt, ik_config_.solver_damping, limits, barriers);
+        prev_velocity_ = velocity;
 
         if (IK_DIAGNOSTICS) {
             const std::string& frame_name = frame_task_->frame();
@@ -205,4 +239,5 @@ namespace torq{
     ik_config_.config_limit_gain = gain;
     if (cfg_limit_) cfg_limit_->setConfigLimitGain(gain);
   }
+
 }

@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['positioncost_330',['positionCost',['../classtorq_1_1FrameTask.html#ace2e0cc0c77d194343ab59a40f7e6093',1,'torq::FrameTask']]],
-  ['posturetask_331',['PostureTask',['../classtorq_1_1PostureTask.html#afd6add7cf08fcedcd6e6e0cdd20838cc',1,'torq::PostureTask']]],
-  ['posturetask_332',['postureTask',['../classtorq_1_1Controller.html#aefc3c31f3a6b02043958f8a797c28b96',1,'torq::Controller']]],
-  ['printframes_333',['printFrames',['../classtorq_1_1KinematicsEngine.html#a5f3aab605189618c25e73f861a72c82c',1,'torq::KinematicsEngine']]]
+  ['operator_3c_3c_391',['operator&lt;&lt;',['../classLogger_1_1LogStream.html#afb1b2ebdf3a06a6a7ac55aad3c908a00',1,'Logger::LogStream']]],
+  ['operator_3d_392',['operator=',['../classtorq_1_1Configuration.html#acaff9b2c5925206ca80ba1d5b3f102cd',1,'torq::Configuration::operator=(const Configuration &amp;)=delete'],['../classtorq_1_1Configuration.html#a66b27e72212a9d92be5038044684b244',1,'torq::Configuration::operator=(Configuration &amp;&amp;)=default']]],
+  ['orientationcost_393',['orientationCost',['../classtorq_1_1FrameTask.html#a6d65b5139fe3196d1fa11a1a77dd962e',1,'torq::FrameTask']]],
+  ['overridejointpositions_394',['overrideJointPositions',['../classtorq_1_1MujocoDriver.html#a6f26ba8f18efab7996598642e193d971',1,'torq::MujocoDriver']]],
+  ['overridejointvelocities_395',['overrideJointVelocities',['../classtorq_1_1MujocoDriver.html#a78642735d375fa3214bb198ca4b5653d',1,'torq::MujocoDriver']]]
 ];

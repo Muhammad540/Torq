@@ -112,9 +112,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a49c73359384bb39a38ffa575c7b0b6e9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1KinematicsEngine.html#a49c73359384bb39a38ffa575c7b0b6e9">initialize</a> (const std::string &amp;model_path, const std::vector&lt; std::string &gt; &amp;locked_joint_names={})</td></tr>
 <tr class="memdesc:a49c73359384bb39a38ffa575c7b0b6e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a model and optionally lock named joints.  <a href="classtorq_1_1KinematicsEngine.html#a49c73359384bb39a38ffa575c7b0b6e9">More...</a><br /></td></tr>
 <tr class="separator:a49c73359384bb39a38ffa575c7b0b6e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f44bda49dbacd8c33e597d862d8ef43"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1KinematicsEngine.html#a6f44bda49dbacd8c33e597d862d8ef43">loadCollisionModel</a> (const std::string &amp;urdf_path, const std::string &amp;srdf_path=&quot;&quot;)</td></tr>
+<tr class="memdesc:a6f44bda49dbacd8c33e597d862d8ef43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load collision geometry from a URDF file.  <a href="classtorq_1_1KinematicsEngine.html#a6f44bda49dbacd8c33e597d862d8ef43">More...</a><br /></td></tr>
+<tr class="separator:a6f44bda49dbacd8c33e597d862d8ef43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f269fb611007ede76e78eda1a8d004f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1KinematicsEngine.html#a4f269fb611007ede76e78eda1a8d004f">isReady</a> () const</td></tr>
 <tr class="memdesc:a4f269fb611007ede76e78eda1a8d004f"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if a model has been loaded successfully.  <a href="classtorq_1_1KinematicsEngine.html#a4f269fb611007ede76e78eda1a8d004f">More...</a><br /></td></tr>
 <tr class="separator:a4f269fb611007ede76e78eda1a8d004f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa13b6dbc2c54332360015c01c4f490e9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1KinematicsEngine.html#aa13b6dbc2c54332360015c01c4f490e9">hasCollisionModel</a> () const</td></tr>
+<tr class="memdesc:aa13b6dbc2c54332360015c01c4f490e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if collision geometry is loaded.  <a href="classtorq_1_1KinematicsEngine.html#aa13b6dbc2c54332360015c01c4f490e9">More...</a><br /></td></tr>
+<tr class="separator:aa13b6dbc2c54332360015c01c4f490e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a039a0591cc70ea39dc9d18140f58c338"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtorq_1_1Configuration.html">Configuration</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1KinematicsEngine.html#a039a0591cc70ea39dc9d18140f58c338">makeConfiguration</a> (const Eigen::VectorXd &amp;q) const</td></tr>
 <tr class="memdesc:a039a0591cc70ea39dc9d18140f58c338"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a <a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a> at the given joint angles.  <a href="classtorq_1_1KinematicsEngine.html#a039a0591cc70ea39dc9d18140f58c338">More...</a><br /></td></tr>
 <tr class="separator:a039a0591cc70ea39dc9d18140f58c338"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -231,6 +237,45 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a6f44bda49dbacd8c33e597d862d8ef43"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f44bda49dbacd8c33e597d862d8ef43">&#9670;&nbsp;</a></span>loadCollisionModel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool torq::KinematicsEngine::loadCollisionModel </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>urdf_path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>srdf_path</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Load collision geometry from a URDF file. </p>
+<p>Call after <a class="el" href="classtorq_1_1KinematicsEngine.html#a49c73359384bb39a38ffa575c7b0b6e9" title="Load a model and optionally lock named joints.">initialize()</a>. The geometry model is used by <a class="el" href="classtorq_1_1SelfCollisionBarrier.html" title="Self-collision avoidance barrier using Pinocchio geometry distances.">SelfCollisionBarrier</a>. Optionally load an SRDF to filter collision pairs.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">urdf_path</td><td>Path to the URDF (same as or different from model_path). </td></tr>
+    <tr><td class="paramname">srdf_path</td><td>Optional SRDF file for collision pair filtering. Empty = use all pairs. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True on success. </dd></dl>
+
+</div>
+</div>
 <a id="a4f269fb611007ede76e78eda1a8d004f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4f269fb611007ede76e78eda1a8d004f">&#9670;&nbsp;</a></span>isReady()</h2>
 
@@ -255,6 +300,33 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>True if a model has been loaded successfully. </p>
+
+</div>
+</div>
+<a id="aa13b6dbc2c54332360015c01c4f490e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa13b6dbc2c54332360015c01c4f490e9">&#9670;&nbsp;</a></span>hasCollisionModel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool torq::KinematicsEngine::hasCollisionModel </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>True if collision geometry is loaded. </p>
 
 </div>
 </div>

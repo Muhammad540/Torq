@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['red_410',['RED',['../namespaceColor.html#a29bfda93a0cf8b1ec0fb44cf989d7eb0',1,'Color']]],
-  ['reset_411',['RESET',['../namespaceColor.html#a5f17e30618539f55680290c9be31967d',1,'Color']]],
-  ['robot_5fmodel_5fpath_412',['robot_model_path',['../structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd',1,'torq::RobotConfig']]]
+  ['max_5fbase_5fangular_5fvel_486',['max_base_angular_vel',['../structtorq_1_1IKConfig.html#ab87b858f3bf664e0ecef9004898afbee',1,'torq::IKConfig']]],
+  ['max_5fbase_5flinear_5fvel_487',['max_base_linear_vel',['../structtorq_1_1IKConfig.html#a0d34ad6858bb350e00b0836d384b8154',1,'torq::IKConfig']]],
+  ['max_5ftracking_5ferror_488',['max_tracking_error',['../structtorq_1_1RobotConfig.html#a635a9f31ebfc286b2eb3bb79d5eb29cc',1,'torq::RobotConfig']]]
 ];

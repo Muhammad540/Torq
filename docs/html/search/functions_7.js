@@ -1,13 +1,6 @@
 var searchData=
 [
-  ['ikconfig_299',['ikConfig',['../classtorq_1_1Controller.html#ae86f659528a26791c5e5528f89e6a5e0',1,'torq::Controller::ikConfig()'],['../classtorq_1_1RobotSystem.html#a3915b74cb62cd1b9376e02f4ab5a4707',1,'torq::RobotSystem::ikConfig()']]],
-  ['ikready_300',['ikReady',['../classtorq_1_1Controller.html#a26f8f9d1f70a5e31acdfdfcf561781ca',1,'torq::Controller::ikReady()'],['../classtorq_1_1RobotSystem.html#af637cec97281b1b230a329491db39aed',1,'torq::RobotSystem::ikReady()']]],
-  ['info_301',['info',['../classLogger.html#a89e09d11074a5c1c5328487054c2afe5',1,'Logger']]],
-  ['initialize_302',['initialize',['../classtorq_1_1Gui.html#a378d5f8283289d9cb8380f21c1b8317a',1,'torq::Gui::initialize()'],['../classtorq_1_1KinematicsEngine.html#a49c73359384bb39a38ffa575c7b0b6e9',1,'torq::KinematicsEngine::initialize()'],['../classtorq_1_1RobotSystem.html#af3c29b688692d2c5f96da67a0a6a8555',1,'torq::RobotSystem::initialize()']]],
-  ['integrate_303',['integrate',['../classtorq_1_1Configuration.html#a4e8d17bb1a7b043ce9632499068e7f57',1,'torq::Configuration']]],
-  ['integrateinplace_304',['integrateInplace',['../classtorq_1_1Configuration.html#a2a1f6fdb65583c328fb43b2d6337b809',1,'torq::Configuration']]],
-  ['inversekinematics_305',['InverseKinematics',['../classtorq_1_1InverseKinematics.html#abf4d5a2cf5f97a802cadd4cde9333765',1,'torq::InverseKinematics']]],
-  ['isgripperopen_306',['isGripperOpen',['../classtorq_1_1Controller.html#af458fed34e7ca353b5e13df4a1ec00c1',1,'torq::Controller::isGripperOpen()'],['../classtorq_1_1RobotSystem.html#a5afc073a3c0f6efafe7923ee01ac4ffe',1,'torq::RobotSystem::isGripperOpen()']]],
-  ['isready_307',['isReady',['../classtorq_1_1KinematicsEngine.html#a4f269fb611007ede76e78eda1a8d004f',1,'torq::KinematicsEngine']]],
-  ['isscalarcost_308',['isScalarCost',['../classtorq_1_1Task.html#a43f478c1dddc720f48b5071bc301e29e',1,'torq::Task']]]
+  ['hascollisionmodel_357',['hasCollisionModel',['../classtorq_1_1Configuration.html#af23583755f4111e6405d479dcdd82c6f',1,'torq::Configuration::hasCollisionModel()'],['../classtorq_1_1KinematicsEngine.html#aa13b6dbc2c54332360015c01c4f490e9',1,'torq::KinematicsEngine::hasCollisionModel()']]],
+  ['hashomeposition_358',['hasHomePosition',['../classtorq_1_1RobotSystem.html#aefa6ecd8f3ac462614485fb567d5e208',1,'torq::RobotSystem']]],
+  ['hastarget_359',['hasTarget',['../classtorq_1_1FrameTask.html#adf1cc8f9ec77e4387ac80fa9056155be',1,'torq::FrameTask::hasTarget()'],['../classtorq_1_1PostureTask.html#a837a7f9f43318e2e121383d5aabcf56d',1,'torq::PostureTask::hasTarget()'],['../classtorq_1_1ComTask.html#a1011ea072ff549ba53c691f3bfcbfa2e',1,'torq::ComTask::hasTarget()'],['../classtorq_1_1RelativeFrameTask.html#a26e74ed29d5ebdb44acb758affa12875',1,'torq::RelativeFrameTask::hasTarget()'],['../classtorq_1_1JointVelocityTask.html#aee8c4e4093dca9676eaa5bc182555b3f',1,'torq::JointVelocityTask::hasTarget()']]]
 ];

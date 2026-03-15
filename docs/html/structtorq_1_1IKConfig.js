@@ -9,5 +9,8 @@ var structtorq_1_1IKConfig =
     [ "posture_lm_damping", "structtorq_1_1IKConfig.html#a6da7b6809ea9bb37e98fc57994283b20", null ],
     [ "damping_cost", "structtorq_1_1IKConfig.html#a9070eb65f07a1a01d578ff2ddbd1fc59", null ],
     [ "solver_damping", "structtorq_1_1IKConfig.html#a354682b1074af8b49bde044ff43e348e", null ],
-    [ "config_limit_gain", "structtorq_1_1IKConfig.html#aa489fecc85c7e752326bfef0011b58e3", null ]
+    [ "config_limit_gain", "structtorq_1_1IKConfig.html#aa489fecc85c7e752326bfef0011b58e3", null ],
+    [ "has_floating_base", "structtorq_1_1IKConfig.html#a8eba70f2d764521f53d19a959223cf5c", null ],
+    [ "max_base_linear_vel", "structtorq_1_1IKConfig.html#a0d34ad6858bb350e00b0836d384b8154", null ],
+    [ "max_base_angular_vel", "structtorq_1_1IKConfig.html#ab87b858f3bf664e0ecef9004898afbee", null ]
 ];

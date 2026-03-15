@@ -135,10 +135,19 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:aa489fecc85c7e752326bfef0011b58e3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1IKConfig.html#aa489fecc85c7e752326bfef0011b58e3">config_limit_gain</a> = 0.5</td></tr>
 <tr class="memdesc:aa489fecc85c7e752326bfef0011b58e3"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits.">ConfigurationLimit</a> gain \(\gamma \in (0,1]\).  <a href="structtorq_1_1IKConfig.html#aa489fecc85c7e752326bfef0011b58e3">More...</a><br /></td></tr>
 <tr class="separator:aa489fecc85c7e752326bfef0011b58e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8eba70f2d764521f53d19a959223cf5c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1IKConfig.html#a8eba70f2d764521f53d19a959223cf5c">has_floating_base</a> = false</td></tr>
+<tr class="memdesc:a8eba70f2d764521f53d19a959223cf5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Auto-attach <a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">FloatingBaseVelocityLimit</a> when true.  <a href="structtorq_1_1IKConfig.html#a8eba70f2d764521f53d19a959223cf5c">More...</a><br /></td></tr>
+<tr class="separator:a8eba70f2d764521f53d19a959223cf5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d34ad6858bb350e00b0836d384b8154"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1IKConfig.html#a0d34ad6858bb350e00b0836d384b8154">max_base_linear_vel</a> = 1.0</td></tr>
+<tr class="memdesc:a0d34ad6858bb350e00b0836d384b8154"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">FloatingBaseVelocityLimit</a> linear bound [m/s].  <a href="structtorq_1_1IKConfig.html#a0d34ad6858bb350e00b0836d384b8154">More...</a><br /></td></tr>
+<tr class="separator:a0d34ad6858bb350e00b0836d384b8154"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab87b858f3bf664e0ecef9004898afbee"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1IKConfig.html#ab87b858f3bf664e0ecef9004898afbee">max_base_angular_vel</a> = 1.0</td></tr>
+<tr class="memdesc:ab87b858f3bf664e0ecef9004898afbee"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">FloatingBaseVelocityLimit</a> angular bound [rad/s].  <a href="structtorq_1_1IKConfig.html#ab87b858f3bf664e0ecef9004898afbee">More...</a><br /></td></tr>
+<tr class="separator:ab87b858f3bf664e0ecef9004898afbee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Centralised store for all tunable IK parameters with sensible defaults. </p>
-<p>Owned by the <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>; read-only access is available through <code><a class="el" href="classtorq_1_1RobotSystem.html#a3915b74cb62cd1b9376e02f4ab5a4707" title="Read-only access to the current IK parameters.">RobotSystem::ikConfig()</a></code>. Every field has a corresponding runtime setter on both <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a> and <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a>.</p>
+<p>Owned by the <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>. Library users get read-only access via <a class="el" href="classtorq_1_1RobotSystem.html#a3915b74cb62cd1b9376e02f4ab5a4707" title="Read-only access to the current IK parameters.">RobotSystem::ikConfig()</a>; runtime setters are called through <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> (e.g. setFrameTaskPositionCost, setConfigLimitGain).</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="tuning_guide.html">Parameter Tuning Guide</a> for detailed descriptions and tuning recipes. </dd></dl>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="aaa3ada437271dbe2ce8771dfee696761"></a>
@@ -298,6 +307,54 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p><a class="el" href="classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits.">ConfigurationLimit</a> gain \(\gamma \in (0,1]\). </p>
+
+</div>
+</div>
+<a id="a8eba70f2d764521f53d19a959223cf5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8eba70f2d764521f53d19a959223cf5c">&#9670;&nbsp;</a></span>has_floating_base</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool torq::IKConfig::has_floating_base = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Auto-attach <a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">FloatingBaseVelocityLimit</a> when true. </p>
+
+</div>
+</div>
+<a id="a0d34ad6858bb350e00b0836d384b8154"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d34ad6858bb350e00b0836d384b8154">&#9670;&nbsp;</a></span>max_base_linear_vel</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double torq::IKConfig::max_base_linear_vel = 1.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">FloatingBaseVelocityLimit</a> linear bound [m/s]. </p>
+
+</div>
+</div>
+<a id="ab87b858f3bf664e0ecef9004898afbee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab87b858f3bf664e0ecef9004898afbee">&#9670;&nbsp;</a></span>max_base_angular_vel</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double torq::IKConfig::max_base_angular_vel = 1.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">FloatingBaseVelocityLimit</a> angular bound [rad/s]. </p>
 
 </div>
 </div>

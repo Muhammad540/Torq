@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['update_371',['update',['../classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec',1,'torq::Controller::update()'],['../classtorq_1_1Configuration.html#a4de9cc3f4a19afc3d1f600e09b01cc6d',1,'torq::Configuration::update()'],['../classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638',1,'torq::RobotSystem::update()']]]
+  ['task_444',['Task',['../classtorq_1_1Task.html#a798a03f76bea31f351ba79dd95b3c60e',1,'torq::Task::Task(const Eigen::VectorXd &amp;cost, double gain=1.0, double lm_damping=0.0)'],['../classtorq_1_1Task.html#ac433faf66f37793ff63b176783bbfa85',1,'torq::Task::Task(double cost, double gain=1.0, double lm_damping=0.0)']]],
+  ['togglegripper_445',['toggleGripper',['../classtorq_1_1Controller.html#a15f513f4712133008ec1b79302fcd2f4',1,'torq::Controller::toggleGripper()'],['../classtorq_1_1RobotSystem.html#a76d181b2c219cf01c7dd0526eaa16ed5',1,'torq::RobotSystem::toggleGripper()']]]
 ];

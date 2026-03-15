@@ -77,6 +77,7 @@ set(CORE_SOURCES
     src/kinematics/PinocchioModel.cpp
     src/tasks/Tasks.cpp
     src/limits/Limits.cpp
+    src/barriers/Barriers.cpp
     src/control/Controller.cpp
     src/control/InverseKinematics.cpp
 )

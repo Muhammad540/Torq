@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['scalar_5fcost_5f_413',['scalar_cost_',['../classtorq_1_1Task.html#af33648c579299777f1733b741314b4d7',1,'torq::Task']]],
-  ['scene_5fpath_414',['scene_path',['../structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7',1,'torq::RobotConfig']]],
-  ['solver_5fdamping_415',['solver_damping',['../structtorq_1_1IKConfig.html#a354682b1074af8b49bde044ff43e348e',1,'torq::IKConfig']]]
+  ['posture_5fcost_489',['posture_cost',['../structtorq_1_1IKConfig.html#a6d7103a1c8405bba5674223add13efe4',1,'torq::IKConfig']]],
+  ['posture_5fgain_490',['posture_gain',['../structtorq_1_1IKConfig.html#aca98afbbab96998514babb6db83f3f59',1,'torq::IKConfig']]],
+  ['posture_5flm_5fdamping_491',['posture_lm_damping',['../structtorq_1_1IKConfig.html#a6da7b6809ea9bb37e98fc57994283b20',1,'torq::IKConfig']]]
 ];

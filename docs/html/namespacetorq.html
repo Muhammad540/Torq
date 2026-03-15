@@ -102,11 +102,23 @@ $(document).ready(function(){initNavTree('namespacetorq.html',''); initResizable
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Barrier.html">Barrier</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for Control <a class="el" href="classtorq_1_1Barrier.html" title="Abstract base class for Control Barrier Functions (CBFs).">Barrier</a> Functions (CBFs).  <a href="classtorq_1_1Barrier.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1PositionBarrier.html">PositionBarrier</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cartesian position barrier on a robot frame.  <a href="classtorq_1_1PositionBarrier.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1BodySphericalBarrier.html">BodySphericalBarrier</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum-distance barrier between two frames (spherical approximation).  <a href="classtorq_1_1BodySphericalBarrier.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1SelfCollisionBarrier.html">SelfCollisionBarrier</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Self-collision avoidance barrier using Pinocchio geometry distances.  <a href="classtorq_1_1SelfCollisionBarrier.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1IKConfig.html">IKConfig</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Centralised store for all tunable IK parameters with sensible defaults.  <a href="structtorq_1_1IKConfig.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html">Controller</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages control modes, IK tasks/limits, and the QP solver.  <a href="classtorq_1_1Controller.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal component: control modes, built-in IK tasks/limits, QP solver.  <a href="classtorq_1_1Controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Gui.html">Gui</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">ImGui + GLFW + OpenGL3 docking GUI for Torq.  <a href="classtorq_1_1Gui.html#details">More...</a><br /></td></tr>
@@ -129,6 +141,12 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1ConfigurationLimit.html">ConfigurationLimit</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint position (configuration) limits.  <a href="classtorq_1_1ConfigurationLimit.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html">FloatingBaseVelocityLimit</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Floating-base twist limits for mobile/legged robots.  <a href="classtorq_1_1FloatingBaseVelocityLimit.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1AccelerationLimit.html">AccelerationLimit</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint acceleration limits with braking-distance bounds.  <a href="classtorq_1_1AccelerationLimit.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1MujocoDriver.html">MujocoDriver</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">MuJoCo simulation backend implementing <a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a>.  <a href="classtorq_1_1MujocoDriver.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -139,10 +157,10 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads and owns the Pinocchio model; creates <a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a> objects.  <a href="classtorq_1_1KinematicsEngine.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html">RobotConfig</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a> for initialising a <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a>.  <a href="structtorq_1_1RobotConfig.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a> for initialising a <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a>.  <a href="structtorq_1_1RobotConfig.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html">RobotSystem</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Top-level user-facing API that owns every subsystem.  <a href="classtorq_1_1RobotSystem.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Top-level user-facing API and sole owner of all main components.  <a href="classtorq_1_1RobotSystem.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Task.html">Task</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for kinematic tasks that contribute to the QP objective.  <a href="classtorq_1_1Task.html#details">More...</a><br /></td></tr>
@@ -155,6 +173,24 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1DampingTask.html">DampingTask</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimise joint velocities — viscous damping.  <a href="classtorq_1_1DampingTask.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1ComTask.html">ComTask</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regulate the center of mass position.  <a href="classtorq_1_1ComTask.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RelativeFrameTask.html">RelativeFrameTask</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regulate the pose of a frame relative to another frame.  <a href="classtorq_1_1RelativeFrameTask.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1LinearHolonomicTask.html">LinearHolonomicTask</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linear holonomic constraint: \(A\,(q_0 \ominus q) = b\).  <a href="classtorq_1_1LinearHolonomicTask.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1JointCouplingTask.html">JointCouplingTask</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coupling constraint between revolute joints.  <a href="classtorq_1_1JointCouplingTask.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1JointVelocityTask.html">JointVelocityTask</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Track reference joint velocities.  <a href="classtorq_1_1JointVelocityTask.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1LowAccelerationTask.html">LowAccelerationTask</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimize joint accelerations: \(\|v - v_{\text{prev}}\|\).  <a href="classtorq_1_1LowAccelerationTask.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
@@ -249,7 +285,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Control mode for the <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a> state machine. </p>
+<p>Control mode for the <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a> state machine. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aafc88d300c5738ef6e253b67cfb516f4aa5daf7f2ebbba4975d61dab1c40188c7"></a>IDLE&#160;</td><td class="fielddoc"><p>No active control — robot holds current position. </p>
 </td></tr>

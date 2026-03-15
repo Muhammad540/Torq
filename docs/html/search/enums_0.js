@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['controlmode_425',['ControlMode',['../namespacetorq.html#aafc88d300c5738ef6e253b67cfb516f4',1,'torq']]]
+  ['controlmode_509',['ControlMode',['../namespacetorq.html#aafc88d300c5738ef6e253b67cfb516f4',1,'torq']]]
 ];

@@ -1,0 +1,4 @@
+<map id="torq::ComTask" name="torq::ComTask">
+<area shape="rect" id="node1" title="Regulate the center of mass position." alt="" coords="5,80,120,107"/>
+<area shape="rect" id="node2" href="$classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective." alt="" coords="20,5,105,32"/>
+</map>

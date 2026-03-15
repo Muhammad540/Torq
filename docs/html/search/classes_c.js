@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['task_232',['Task',['../classtorq_1_1Task.html',1,'torq']]]
+  ['positionbarrier_272',['PositionBarrier',['../classtorq_1_1PositionBarrier.html',1,'torq']]],
+  ['posturetask_273',['PostureTask',['../classtorq_1_1PostureTask.html',1,'torq']]]
 ];

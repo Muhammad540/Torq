@@ -100,10 +100,12 @@ $(document).ready(function(){initNavTree('Controller_8hpp.html',''); initResizab
 <div class="contents">
 <div class="textblock"><code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;Eigen/Dense&gt;</code><br />
 <code>#include &quot;<a class="el" href="InverseKinematics_8hpp_source.html">torq/InverseKinematics.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="Tasks_8hpp_source.html">torq/Tasks.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="Limits_8hpp_source.html">torq/Limits.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="Barriers_8hpp_source.html">torq/Barriers.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="HardwareInterface_8hpp_source.html">torq/HardwareInterface.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="PinocchioModel_8hpp_source.html">torq/PinocchioModel.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="logger_8hpp_source.html">torq/logger.hpp</a>&quot;</code><br />
@@ -116,7 +118,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Centralised store for all tunable IK parameters with sensible defaults.  <a href="structtorq_1_1IKConfig.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html">torq::Controller</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages control modes, IK tasks/limits, and the QP solver.  <a href="classtorq_1_1Controller.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal component: control modes, built-in IK tasks/limits, QP solver.  <a href="classtorq_1_1Controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>

@@ -6,10 +6,14 @@
 #include "logger.hpp"
 #include "PinocchioModel.hpp"
 #include "Controller.hpp"
+#include "Tasks.hpp"
+#include "Limits.hpp"
+#include "Barriers.hpp"
 
 #include <string>
 #include <vector>
 #include <memory>
+
 namespace torq {
 
     /**
@@ -33,18 +37,25 @@ namespace torq {
     class HardwareInterface;
 
     /**
-     * @brief Top-level user-facing API that owns every subsystem.
+     * @brief Top-level user-facing API and sole owner of all main components.
      *
-     * RobotSystem is the single entry point for all robot operations: physics
-     * simulation, kinematics, IK-based control, and GUI interaction.  It owns
-     * the HardwareInterface (simulation or real), KinematicsEngine, and Controller.
+     * **Ownership hierarchy**
      *
-     * Control loop frequency: update() should be called at the configured
-     * control_frequency_hz (see setControlFrequencyHz, RobotConfig). Typical
-     * range is 200–1000 Hz for the combined physics + IK loop. The actual rate
-     * is determined by the caller (e.g. main loop with a rate limiter).
+     * RobotSystem is the single entry point for library users. It owns:
+     * - HardwareInterface (simulation or real hardware)
+     * - KinematicsEngine (Pinocchio model and configurations)
+     * - Controller (control modes, built-in IK tasks/limits, QP solver)
+     * - User-added tasks, limits, and barriers (when added via addTask/addLimit/addBarrier)
      *
-     * Typical usage:
+     * The Controller is an internal implementation detail: it owns the
+     * InverseKinematics solver and built-in tasks/limits (FrameTask, PostureTask,
+     * DampingTask, VelocityLimit, ConfigurationLimit, etc.). Users do not
+     * access the Controller or IK solver directly; all interaction is through
+     * RobotSystem.
+     *
+     * Control loop: call update() at the configured control_frequency_hz
+     * (200–1000 Hz typical). The caller is responsible for rate limiting.
+     *
      * @code
      * torq::RobotConfig cfg;
      * cfg.scene_path         = "scene.xml";
@@ -56,7 +67,7 @@ namespace torq {
      *
      * while (running) {
      *     robot.update();
-     *     rate_limiter.sleep();  // e.g. at robot.getControlPeriodSec()
+     *     rate_limiter.sleep();
      * }
      * @endcode
      *
@@ -196,6 +207,41 @@ namespace torq {
             bool ikReady() const;
             /** @} */
 
+            /** @name User task / limit / barrier composition
+             *  RobotSystem owns all objects added here. They are included in
+             *  every IK solve alongside the built-in tasks/limits. Use for
+             *  humanoids, quadrupeds, or custom constraints.
+             *  @{
+             */
+
+            /**
+             * @brief Add a task; RobotSystem takes ownership.
+             * @param task  Task to add (e.g. ComTask, RelativeFrameTask). Must be heap-allocated.
+             */
+            void addTask(std::unique_ptr<Task> task);
+
+            /** @brief Remove a task by pointer. It is destroyed and no longer used in IK. */
+            void removeTask(Task* task);
+
+            /**
+             * @brief Add a limit; RobotSystem takes ownership.
+             * @param limit  Limit to add (e.g. FloatingBaseVelocityLimit, AccelerationLimit).
+             */
+            void addLimit(std::unique_ptr<Limit> limit);
+
+            /** @brief Remove a limit by pointer. It is destroyed and no longer used in IK. */
+            void removeLimit(Limit* limit);
+
+            /**
+             * @brief Add a barrier; RobotSystem takes ownership.
+             * @param barrier  Barrier to add (e.g. PositionBarrier, BodySphericalBarrier).
+             */
+            void addBarrier(std::unique_ptr<Barrier> barrier);
+
+            /** @brief Remove a barrier by pointer. It is destroyed and no longer used in IK. */
+            void removeBarrier(Barrier* barrier);
+            /** @} */
+
             /** @name State queries
              *  @{
              */
@@ -219,6 +265,12 @@ namespace torq {
             std::unique_ptr<HardwareInterface> hardware_;
             std::unique_ptr<KinematicsEngine> kinematics_;
             std::unique_ptr<Controller> controller_;
+
+            /// User-added tasks/limits/barriers (RobotSystem owns these)
+            std::vector<std::unique_ptr<Task>> user_tasks_;
+            std::vector<std::unique_ptr<Limit>> user_limits_;
+            std::vector<std::unique_ptr<Barrier>> user_barriers_;
+
             Eigen::VectorXd home_position_;
             bool home_set_ = false;
             double jog_linear_step_ = 0.01;

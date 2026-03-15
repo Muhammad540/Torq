@@ -1,5 +1,9 @@
 var namespacetorq =
 [
+    [ "Barrier", "classtorq_1_1Barrier.html", "classtorq_1_1Barrier" ],
+    [ "PositionBarrier", "classtorq_1_1PositionBarrier.html", "classtorq_1_1PositionBarrier" ],
+    [ "BodySphericalBarrier", "classtorq_1_1BodySphericalBarrier.html", "classtorq_1_1BodySphericalBarrier" ],
+    [ "SelfCollisionBarrier", "classtorq_1_1SelfCollisionBarrier.html", "classtorq_1_1SelfCollisionBarrier" ],
     [ "IKConfig", "structtorq_1_1IKConfig.html", "structtorq_1_1IKConfig" ],
     [ "Controller", "classtorq_1_1Controller.html", "classtorq_1_1Controller" ],
     [ "Gui", "classtorq_1_1Gui.html", "classtorq_1_1Gui" ],
@@ -9,6 +13,8 @@ var namespacetorq =
     [ "Limit", "classtorq_1_1Limit.html", "classtorq_1_1Limit" ],
     [ "VelocityLimit", "classtorq_1_1VelocityLimit.html", "classtorq_1_1VelocityLimit" ],
     [ "ConfigurationLimit", "classtorq_1_1ConfigurationLimit.html", "classtorq_1_1ConfigurationLimit" ],
+    [ "FloatingBaseVelocityLimit", "classtorq_1_1FloatingBaseVelocityLimit.html", "classtorq_1_1FloatingBaseVelocityLimit" ],
+    [ "AccelerationLimit", "classtorq_1_1AccelerationLimit.html", "classtorq_1_1AccelerationLimit" ],
     [ "MujocoDriver", "classtorq_1_1MujocoDriver.html", "classtorq_1_1MujocoDriver" ],
     [ "Configuration", "classtorq_1_1Configuration.html", "classtorq_1_1Configuration" ],
     [ "KinematicsEngine", "classtorq_1_1KinematicsEngine.html", "classtorq_1_1KinematicsEngine" ],
@@ -18,6 +24,12 @@ var namespacetorq =
     [ "FrameTask", "classtorq_1_1FrameTask.html", "classtorq_1_1FrameTask" ],
     [ "PostureTask", "classtorq_1_1PostureTask.html", "classtorq_1_1PostureTask" ],
     [ "DampingTask", "classtorq_1_1DampingTask.html", "classtorq_1_1DampingTask" ],
+    [ "ComTask", "classtorq_1_1ComTask.html", "classtorq_1_1ComTask" ],
+    [ "RelativeFrameTask", "classtorq_1_1RelativeFrameTask.html", "classtorq_1_1RelativeFrameTask" ],
+    [ "LinearHolonomicTask", "classtorq_1_1LinearHolonomicTask.html", "classtorq_1_1LinearHolonomicTask" ],
+    [ "JointCouplingTask", "classtorq_1_1JointCouplingTask.html", "classtorq_1_1JointCouplingTask" ],
+    [ "JointVelocityTask", "classtorq_1_1JointVelocityTask.html", "classtorq_1_1JointVelocityTask" ],
+    [ "LowAccelerationTask", "classtorq_1_1LowAccelerationTask.html", "classtorq_1_1LowAccelerationTask" ],
     [ "ModelPtr", "namespacetorq.html#a72bbbef0767016a2310cb1ec0a8a28da", null ],
     [ "DataPtr", "namespacetorq.html#abd5c602ba46e33f48433cc6ce465d707", null ],
     [ "ControlMode", "namespacetorq.html#aafc88d300c5738ef6e253b67cfb516f4", [

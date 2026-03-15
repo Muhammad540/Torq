@@ -1,4 +1,8 @@
 var searchData=
 [
-  ['kinematicsengine_312',['KinematicsEngine',['../classtorq_1_1KinematicsEngine.html#ad265bf42b46984931158147dd19d175a',1,'torq::KinematicsEngine']]]
+  ['jogangularstep_370',['jogAngularStep',['../classtorq_1_1RobotSystem.html#ad32d3f42be00936ff6f3f7f70cd7a37c',1,'torq::RobotSystem']]],
+  ['jogcartesian_371',['jogCartesian',['../classtorq_1_1RobotSystem.html#a851d78b8976b912814279eb50b995b8e',1,'torq::RobotSystem']]],
+  ['joglinearstep_372',['jogLinearStep',['../classtorq_1_1RobotSystem.html#a6396ce606954226a089fc5157b792ad4',1,'torq::RobotSystem']]],
+  ['jointcouplingtask_373',['JointCouplingTask',['../classtorq_1_1JointCouplingTask.html#a058c630aecc7de69ac5066ee99921c9e',1,'torq::JointCouplingTask']]],
+  ['jointvelocitytask_374',['JointVelocityTask',['../classtorq_1_1JointVelocityTask.html#ad8e2a6941544007270693760cbbade26',1,'torq::JointVelocityTask']]]
 ];

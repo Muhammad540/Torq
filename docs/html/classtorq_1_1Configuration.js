@@ -9,6 +9,7 @@ var classtorq_1_1Configuration =
     [ "update", "classtorq_1_1Configuration.html#a4de9cc3f4a19afc3d1f600e09b01cc6d", null ],
     [ "checklimits", "classtorq_1_1Configuration.html#a7ec0f40d392785bb54a3e308371bd43b", null ],
     [ "getFrameJacobian", "classtorq_1_1Configuration.html#a0e55fffe403c56b36784219ae3130dea", null ],
+    [ "getFrameJacobianWorldAligned", "classtorq_1_1Configuration.html#a6cba53da27afe032237e6733ac766d1c", null ],
     [ "getTransformFrameToWorld", "classtorq_1_1Configuration.html#ab97d1cb52b99f773a8726a9c4161c414", null ],
     [ "getTransform", "classtorq_1_1Configuration.html#a7cc80d2ade0acde1cb81b534d05b93fb", null ],
     [ "integrate", "classtorq_1_1Configuration.html#a4e8d17bb1a7b043ce9632499068e7f57", null ],
@@ -17,6 +18,11 @@ var classtorq_1_1Configuration =
     [ "nq", "classtorq_1_1Configuration.html#a7d803beb47938a694dd81fe524f19b75", null ],
     [ "q", "classtorq_1_1Configuration.html#ac4fd95c91caae08627d4c2646933b80c", null ],
     [ "model", "classtorq_1_1Configuration.html#aded05c941359c6858f810b4a48ecc1a3", null ],
+    [ "data", "classtorq_1_1Configuration.html#aa7b04d7e3d3eaedb78b0ac471ca296ee", null ],
+    [ "data", "classtorq_1_1Configuration.html#ad17bd239f0c68cb9f21427eac5734793", null ],
+    [ "collisionModel", "classtorq_1_1Configuration.html#a29a89a95b8c7b31546fed65bfa57db2c", null ],
+    [ "collisionData", "classtorq_1_1Configuration.html#a2db8ec6c537b5710016abba2c80e7005", null ],
+    [ "hasCollisionModel", "classtorq_1_1Configuration.html#af23583755f4111e6405d479dcdd82c6f", null ],
     [ "geterror", "classtorq_1_1Configuration.html#a81bb0ed6c3e78dfb4fb33185fe4ecc9f", null ],
     [ "clearError", "classtorq_1_1Configuration.html#a12a30a0936ffcc02cfb5cc37e0295721", null ]
 ];

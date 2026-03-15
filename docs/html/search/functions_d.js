@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['operator_3c_3c_325',['operator&lt;&lt;',['../classLogger_1_1LogStream.html#afb1b2ebdf3a06a6a7ac55aad3c908a00',1,'Logger::LogStream']]],
-  ['operator_3d_326',['operator=',['../classtorq_1_1Configuration.html#acaff9b2c5925206ca80ba1d5b3f102cd',1,'torq::Configuration::operator=(const Configuration &amp;)=delete'],['../classtorq_1_1Configuration.html#a66b27e72212a9d92be5038044684b244',1,'torq::Configuration::operator=(Configuration &amp;&amp;)=default']]],
-  ['orientationcost_327',['orientationCost',['../classtorq_1_1FrameTask.html#a6d65b5139fe3196d1fa11a1a77dd962e',1,'torq::FrameTask']]],
-  ['overridejointpositions_328',['overrideJointPositions',['../classtorq_1_1MujocoDriver.html#a6f26ba8f18efab7996598642e193d971',1,'torq::MujocoDriver']]],
-  ['overridejointvelocities_329',['overrideJointVelocities',['../classtorq_1_1MujocoDriver.html#a78642735d375fa3214bb198ca4b5653d',1,'torq::MujocoDriver']]]
+  ['nq_387',['nq',['../classtorq_1_1Configuration.html#a7d803beb47938a694dd81fe524f19b75',1,'torq::Configuration']]],
+  ['numactuators_388',['numActuators',['../classtorq_1_1HardwareInterface.html#af6bee62bbf84bc3390397a98962c938d',1,'torq::HardwareInterface::numActuators()'],['../classtorq_1_1MujocoDriver.html#ad62a3507c8413b79ad695a620e1fceae',1,'torq::MujocoDriver::numActuators()']]],
+  ['numjoints_389',['numJoints',['../classtorq_1_1HardwareInterface.html#a0c9ad38fbffce8140e70e7dfaf788d82',1,'torq::HardwareInterface::numJoints()'],['../classtorq_1_1MujocoDriver.html#a70df9a3cc06fec56804ea0395b8fc422',1,'torq::MujocoDriver::numJoints()']]],
+  ['nv_390',['nv',['../classtorq_1_1Configuration.html#a7a55b1568f0bbc2aaa72fff582feb602',1,'torq::Configuration']]]
 ];

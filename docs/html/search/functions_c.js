@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['nq_321',['nq',['../classtorq_1_1Configuration.html#a7d803beb47938a694dd81fe524f19b75',1,'torq::Configuration']]],
-  ['numactuators_322',['numActuators',['../classtorq_1_1HardwareInterface.html#af6bee62bbf84bc3390397a98962c938d',1,'torq::HardwareInterface::numActuators()'],['../classtorq_1_1MujocoDriver.html#ad62a3507c8413b79ad695a620e1fceae',1,'torq::MujocoDriver::numActuators()']]],
-  ['numjoints_323',['numJoints',['../classtorq_1_1HardwareInterface.html#a0c9ad38fbffce8140e70e7dfaf788d82',1,'torq::HardwareInterface::numJoints()'],['../classtorq_1_1MujocoDriver.html#a70df9a3cc06fec56804ea0395b8fc422',1,'torq::MujocoDriver::numJoints()']]],
-  ['nv_324',['nv',['../classtorq_1_1Configuration.html#a7a55b1568f0bbc2aaa72fff582feb602',1,'torq::Configuration']]]
+  ['makeconfiguration_382',['makeConfiguration',['../classtorq_1_1KinematicsEngine.html#a039a0591cc70ea39dc9d18140f58c338',1,'torq::KinematicsEngine']]],
+  ['maxtrackingerror_383',['maxTrackingError',['../classtorq_1_1RobotSystem.html#a66dbdd0cd85f050a1206c53e63d045f9',1,'torq::RobotSystem']]],
+  ['model_384',['model',['../classtorq_1_1Configuration.html#aded05c941359c6858f810b4a48ecc1a3',1,'torq::Configuration::model()'],['../classtorq_1_1KinematicsEngine.html#aec6d8aca289a3f11e0dba2f2bab4c43d',1,'torq::KinematicsEngine::model()']]],
+  ['movetohome_385',['moveToHome',['../classtorq_1_1RobotSystem.html#aaef8fe8a5f0d5c4c2e1073e0b1a4934e',1,'torq::RobotSystem']]],
+  ['mujocodriver_386',['MujocoDriver',['../classtorq_1_1MujocoDriver.html#a98e2aae7b4043b669714e090c8d32e37',1,'torq::MujocoDriver::MujocoDriver()'],['../classtorq_1_1MujocoDriver.html#a9e977dbabcec3afa0e1c4fe617121562',1,'torq::MujocoDriver::MujocoDriver(const MujocoDriver &amp;)=delete']]]
 ];

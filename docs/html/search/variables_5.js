@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['h_401',['H',['../structtorq_1_1QPProblem.html#af62c54036cd1ff852535cfc0c8f9d0a0',1,'torq::QPProblem']]],
-  ['h_402',['h',['../structtorq_1_1QPProblem.html#a3ab4762dd9ddc4b2f66084c846cdd32d',1,'torq::QPProblem']]],
-  ['has_5fconstraints_403',['has_constraints',['../structtorq_1_1QPProblem.html#acead5105d34b5a58f288d332354f5f36',1,'torq::QPProblem']]]
+  ['frame_5fgain_471',['frame_gain',['../structtorq_1_1IKConfig.html#a46c5be2a7e907fbc9164f9f61b061a61',1,'torq::IKConfig']]],
+  ['frame_5flm_5fdamping_472',['frame_lm_damping',['../structtorq_1_1IKConfig.html#ad1bbd4a21ff712ea6034165ee2764632',1,'torq::IKConfig']]],
+  ['frame_5forientation_5fcost_473',['frame_orientation_cost',['../structtorq_1_1IKConfig.html#ae5b634c6624b3c7b51c92a9fb7a1679c',1,'torq::IKConfig']]],
+  ['frame_5fposition_5fcost_474',['frame_position_cost',['../structtorq_1_1IKConfig.html#aaa3ada437271dbe2ce8771dfee696761',1,'torq::IKConfig']]]
 ];

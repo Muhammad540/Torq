@@ -98,7 +98,7 @@ $(document).ready(function(){initNavTree('classtorq_1_1RobotSystem.html',''); in
 </div><!--header-->
 <div class="contents">
 
-<p>Top-level user-facing API that owns every subsystem.  
+<p>Top-level user-facing API and sole owner of all main components.  
  <a href="classtorq_1_1RobotSystem.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="RobotSystem_8hpp_source.html">RobotSystem.hpp</a>&gt;</code></p>
@@ -174,7 +174,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ac2019b9ad517e2b9b0cd6711bc4fbca0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the end-effector frame.  <a href="classtorq_1_1RobotSystem.html#ac2019b9ad517e2b9b0cd6711bc4fbca0">More...</a><br /></td></tr>
 <tr class="separator:ac2019b9ad517e2b9b0cd6711bc4fbca0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">IK parameter tuning</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><p>Pass-through setters to <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>.</p>
+<tr><td colspan="2"><div class="groupText"><p>Pass-through setters to <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>.</p>
 <p>See <a class="el" href="tuning_guide.html">Parameter Tuning Guide</a>. </p>
 </div></td></tr>
 <tr class="memitem:a3156525d4efde659721ea219f0bc51ef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a3156525d4efde659721ea219f0bc51ef">setFrameTaskPositionCost</a> (double cost)</td></tr>
@@ -203,6 +203,28 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af637cec97281b1b230a329491db39aed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#af637cec97281b1b230a329491db39aed">ikReady</a> () const</td></tr>
 <tr class="memdesc:af637cec97281b1b230a329491db39aed"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if the IK subsystem has been initialised.  <a href="classtorq_1_1RobotSystem.html#af637cec97281b1b230a329491db39aed">More...</a><br /></td></tr>
 <tr class="separator:af637cec97281b1b230a329491db39aed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">User task / limit / barrier composition</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><p><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> owns all objects added here.</p>
+<p>They are included in every IK solve alongside the built-in tasks/limits. Use for humanoids, quadrupeds, or custom constraints. </p>
+</div></td></tr>
+<tr class="memitem:a79ffe9602580fd49621f8638af086e2e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a79ffe9602580fd49621f8638af086e2e">addTask</a> (std::unique_ptr&lt; <a class="el" href="classtorq_1_1Task.html">Task</a> &gt; task)</td></tr>
+<tr class="memdesc:a79ffe9602580fd49621f8638af086e2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a task; <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> takes ownership.  <a href="classtorq_1_1RobotSystem.html#a79ffe9602580fd49621f8638af086e2e">More...</a><br /></td></tr>
+<tr class="separator:a79ffe9602580fd49621f8638af086e2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c5d28b8098c5a6bb60a5975e57fa020"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a7c5d28b8098c5a6bb60a5975e57fa020">removeTask</a> (<a class="el" href="classtorq_1_1Task.html">Task</a> *task)</td></tr>
+<tr class="memdesc:a7c5d28b8098c5a6bb60a5975e57fa020"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a task by pointer.  <a href="classtorq_1_1RobotSystem.html#a7c5d28b8098c5a6bb60a5975e57fa020">More...</a><br /></td></tr>
+<tr class="separator:a7c5d28b8098c5a6bb60a5975e57fa020"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af13308e859b1ca702a4bfaed53445273"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#af13308e859b1ca702a4bfaed53445273">addLimit</a> (std::unique_ptr&lt; <a class="el" href="classtorq_1_1Limit.html">Limit</a> &gt; limit)</td></tr>
+<tr class="memdesc:af13308e859b1ca702a4bfaed53445273"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a limit; <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> takes ownership.  <a href="classtorq_1_1RobotSystem.html#af13308e859b1ca702a4bfaed53445273">More...</a><br /></td></tr>
+<tr class="separator:af13308e859b1ca702a4bfaed53445273"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14d539530464f66c153aa7e8dd15b7da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a14d539530464f66c153aa7e8dd15b7da">removeLimit</a> (<a class="el" href="classtorq_1_1Limit.html">Limit</a> *limit)</td></tr>
+<tr class="memdesc:a14d539530464f66c153aa7e8dd15b7da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a limit by pointer.  <a href="classtorq_1_1RobotSystem.html#a14d539530464f66c153aa7e8dd15b7da">More...</a><br /></td></tr>
+<tr class="separator:a14d539530464f66c153aa7e8dd15b7da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54e44426bb7fb5c2ad09a0b014ce0f48"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a54e44426bb7fb5c2ad09a0b014ce0f48">addBarrier</a> (std::unique_ptr&lt; <a class="el" href="classtorq_1_1Barrier.html">Barrier</a> &gt; barrier)</td></tr>
+<tr class="memdesc:a54e44426bb7fb5c2ad09a0b014ce0f48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a barrier; <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> takes ownership.  <a href="classtorq_1_1RobotSystem.html#a54e44426bb7fb5c2ad09a0b014ce0f48">More...</a><br /></td></tr>
+<tr class="separator:a54e44426bb7fb5c2ad09a0b014ce0f48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4651ca9534c44fdef0f3b0500a290a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#ad4651ca9534c44fdef0f3b0500a290a3">removeBarrier</a> (<a class="el" href="classtorq_1_1Barrier.html">Barrier</a> *barrier)</td></tr>
+<tr class="memdesc:ad4651ca9534c44fdef0f3b0500a290a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a barrier by pointer.  <a href="classtorq_1_1RobotSystem.html#ad4651ca9534c44fdef0f3b0500a290a3">More...</a><br /></td></tr>
+<tr class="separator:ad4651ca9534c44fdef0f3b0500a290a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">State queries</div></td></tr>
 <tr class="memitem:a3a074e3ea2b3755df34f01ed9952fa86"><td class="memItemLeft" align="right" valign="top">Eigen::Matrix4d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1RobotSystem.html#a3a074e3ea2b3755df34f01ed9952fa86">getFramePose</a> (std::string frame_name)</td></tr>
 <tr class="memdesc:a3a074e3ea2b3755df34f01ed9952fa86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the SE(3) pose of a named frame.  <a href="classtorq_1_1RobotSystem.html#a3a074e3ea2b3755df34f01ed9952fa86">More...</a><br /></td></tr>
@@ -212,10 +234,17 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:afee5066501702da621742ffc91766793"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Top-level user-facing API that owns every subsystem. </p>
-<p><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API that owns every subsystem.">RobotSystem</a> is the single entry point for all robot operations: physics simulation, kinematics, IK-based control, and GUI interaction. It owns the <a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a> (simulation or real), <a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">KinematicsEngine</a>, and <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>.</p>
-<p>Control loop frequency: <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">update()</a> should be called at the configured control_frequency_hz (see setControlFrequencyHz, <a class="el" href="structtorq_1_1RobotConfig.html" title="Configuration for initialising a RobotSystem.">RobotConfig</a>). Typical range is 200–1000 Hz for the combined physics + IK loop. The actual rate is determined by the caller (e.g. main loop with a rate limiter).</p>
-<p>Typical usage: </p><div class="fragment"><div class="line"><a class="code" href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a> cfg;</div>
+<div class="textblock"><p>Top-level user-facing API and sole owner of all main components. </p>
+<p><b>Ownership hierarchy</b></p>
+<p><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> is the single entry point for library users. It owns:</p><ul>
+<li><a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a> (simulation or real hardware)</li>
+<li><a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">KinematicsEngine</a> (Pinocchio model and configurations)</li>
+<li><a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a> (control modes, built-in IK tasks/limits, QP solver)</li>
+<li>User-added tasks, limits, and barriers (when added via addTask/addLimit/addBarrier)</li>
+</ul>
+<p>The <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a> is an internal implementation detail: it owns the <a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">InverseKinematics</a> solver and built-in tasks/limits (<a class="el" href="classtorq_1_1FrameTask.html" title="Regulate the SE(3) pose of a robot frame to a desired target.">FrameTask</a>, <a class="el" href="classtorq_1_1PostureTask.html" title="Regulate joint angles toward a desired posture.">PostureTask</a>, <a class="el" href="classtorq_1_1DampingTask.html" title="Minimise joint velocities — viscous damping.">DampingTask</a>, <a class="el" href="classtorq_1_1VelocityLimit.html" title="Joint velocity limits.">VelocityLimit</a>, <a class="el" href="classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits.">ConfigurationLimit</a>, etc.). Users do not access the <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a> or IK solver directly; all interaction is through <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a>.</p>
+<p>Control loop: call <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">update()</a> at the configured control_frequency_hz (200–1000 Hz typical). The caller is responsible for rate limiting.</p>
+<div class="fragment"><div class="line"><a class="code" href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a> cfg;</div>
 <div class="line">cfg.<a class="code" href="structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7">scene_path</a>         = <span class="stringliteral">&quot;scene.xml&quot;</span>;</div>
 <div class="line">cfg.<a class="code" href="structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd">robot_model_path</a>   = <span class="stringliteral">&quot;robot.urdf&quot;</span>;</div>
 <div class="line">cfg.<a class="code" href="structtorq_1_1RobotConfig.html#abf39d0547e9806a341e8f7129fab68c7">end_effector_frame</a> = <span class="stringliteral">&quot;ee_link&quot;</span>;</div>
@@ -225,16 +254,16 @@ Public Member Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">while</span> (running) {</div>
 <div class="line">    robot.<a class="code" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638">update</a>();</div>
-<div class="line">    rate_limiter.sleep();  <span class="comment">// e.g. at robot.getControlPeriodSec()</span></div>
+<div class="line">    rate_limiter.sleep();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclasstorq_1_1RobotSystem_html"><div class="ttname"><a href="classtorq_1_1RobotSystem.html">torq::RobotSystem</a></div><div class="ttdoc">Top-level user-facing API that owns every subsystem.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:65</div></div>
+<div class="ttc" id="aclasstorq_1_1RobotSystem_html"><div class="ttname"><a href="classtorq_1_1RobotSystem.html">torq::RobotSystem</a></div><div class="ttdoc">Top-level user-facing API and sole owner of all main components.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:76</div></div>
 <div class="ttc" id="aclasstorq_1_1RobotSystem_html_a47c6dd4b4562e2adee434ab424a95638"><div class="ttname"><a href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638">torq::RobotSystem::update</a></div><div class="ttdeci">void update()</div><div class="ttdoc">Execute one control + physics tick.</div></div>
 <div class="ttc" id="aclasstorq_1_1RobotSystem_html_af3c29b688692d2c5f96da67a0a6a8555"><div class="ttname"><a href="classtorq_1_1RobotSystem.html#af3c29b688692d2c5f96da67a0a6a8555">torq::RobotSystem::initialize</a></div><div class="ttdeci">bool initialize(const RobotConfig &amp;config)</div><div class="ttdoc">Initialise the robot from a configuration.</div></div>
-<div class="ttc" id="astructtorq_1_1RobotConfig_html"><div class="ttname"><a href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a></div><div class="ttdoc">Configuration for initialising a RobotSystem.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:21</div></div>
-<div class="ttc" id="astructtorq_1_1RobotConfig_html_abf39d0547e9806a341e8f7129fab68c7"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#abf39d0547e9806a341e8f7129fab68c7">torq::RobotConfig::end_effector_frame</a></div><div class="ttdeci">std::string end_effector_frame</div><div class="ttdoc">Name of the end-effector frame in the Pinocchio model.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:24</div></div>
-<div class="ttc" id="astructtorq_1_1RobotConfig_html_ad230ad2d4e45e2fa9e975abba0d471cd"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd">torq::RobotConfig::robot_model_path</a></div><div class="ttdeci">std::string robot_model_path</div><div class="ttdoc">Path to the robot-only URDF or MJCF for Pinocchio kinematics.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:23</div></div>
-<div class="ttc" id="astructtorq_1_1RobotConfig_html_af034c7f47cfcea2c4bea783247dd8bc7"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7">torq::RobotConfig::scene_path</a></div><div class="ttdeci">std::string scene_path</div><div class="ttdoc">Path to the MuJoCo scene XML (floor, lights, robot include).</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:22</div></div>
-</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>, <a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">KinematicsEngine</a>, <a class="el" href="classtorq_1_1MujocoDriver.html" title="MuJoCo simulation backend implementing HardwareInterface.">MujocoDriver</a> </dd></dl>
+<div class="ttc" id="astructtorq_1_1RobotConfig_html"><div class="ttname"><a href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a></div><div class="ttdoc">Configuration for initialising a RobotSystem.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:25</div></div>
+<div class="ttc" id="astructtorq_1_1RobotConfig_html_abf39d0547e9806a341e8f7129fab68c7"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#abf39d0547e9806a341e8f7129fab68c7">torq::RobotConfig::end_effector_frame</a></div><div class="ttdeci">std::string end_effector_frame</div><div class="ttdoc">Name of the end-effector frame in the Pinocchio model.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:28</div></div>
+<div class="ttc" id="astructtorq_1_1RobotConfig_html_ad230ad2d4e45e2fa9e975abba0d471cd"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd">torq::RobotConfig::robot_model_path</a></div><div class="ttdeci">std::string robot_model_path</div><div class="ttdoc">Path to the robot-only URDF or MJCF for Pinocchio kinematics.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:27</div></div>
+<div class="ttc" id="astructtorq_1_1RobotConfig_html_af034c7f47cfcea2c4bea783247dd8bc7"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7">torq::RobotConfig::scene_path</a></div><div class="ttdeci">std::string scene_path</div><div class="ttdoc">Path to the MuJoCo scene XML (floor, lights, robot include).</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:26</div></div>
+</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>, <a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">KinematicsEngine</a>, <a class="el" href="classtorq_1_1MujocoDriver.html" title="MuJoCo simulation backend implementing HardwareInterface.">MujocoDriver</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab3076e30ff231089384726b468f7b1dc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab3076e30ff231089384726b468f7b1dc">&#9670;&nbsp;</a></span>RobotSystem()</h2>
@@ -288,7 +317,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Initialise the robot from a configuration. </p>
-<p>Loads the MuJoCo scene, builds the Pinocchio model (with locked joints), creates the <a class="el" href="classtorq_1_1Controller.html" title="Manages control modes, IK tasks/limits, and the QP solver.">Controller</a>, and detects the gripper actuator.</p>
+<p>Loads the MuJoCo scene, builds the Pinocchio model (with locked joints), creates the <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>, and detects the gripper actuator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">config</td><td>Robot configuration describing model paths and options. </td></tr>
@@ -315,7 +344,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Execute one control + physics tick. </p>
-<p>Runs at the rate of the caller; typically invoked at control_frequency_hz (200–1000 Hz). Performs: physics step, then <a class="el" href="classtorq_1_1Controller.html#a512af835cb935c7d9f28518bf6ecfcec" title="Execute one control tick.">Controller::update()</a> (IK solve and joint command). Call at a fixed rate for deterministic behaviour. </p>
+<p>Runs at the rate of the caller; typically invoked at control_frequency_hz (200–1000 Hz). Performs: physics step, then <a class="el" href="classtorq_1_1Controller.html#a4effba43bcd315720ec3da23b6c0cfd8" title="Execute one control tick.">Controller::update()</a> (IK solve and joint command). Call at a fixed rate for deterministic behaviour. </p>
 
 </div>
 </div>
@@ -1023,6 +1052,147 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>True if the IK subsystem has been initialised. </p>
+
+</div>
+</div>
+<a id="a79ffe9602580fd49621f8638af086e2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79ffe9602580fd49621f8638af086e2e">&#9670;&nbsp;</a></span>addTask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::addTask </td>
+          <td>(</td>
+          <td class="paramtype">std::unique_ptr&lt; <a class="el" href="classtorq_1_1Task.html">Task</a> &gt;&#160;</td>
+          <td class="paramname"><em>task</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add a task; <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> takes ownership. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">task</td><td><a class="el" href="classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective.">Task</a> to add (e.g. <a class="el" href="classtorq_1_1ComTask.html" title="Regulate the center of mass position.">ComTask</a>, <a class="el" href="classtorq_1_1RelativeFrameTask.html" title="Regulate the pose of a frame relative to another frame.">RelativeFrameTask</a>). Must be heap-allocated. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7c5d28b8098c5a6bb60a5975e57fa020"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c5d28b8098c5a6bb60a5975e57fa020">&#9670;&nbsp;</a></span>removeTask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::removeTask </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classtorq_1_1Task.html">Task</a> *&#160;</td>
+          <td class="paramname"><em>task</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove a task by pointer. </p>
+<p>It is destroyed and no longer used in IK. </p>
+
+</div>
+</div>
+<a id="af13308e859b1ca702a4bfaed53445273"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af13308e859b1ca702a4bfaed53445273">&#9670;&nbsp;</a></span>addLimit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::addLimit </td>
+          <td>(</td>
+          <td class="paramtype">std::unique_ptr&lt; <a class="el" href="classtorq_1_1Limit.html">Limit</a> &gt;&#160;</td>
+          <td class="paramname"><em>limit</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add a limit; <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> takes ownership. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">limit</td><td><a class="el" href="classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints).">Limit</a> to add (e.g. <a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">FloatingBaseVelocityLimit</a>, <a class="el" href="classtorq_1_1AccelerationLimit.html" title="Joint acceleration limits with braking-distance bounds.">AccelerationLimit</a>). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a14d539530464f66c153aa7e8dd15b7da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14d539530464f66c153aa7e8dd15b7da">&#9670;&nbsp;</a></span>removeLimit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::removeLimit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classtorq_1_1Limit.html">Limit</a> *&#160;</td>
+          <td class="paramname"><em>limit</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove a limit by pointer. </p>
+<p>It is destroyed and no longer used in IK. </p>
+
+</div>
+</div>
+<a id="a54e44426bb7fb5c2ad09a0b014ce0f48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54e44426bb7fb5c2ad09a0b014ce0f48">&#9670;&nbsp;</a></span>addBarrier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::addBarrier </td>
+          <td>(</td>
+          <td class="paramtype">std::unique_ptr&lt; <a class="el" href="classtorq_1_1Barrier.html">Barrier</a> &gt;&#160;</td>
+          <td class="paramname"><em>barrier</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add a barrier; <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a> takes ownership. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">barrier</td><td><a class="el" href="classtorq_1_1Barrier.html" title="Abstract base class for Control Barrier Functions (CBFs).">Barrier</a> to add (e.g. <a class="el" href="classtorq_1_1PositionBarrier.html" title="Cartesian position barrier on a robot frame.">PositionBarrier</a>, <a class="el" href="classtorq_1_1BodySphericalBarrier.html" title="Minimum-distance barrier between two frames (spherical approximation).">BodySphericalBarrier</a>). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad4651ca9534c44fdef0f3b0500a290a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4651ca9534c44fdef0f3b0500a290a3">&#9670;&nbsp;</a></span>removeBarrier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::RobotSystem::removeBarrier </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classtorq_1_1Barrier.html">Barrier</a> *&#160;</td>
+          <td class="paramname"><em>barrier</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove a barrier by pointer. </p>
+<p>It is destroyed and no longer used in IK. </p>
 
 </div>
 </div>

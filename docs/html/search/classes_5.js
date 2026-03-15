@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['ikconfig_221',['IKConfig',['../structtorq_1_1IKConfig.html',1,'torq']]],
-  ['inversekinematics_222',['InverseKinematics',['../classtorq_1_1InverseKinematics.html',1,'torq']]]
+  ['gui_259',['Gui',['../classtorq_1_1Gui.html',1,'torq']]]
 ];

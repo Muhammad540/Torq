@@ -1,5 +1,7 @@
 <map id="torq::Limit" name="torq::Limit">
-<area shape="rect" id="node1" title="Abstract base class for kinematic limits (QP inequality constraints)." alt="" coords="139,5,229,32"/>
-<area shape="rect" id="node2" href="$classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits." alt="" coords="5,80,181,107"/>
-<area shape="rect" id="node3" href="$classtorq_1_1VelocityLimit.html" title="Joint velocity limits." alt="" coords="205,80,347,107"/>
+<area shape="rect" id="node1" title="Abstract base class for kinematic limits (QP inequality constraints)." alt="" coords="5,85,95,112"/>
+<area shape="rect" id="node2" href="$classtorq_1_1AccelerationLimit.html" title="Joint acceleration limits with braking&#45;distance bounds." alt="" coords="154,5,325,32"/>
+<area shape="rect" id="node3" href="$classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits." alt="" coords="151,56,327,83"/>
+<area shape="rect" id="node4" href="$classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating&#45;base twist limits for mobile/legged robots." alt="" coords="143,107,336,149"/>
+<area shape="rect" id="node5" href="$classtorq_1_1VelocityLimit.html" title="Joint velocity limits." alt="" coords="169,173,310,200"/>
 </map>

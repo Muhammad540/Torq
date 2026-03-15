@@ -3,6 +3,7 @@
 #include "torq/PinocchioModel.hpp"
 #include <Eigen/Geometry>
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 
@@ -75,8 +76,8 @@ namespace torq {
           Eigen::Vector3d pos_after;
           std::string diag_frame;
           bool capture_actual = false;
-          if (IK_ACTUAL_MOTION_DIAGNOSTICS && controller_ && controller_->ikReady() && controller_->frameTask()) {
-             diag_frame = controller_->frameTask()->frame();
+          if (IK_ACTUAL_MOTION_DIAGNOSTICS && controller_ && controller_->ikReady()) {
+             diag_frame = end_effector_frame_;
              pos_before = getFramePose(diag_frame).block<3, 1>(0, 3);
              capture_actual = true;
           }
@@ -92,8 +93,16 @@ namespace torq {
           }
 
           if (controller_) {
-            // updating physics
-            controller_->update();
+            std::vector<Task*> user_task_ptrs;
+            user_task_ptrs.reserve(user_tasks_.size());
+            for (const auto& p : user_tasks_) user_task_ptrs.push_back(p.get());
+            std::vector<Limit*> user_limit_ptrs;
+            user_limit_ptrs.reserve(user_limits_.size());
+            for (const auto& p : user_limits_) user_limit_ptrs.push_back(p.get());
+            std::vector<Barrier*> user_barrier_ptrs;
+            user_barrier_ptrs.reserve(user_barriers_.size());
+            for (const auto& p : user_barriers_) user_barrier_ptrs.push_back(p.get());
+            controller_->update(user_task_ptrs, user_limit_ptrs, user_barrier_ptrs);
           }
        }
     }
@@ -245,5 +254,43 @@ namespace torq {
     Eigen::VectorXd RobotSystem::getJointPositions(){
       return hardware_->getJointPositions();
     }
-  
+
+    void RobotSystem::addTask(std::unique_ptr<Task> task) {
+        if (task)
+            user_tasks_.push_back(std::move(task));
+    }
+
+    void RobotSystem::removeTask(Task* task) {
+        if (!task) return;
+        user_tasks_.erase(
+            std::remove_if(user_tasks_.begin(), user_tasks_.end(),
+                [task](const std::unique_ptr<Task>& p) { return p.get() == task; }),
+            user_tasks_.end());
+    }
+
+    void RobotSystem::addLimit(std::unique_ptr<Limit> limit) {
+        if (limit)
+            user_limits_.push_back(std::move(limit));
+    }
+
+    void RobotSystem::removeLimit(Limit* limit) {
+        if (!limit) return;
+        user_limits_.erase(
+            std::remove_if(user_limits_.begin(), user_limits_.end(),
+                [limit](const std::unique_ptr<Limit>& p) { return p.get() == limit; }),
+            user_limits_.end());
+    }
+
+    void RobotSystem::addBarrier(std::unique_ptr<Barrier> barrier) {
+        if (barrier)
+            user_barriers_.push_back(std::move(barrier));
+    }
+
+    void RobotSystem::removeBarrier(Barrier* barrier) {
+        if (!barrier) return;
+        user_barriers_.erase(
+            std::remove_if(user_barriers_.begin(), user_barriers_.end(),
+                [barrier](const std::unique_ptr<Barrier>& p) { return p.get() == barrier; }),
+            user_barriers_.end());
+    }
 }

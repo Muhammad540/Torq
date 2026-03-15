@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['vellimit_372',['velLimit',['../classtorq_1_1Controller.html#af3d1f1bba83f9914d14858a4e363ba06',1,'torq::Controller']]],
-  ['velocitylimit_373',['VelocityLimit',['../classtorq_1_1VelocityLimit.html#acd3e188e4294951b9fe43f46c2b0576b',1,'torq::VelocityLimit']]]
+  ['update_446',['update',['../classtorq_1_1Controller.html#a4effba43bcd315720ec3da23b6c0cfd8',1,'torq::Controller::update()'],['../classtorq_1_1Configuration.html#a4de9cc3f4a19afc3d1f600e09b01cc6d',1,'torq::Configuration::update()'],['../classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638',1,'torq::RobotSystem::update()']]]
 ];

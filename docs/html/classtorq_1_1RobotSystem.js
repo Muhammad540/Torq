@@ -35,6 +35,12 @@ var classtorq_1_1RobotSystem =
     [ "setConfigLimitGain", "classtorq_1_1RobotSystem.html#a86b12595d307d64ec848c8ed6ab2a019", null ],
     [ "ikConfig", "classtorq_1_1RobotSystem.html#a3915b74cb62cd1b9376e02f4ab5a4707", null ],
     [ "ikReady", "classtorq_1_1RobotSystem.html#af637cec97281b1b230a329491db39aed", null ],
+    [ "addTask", "classtorq_1_1RobotSystem.html#a79ffe9602580fd49621f8638af086e2e", null ],
+    [ "removeTask", "classtorq_1_1RobotSystem.html#a7c5d28b8098c5a6bb60a5975e57fa020", null ],
+    [ "addLimit", "classtorq_1_1RobotSystem.html#af13308e859b1ca702a4bfaed53445273", null ],
+    [ "removeLimit", "classtorq_1_1RobotSystem.html#a14d539530464f66c153aa7e8dd15b7da", null ],
+    [ "addBarrier", "classtorq_1_1RobotSystem.html#a54e44426bb7fb5c2ad09a0b014ce0f48", null ],
+    [ "removeBarrier", "classtorq_1_1RobotSystem.html#ad4651ca9534c44fdef0f3b0500a290a3", null ],
     [ "getFramePose", "classtorq_1_1RobotSystem.html#a3a074e3ea2b3755df34f01ed9952fa86", null ],
     [ "getJointPositions", "classtorq_1_1RobotSystem.html#afee5066501702da621742ffc91766793", null ]
 ];
