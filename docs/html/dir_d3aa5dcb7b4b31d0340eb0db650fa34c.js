@@ -1,5 +1,6 @@
 var dir_d3aa5dcb7b4b31d0340eb0db650fa34c =
 [
+    [ "Barriers.hpp", "Barriers_8hpp.html", null ],
     [ "Controller.hpp", "Controller_8hpp.html", "Controller_8hpp" ],
     [ "Gui.hpp", "Gui_8hpp.html", "Gui_8hpp" ],
     [ "HardwareInterface.hpp", "HardwareInterface_8hpp.html", [

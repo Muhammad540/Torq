@@ -87,7 +87,7 @@ var NAVTREE =
       ] ],
       [ "ConfigurationLimit", "limits_page.html#autotoc_md30", [
         [ "Formulation", "limits_page.html#autotoc_md31", null ],
-        [ "Effect of config_limit_gain", "limits_page.html#autotoc_md32", null ],
+        [ "Effect of <tt>config_limit_gain</tt>", "limits_page.html#autotoc_md32", null ],
         [ "Parameters", "limits_page.html#autotoc_md33", null ]
       ] ],
       [ "How limits stack", "limits_page.html#autotoc_md35", null ],
@@ -161,8 +161,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"Controller_8hpp.html",
-"classtorq_1_1Task.html#abb180306359c84b1662677be458236cc"
+"Barriers_8hpp.html",
+"classtorq_1_1Task.html#a7cd693f433bc3f5e26fbab86c67645d1"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
