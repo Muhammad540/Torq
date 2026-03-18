@@ -68,10 +68,21 @@ target_link_libraries(imgui_lib PUBLIC glfw)
 set_target_properties(imgui_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # =======
+# SCServo (ST/STS/SMS protocol)
+# =======
+set(SCSERVO_SOURCES
+    src/hardware/scservo/SCS.cpp
+    src/hardware/scservo/SCSPort.cpp
+    src/hardware/scservo/SMS_STS_Port.cpp
+)
+
+# =======
 # Library
 # =======
 set(CORE_SOURCES
-    src/physics/MujocoDriver.cpp
+    src/hardware/MujocoDriver.cpp
+    src/hardware/ServoDriver.cpp
+    ${SCSERVO_SOURCES}
     src/core/RobotSystem.cpp
     src/gui/Gui.cpp
     src/kinematics/PinocchioModel.cpp
@@ -86,6 +97,7 @@ add_library(torq SHARED ${CORE_SOURCES})
 
 target_include_directories(torq PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/torq/scservo>
     $<INSTALL_INTERFACE:include>
 )
 

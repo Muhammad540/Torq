@@ -52,6 +52,11 @@ namespace torq {
     bool Gui::initialize(RobotSystem* robot, const std::string& title) {
         if (!robot) return false;
         robot_ = robot;
+        if (!robot->getPhysics()) {
+            logger.error() << "[Gui] No MuJoCo model available for rendering. "
+                              "Use driver_type=\"mujoco\", or provide scene_path with driver_type=\"serial_servo\" for display mirror.";
+            return false;
+        }
         model_ = static_cast<mjModel*>(robot->getPhysics()->getModel());
         data_ = static_cast<mjData*>(robot->getPhysics()->getData());
 
@@ -275,6 +280,18 @@ namespace torq {
 
     void Gui::drawJointControlPanel(){
         ImGui::Begin("Joint Control");
+
+        if (robot_->isRealRobot()) {
+            bool active = robot_->isActiveControl();
+            if (ImGui::Checkbox("Active control", &active)) {
+                robot_->setActiveControl(active);
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Off: only read positions and show in 3D (move by hand). On: send commands to robot.");
+            }
+            ImGui::Separator();
+        }
+
         ImGui::Text("Forward Kinematics - Joint Jog");
         ImGui::Separator();
         
