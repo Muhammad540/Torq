@@ -2,6 +2,7 @@ var classtorq_1_1Controller =
 [
     [ "Controller", "classtorq_1_1Controller.html#a3a45d9b2cb3fc3af7ffffb9147b64bb2", null ],
     [ "~Controller", "classtorq_1_1Controller.html#a54d86e1fccecd0b47bd198880da2a886", null ],
+    [ "setHardwareInterface", "classtorq_1_1Controller.html#af36b5872fdc7fe2df078c82d87c1d7e8", null ],
     [ "setTaskSpaceTarget", "classtorq_1_1Controller.html#a29033b11c98cf307313dc7c7e375a6be", null ],
     [ "setJointSpaceTarget", "classtorq_1_1Controller.html#aa7639e9d8aa33178df6ab8dfd7104d26", null ],
     [ "resetIKState", "classtorq_1_1Controller.html#a6f2581f133f32fdc836b09c9a79e8629", null ],

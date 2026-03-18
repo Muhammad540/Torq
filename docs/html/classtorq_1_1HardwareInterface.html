@@ -107,7 +107,8 @@ $(document).ready(function(){initNavTree('classtorq_1_1HardwareInterface.html','
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classtorq_1_1HardwareInterface__inherit__graph.svg" width="188" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classtorq_1_1HardwareInterface__inherit__graph.svg" width="312" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+</div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -150,12 +151,12 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract hardware abstraction layer for any robot driver (simulation or real). </p>
-<p>All control and kinematics code targets this interface. Swapping the concrete implementation (e.g. <a class="el" href="classtorq_1_1MujocoDriver.html" title="MuJoCo simulation backend implementing HardwareInterface.">MujocoDriver</a> → a real hardware driver) enables sim-to-real transfer without touching control logic.</p>
+<p>All control and kinematics code targets this interface. Swapping the concrete implementation (e.g. <a class="el" href="classtorq_1_1MujocoDriver.html">MujocoDriver</a> → a real hardware driver) enables sim-to-real transfer without touching control logic.</p>
 <p>Two "spaces" are exposed:</p><ul>
 <li><b>State space</b> (<code>getJointPositions</code> / <code>getJointVelocities</code>): \(q \in \mathbb{R}^{n_q}\), \(\dot{q} \in \mathbb{R}^{n_v}\).</li>
 <li><b>Actuator command space</b> (<code>setJointPositions</code> / <code>setJointVelocities</code>, <code>getCtrl</code>): may differ from state space (e.g. underactuated systems, gear ratios).</li>
 </ul>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1MujocoDriver.html" title="MuJoCo simulation backend implementing HardwareInterface.">MujocoDriver</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1MujocoDriver.html">MujocoDriver</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab5abbd2be0cf4e55990a340e83983e24"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab5abbd2be0cf4e55990a340e83983e24">&#9670;&nbsp;</a></span>~HardwareInterface()</h2>
@@ -216,7 +217,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True on success. </dd></dl>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#ab49e55d966ec0fae72bbe6fe003685a9">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#a04a5254cb0737725211e3b060a4730d5">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#ab49e55d966ec0fae72bbe6fe003685a9">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -245,7 +246,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Disconnect from the hardware / release resources. </p>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#a44500c40147a4581adb4abd19ab0a959">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#a151c4258ac4dc5421e50110e6d870328">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#a44500c40147a4581adb4abd19ab0a959">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -274,7 +275,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Current joint positions \(q \in \mathbb{R}^{n_q}\). </p>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#af08b337b82bf520b23432ce3a6ecc321">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#aa26e79cfe7e5a5e1905c300f51e08f1a">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#af08b337b82bf520b23432ce3a6ecc321">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -303,7 +304,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Current joint velocities \(\dot{q} \in \mathbb{R}^{n_v}\). </p>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#ad619dbe9893fbfad19d3a699d90e9e95">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#ad3b8d9bc42344fd17179b46a12b752f0">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#ad619dbe9893fbfad19d3a699d90e9e95">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -332,7 +333,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Current actuator commands (ctrl vector, size \(n_u\)). </p>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#aaf550104e163b19f84d03dfc0c295c94">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#af8e92c7ad2710e6e20770f67162fd28b">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#aaf550104e163b19f84d03dfc0c295c94">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -368,7 +369,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#a0416ff65bfaee6e26c9510bfc0c91a8c">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#a8b2b94ce0960b2cc8a13bf06a39b0cbe">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#a0416ff65bfaee6e26c9510bfc0c91a8c">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -404,7 +405,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#a2e2aaa3d19a881dbefba8ad3d61f925f">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#a2f9383da454c183f757177d1bee96e7a">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#a2e2aaa3d19a881dbefba8ad3d61f925f">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -434,7 +435,7 @@ Public Member Functions</h2></td></tr>
 <p>Advance the simulation / hardware by one timestep. </p>
 <p>Called at the control loop frequency. </p>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#a8393d73ea73facd1507db8c92aaf8e6c">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#a49bc738b8688382d18d6127793ead2ee">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#a8393d73ea73facd1507db8c92aaf8e6c">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -464,7 +465,7 @@ Public Member Functions</h2></td></tr>
 <p>Integration timestep [s]. </p>
 <p>Physics rate is 1/getTimestep() Hz. </p>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#aa1db70ad77e651c5144f72e036ed8cb7">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#a96746a22ef22e31ce18785674bc0d475">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#aa1db70ad77e651c5144f72e036ed8cb7">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -493,7 +494,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Number of joints (state-space dimension \(n_q\)). </p>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#a70df9a3cc06fec56804ea0395b8fc422">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#ac3b54a95f29743aec55b8fcc605cd3ee">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#a70df9a3cc06fec56804ea0395b8fc422">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>
@@ -522,7 +523,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Number of actuators (command-space dimension \(n_u\)). </p>
 
-<p>Implemented in <a class="el" href="classtorq_1_1MujocoDriver.html#ad62a3507c8413b79ad695a620e1fceae">torq::MujocoDriver</a>.</p>
+<p>Implemented in <a class="el" href="classtorq_1_1ServoDriver.html#aca66a5828fc5e771744ac66e73c4c07f">torq::ServoDriver</a>, and <a class="el" href="classtorq_1_1MujocoDriver.html#ad62a3507c8413b79ad695a620e1fceae">torq::MujocoDriver</a>.</p>
 
 </div>
 </div>

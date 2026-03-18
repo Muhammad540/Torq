@@ -9,7 +9,8 @@ var hierarchy =
     [ "torq::Controller", "classtorq_1_1Controller.html", null ],
     [ "torq::Gui", "classtorq_1_1Gui.html", null ],
     [ "torq::HardwareInterface", "classtorq_1_1HardwareInterface.html", [
-      [ "torq::MujocoDriver", "classtorq_1_1MujocoDriver.html", null ]
+      [ "torq::MujocoDriver", "classtorq_1_1MujocoDriver.html", null ],
+      [ "torq::ServoDriver", "classtorq_1_1ServoDriver.html", null ]
     ] ],
     [ "torq::IKConfig", "structtorq_1_1IKConfig.html", null ],
     [ "torq::InverseKinematics", "classtorq_1_1InverseKinematics.html", null ],
@@ -25,6 +26,12 @@ var hierarchy =
     [ "torq::QPProblem", "structtorq_1_1QPProblem.html", null ],
     [ "torq::RobotConfig", "structtorq_1_1RobotConfig.html", null ],
     [ "torq::RobotSystem", "classtorq_1_1RobotSystem.html", null ],
+    [ "SCS", null, [
+      [ "torq::scservo::SCSPort", "classtorq_1_1scservo_1_1SCSPort.html", [
+        [ "torq::scservo::SMS_STS_Port", "classtorq_1_1scservo_1_1SMS__STS__Port.html", null ]
+      ] ]
+    ] ],
+    [ "torq::SerialServoConfig", "structtorq_1_1SerialServoConfig.html", null ],
     [ "torq::Task", "classtorq_1_1Task.html", [
       [ "torq::ComTask", "classtorq_1_1ComTask.html", null ],
       [ "torq::DampingTask", "classtorq_1_1DampingTask.html", null ],

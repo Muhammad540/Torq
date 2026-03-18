@@ -1,4 +1,4 @@
 <map id="torq::MujocoDriver" name="torq::MujocoDriver">
-<area shape="rect" id="node1" title="MuJoCo simulation backend implementing HardwareInterface." alt="" coords="23,80,165,107"/>
+<area shape="rect" id="node1" title=" " alt="" coords="23,80,165,107"/>
 <area shape="rect" id="node2" href="$classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real)." alt="" coords="5,5,183,32"/>
 </map>

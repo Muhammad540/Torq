@@ -97,12 +97,12 @@ $(document).ready(function(){initNavTree('barriers_page.html',''); initResizable
 <div class="textblock"><p><a class="anchor" id="md_doc_barriers"></a> </p><blockquote class="doxtable">
 <p><b>Status:</b> <b>Barriers</b> are <b>planned</b> but not yet implemented <b>in</b> Torq. This page documents the intended design, based on <a href="https://github.com/stephane-caron/pink">Pink</a>'s barrier system. </p>
 </blockquote>
-<h1><a class="anchor" id="autotoc_md15"></a>
+<h1><a class="anchor" id="autotoc_md20"></a>
 &lt;/blockquote&gt;</h1>
-<h1><a class="anchor" id="autotoc_md16"></a>
+<h1><a class="anchor" id="autotoc_md21"></a>
 Control Barrier Functions (CBFs)</h1>
 <p>A barrier enforces a safety constraint \(h(q) \ge 0\) by adding inequality rows to the QP that prevent the robot from entering unsafe regions.</p>
-<h2><a class="anchor" id="autotoc_md17"></a>
+<h2><a class="anchor" id="autotoc_md22"></a>
 CBF inequality</h2>
 <p>For a barrier function \(h : \mathcal{Q} \to \mathbb{R}\):</p>
 <p class="formulaDsp">
@@ -113,7 +113,7 @@ CBF inequality</h2>
 \[ -\nabla_q h(q)^\top \Delta q \;\le\; \gamma_b\; h(q) \]
 </p>
 <p>where \(\gamma_b &gt; 0\) is the <b>barrier</b> gain <b></b>.</p>
-<h2><a class="anchor" id="autotoc_md18"></a>
+<h2><a class="anchor" id="autotoc_md23"></a>
 Safe displacement objective</h2>
 <p>In addition to the constraint, barriers add a secondary objective that pushes the robot away from the boundary:</p>
 <p class="formulaDsp">
@@ -121,9 +121,9 @@ Safe displacement objective</h2>
 </p>
 <p>where \(\kappa\) is the <b>safe</b> displacement gain <b></b>. When \(\kappa = 0\) only the hard constraint is active; when \(\kappa &gt; 0\) the solver also actively moves the robot away from the unsafe boundary.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md20"></a>
+<h1><a class="anchor" id="autotoc_md25"></a>
 Planned barrier types</h1>
-<h2><a class="anchor" id="autotoc_md21"></a>
+<h2><a class="anchor" id="autotoc_md26"></a>
 PositionBarrier</h2>
 <p>Bound the Cartesian position of a frame along selected axes.</p>
 <p class="formulaDsp">
@@ -143,7 +143,7 @@ PositionBarrier</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>safe_displacement_gain</code>   </td><td class="markdownTableBodyNone">float   </td><td class="markdownTableBodyNone">\(\kappa\)   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md22"></a>
+<h2><a class="anchor" id="autotoc_md27"></a>
 BodySphericalBarrier</h2>
 <p>Maintain minimum distance between two frames (collision avoidance between specific body pairs).</p>
 <p class="formulaDsp">
@@ -161,7 +161,7 @@ BodySphericalBarrier</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>safe_displacement_gain</code>   </td><td class="markdownTableBodyNone">float   </td><td class="markdownTableBodyNone">\(\kappa\) (default 3.0)   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md23"></a>
+<h2><a class="anchor" id="autotoc_md28"></a>
 SelfCollisionBarrier</h2>
 <p>Monitor multiple collision pairs from the Pinocchio geometry model and keep them above a minimum distance.</p>
 <p class="formulaDsp">
@@ -180,7 +180,7 @@ SelfCollisionBarrier</h2>
 <td class="markdownTableBodyNone"><code>safe_displacement_gain</code>   </td><td class="markdownTableBodyNone">float   </td><td class="markdownTableBodyNone">\(\kappa\) (default 1.0)   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md25"></a>
+<h1><a class="anchor" id="autotoc_md30"></a>
 How barriers fit into the QP</h1>
 <p>Once implemented, barriers will contribute:</p>
 <ol type="1">
@@ -189,7 +189,7 @@ How barriers fit into the QP</h1>
 </ol>
 <p>The overall QP structure remains unchanged — barriers are additive.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md27"></a>
+<h1><a class="anchor" id="autotoc_md32"></a>
 Common barrier parameters</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">

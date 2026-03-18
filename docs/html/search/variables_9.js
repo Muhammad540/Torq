@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['max_5fbase_5fangular_5fvel_486',['max_base_angular_vel',['../structtorq_1_1IKConfig.html#ab87b858f3bf664e0ecef9004898afbee',1,'torq::IKConfig']]],
-  ['max_5fbase_5flinear_5fvel_487',['max_base_linear_vel',['../structtorq_1_1IKConfig.html#a0d34ad6858bb350e00b0836d384b8154',1,'torq::IKConfig']]],
-  ['max_5ftracking_5ferror_488',['max_tracking_error',['../structtorq_1_1RobotConfig.html#a635a9f31ebfc286b2eb3bb79d5eb29cc',1,'torq::RobotConfig']]]
+  ['lm_5fdamping_5f_607',['lm_damping_',['../classtorq_1_1Task.html#a7cd693f433bc3f5e26fbab86c67645d1',1,'torq::Task']]],
+  ['locked_5fjoints_608',['locked_joints',['../structtorq_1_1RobotConfig.html#ac6b9ccaad2f9ff364fa5277fd1358f0c',1,'torq::RobotConfig']]]
 ];

@@ -6,5 +6,8 @@ var structtorq_1_1RobotConfig =
     [ "locked_joints", "structtorq_1_1RobotConfig.html#ac6b9ccaad2f9ff364fa5277fd1358f0c", null ],
     [ "gripper_actuator_idx", "structtorq_1_1RobotConfig.html#a44a180e01fafeab6e8285fe892e9a2cd", null ],
     [ "max_tracking_error", "structtorq_1_1RobotConfig.html#a635a9f31ebfc286b2eb3bb79d5eb29cc", null ],
-    [ "control_frequency_hz", "structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac", null ]
+    [ "control_frequency_hz", "structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac", null ],
+    [ "driver_type", "structtorq_1_1RobotConfig.html#a77c35664a8582d9a56fc54c4404a6218", null ],
+    [ "driver_connection", "structtorq_1_1RobotConfig.html#a2a8ee53f93de148493c86afab68c41aa", null ],
+    [ "active_control", "structtorq_1_1RobotConfig.html#aa91fd616a7878c0f259e76afffc64672", null ]
 ];

@@ -1,5 +1,6 @@
 var namespacetorq =
 [
+    [ "scservo", "namespacetorq_1_1scservo.html", "namespacetorq_1_1scservo" ],
     [ "Barrier", "classtorq_1_1Barrier.html", "classtorq_1_1Barrier" ],
     [ "PositionBarrier", "classtorq_1_1PositionBarrier.html", "classtorq_1_1PositionBarrier" ],
     [ "BodySphericalBarrier", "classtorq_1_1BodySphericalBarrier.html", "classtorq_1_1BodySphericalBarrier" ],
@@ -20,6 +21,8 @@ var namespacetorq =
     [ "KinematicsEngine", "classtorq_1_1KinematicsEngine.html", "classtorq_1_1KinematicsEngine" ],
     [ "RobotConfig", "structtorq_1_1RobotConfig.html", "structtorq_1_1RobotConfig" ],
     [ "RobotSystem", "classtorq_1_1RobotSystem.html", "classtorq_1_1RobotSystem" ],
+    [ "SerialServoConfig", "structtorq_1_1SerialServoConfig.html", "structtorq_1_1SerialServoConfig" ],
+    [ "ServoDriver", "classtorq_1_1ServoDriver.html", "classtorq_1_1ServoDriver" ],
     [ "Task", "classtorq_1_1Task.html", "classtorq_1_1Task" ],
     [ "FrameTask", "classtorq_1_1FrameTask.html", "classtorq_1_1FrameTask" ],
     [ "PostureTask", "classtorq_1_1PostureTask.html", "classtorq_1_1PostureTask" ],

@@ -110,6 +110,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3a45d9b2cb3fc3af7ffffb9147b64bb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54d86e1fccecd0b47bd198880da2a886"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a54d86e1fccecd0b47bd198880da2a886">~Controller</a> ()</td></tr>
 <tr class="separator:a54d86e1fccecd0b47bd198880da2a886"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af36b5872fdc7fe2df078c82d87c1d7e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#af36b5872fdc7fe2df078c82d87c1d7e8">setHardwareInterface</a> (<a class="el" href="classtorq_1_1HardwareInterface.html">HardwareInterface</a> *hardware)</td></tr>
+<tr class="memdesc:af36b5872fdc7fe2df078c82d87c1d7e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the hardware interface (e.g.  <a href="classtorq_1_1Controller.html#af36b5872fdc7fe2df078c82d87c1d7e8">More...</a><br /></td></tr>
+<tr class="separator:af36b5872fdc7fe2df078c82d87c1d7e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29033b11c98cf307313dc7c7e375a6be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtorq_1_1Controller.html#a29033b11c98cf307313dc7c7e375a6be">setTaskSpaceTarget</a> (const Eigen::Matrix4d &amp;target_pose, const std::string &amp;frame_name)</td></tr>
 <tr class="memdesc:a29033b11c98cf307313dc7c7e375a6be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a Cartesian target and switch to TASK_SPACE mode.  <a href="classtorq_1_1Controller.html#a29033b11c98cf307313dc7c7e375a6be">More...</a><br /></td></tr>
 <tr class="separator:a29033b11c98cf307313dc7c7e375a6be"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -223,6 +226,35 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="af36b5872fdc7fe2df078c82d87c1d7e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af36b5872fdc7fe2df078c82d87c1d7e8">&#9670;&nbsp;</a></span>setHardwareInterface()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void torq::Controller::setHardwareInterface </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classtorq_1_1HardwareInterface.html">HardwareInterface</a> *&#160;</td>
+          <td class="paramname"><em>hardware</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the hardware interface (e.g. </p>
+<p>when switching from sim to real driver). Must outlive the <a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">Controller</a>. </p>
+
+</div>
+</div>
 <a id="a29033b11c98cf307313dc7c7e375a6be"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a29033b11c98cf307313dc7c7e375a6be">&#9670;&nbsp;</a></span>setTaskSpaceTarget()</h2>
 

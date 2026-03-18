@@ -1,5 +1,6 @@
 var dir_d3aa5dcb7b4b31d0340eb0db650fa34c =
 [
+    [ "scservo", "dir_f34a13a3f4052837337085b55f0c81fc.html", "dir_f34a13a3f4052837337085b55f0c81fc" ],
     [ "Barriers.hpp", "Barriers_8hpp.html", [
       [ "Barrier", "classtorq_1_1Barrier.html", "classtorq_1_1Barrier" ],
       [ "PositionBarrier", "classtorq_1_1PositionBarrier.html", "classtorq_1_1PositionBarrier" ],
@@ -31,6 +32,10 @@ var dir_d3aa5dcb7b4b31d0340eb0db650fa34c =
     [ "RobotSystem.hpp", "RobotSystem_8hpp.html", [
       [ "RobotConfig", "structtorq_1_1RobotConfig.html", "structtorq_1_1RobotConfig" ],
       [ "RobotSystem", "classtorq_1_1RobotSystem.html", "classtorq_1_1RobotSystem" ]
+    ] ],
+    [ "ServoDriver.hpp", "ServoDriver_8hpp.html", [
+      [ "SerialServoConfig", "structtorq_1_1SerialServoConfig.html", "structtorq_1_1SerialServoConfig" ],
+      [ "ServoDriver", "classtorq_1_1ServoDriver.html", "classtorq_1_1ServoDriver" ]
     ] ],
     [ "Tasks.hpp", "Tasks_8hpp.html", [
       [ "Task", "classtorq_1_1Task.html", "classtorq_1_1Task" ],

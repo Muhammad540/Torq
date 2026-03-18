@@ -1,6 +1,10 @@
 var annotated_dup =
 [
     [ "torq", "namespacetorq.html", [
+      [ "scservo", "namespacetorq_1_1scservo.html", [
+        [ "SCSPort", "classtorq_1_1scservo_1_1SCSPort.html", "classtorq_1_1scservo_1_1SCSPort" ],
+        [ "SMS_STS_Port", "classtorq_1_1scservo_1_1SMS__STS__Port.html", "classtorq_1_1scservo_1_1SMS__STS__Port" ]
+      ] ],
       [ "Barrier", "classtorq_1_1Barrier.html", "classtorq_1_1Barrier" ],
       [ "PositionBarrier", "classtorq_1_1PositionBarrier.html", "classtorq_1_1PositionBarrier" ],
       [ "BodySphericalBarrier", "classtorq_1_1BodySphericalBarrier.html", "classtorq_1_1BodySphericalBarrier" ],
@@ -21,6 +25,8 @@ var annotated_dup =
       [ "KinematicsEngine", "classtorq_1_1KinematicsEngine.html", "classtorq_1_1KinematicsEngine" ],
       [ "RobotConfig", "structtorq_1_1RobotConfig.html", "structtorq_1_1RobotConfig" ],
       [ "RobotSystem", "classtorq_1_1RobotSystem.html", "classtorq_1_1RobotSystem" ],
+      [ "SerialServoConfig", "structtorq_1_1SerialServoConfig.html", "structtorq_1_1SerialServoConfig" ],
+      [ "ServoDriver", "classtorq_1_1ServoDriver.html", "classtorq_1_1ServoDriver" ],
       [ "Task", "classtorq_1_1Task.html", "classtorq_1_1Task" ],
       [ "FrameTask", "classtorq_1_1FrameTask.html", "classtorq_1_1FrameTask" ],
       [ "PostureTask", "classtorq_1_1PostureTask.html", "classtorq_1_1PostureTask" ],

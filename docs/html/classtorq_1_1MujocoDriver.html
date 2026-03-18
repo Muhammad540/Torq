@@ -98,16 +98,14 @@ $(document).ready(function(){initNavTree('classtorq_1_1MujocoDriver.html',''); i
 </div><!--header-->
 <div class="contents">
 
-<p>MuJoCo simulation backend implementing <a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a>.  
- <a href="classtorq_1_1MujocoDriver.html#details">More...</a></p>
-
 <p><code>#include &lt;<a class="el" href="MujocoDriver_8hpp_source.html">MujocoDriver.hpp</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for torq::MujocoDriver:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classtorq_1_1MujocoDriver__inherit__graph.svg" width="188" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classtorq_1_1MujocoDriver__inherit__graph.svg" width="188" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+</div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -171,9 +169,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab5abbd2be0cf4e55990a340e83983e24 inherit pub_methods_classtorq_1_1HardwareInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>MuJoCo simulation backend implementing <a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a>. </p>
-<p>Wraps <code>mjModel</code> / <code>mjData</code> with RAII smart pointers. Provides both the actuator-command interface (setJointPositions writes to <code>ctrl</code>) and direct state overrides (overrideJointPositions writes to <code>qpos</code>).</p>
-<p>Step frequency: <a class="el" href="classtorq_1_1MujocoDriver.html#a8393d73ea73facd1507db8c92aaf8e6c" title="Advance simulation by one physics step.">step()</a> is called from <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">RobotSystem::update()</a> at the application control frequency (see <a class="el" href="classtorq_1_1RobotSystem.html#a389b81123356f7349711522f9987913b" title="Current target control frequency [Hz].">RobotSystem::controlFrequencyHz()</a>). The physics timestep (<a class="el" href="classtorq_1_1MujocoDriver.html#aa1db70ad77e651c5144f72e036ed8cb7" title="Physics integration timestep [s] from the model (frequency = 1/getTimestep()).">getTimestep()</a>) is set in the MJCF/XML model; typical values yield 500–2000 Hz physics. The control loop usually runs one physics step per update() call.</p>
+<div class="textblock"><pre class="fragment">   @brief MuJoCo simulation backend implementing HardwareInterface.
+
+   Wraps `mjModel` / `mjData` with RAII smart pointers.  Provides both the
+   actuator-command interface (setJointPositions writes to `ctrl`) and
+   direct state overrides (overrideJointPositions writes to `qpos`).
+</pre><p> p * Step frequency: <a class="el" href="classtorq_1_1MujocoDriver.html#a8393d73ea73facd1507db8c92aaf8e6c" title="Advance simulation by one physics step.">step()</a> is called from <a class="el" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638" title="Execute one control + physics tick.">RobotSystem::update()</a> at the application control frequency (see <a class="el" href="classtorq_1_1RobotSystem.html#a389b81123356f7349711522f9987913b" title="Current target control frequency [Hz].">RobotSystem::controlFrequencyHz()</a>). The physics timestep (<a class="el" href="classtorq_1_1MujocoDriver.html#aa1db70ad77e651c5144f72e036ed8cb7" title="Physics integration timestep [s] from the model (frequency = 1/getTimestep()).">getTimestep()</a>) is set in the MJCF/XML model; typical values yield 500–2000 Hz physics. The control loop usually runs one physics step per update() call.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">HardwareInterface</a> </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a98e2aae7b4043b669714e090c8d32e37"></a>

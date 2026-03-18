@@ -106,7 +106,7 @@ $(document).ready(function(){initNavTree('structtorq_1_1RobotConfig.html',''); i
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:af034c7f47cfcea2c4bea783247dd8bc7"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7">scene_path</a></td></tr>
-<tr class="memdesc:af034c7f47cfcea2c4bea783247dd8bc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Path to the MuJoCo scene XML (floor, lights, robot include).  <a href="structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7">More...</a><br /></td></tr>
+<tr class="memdesc:af034c7f47cfcea2c4bea783247dd8bc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Path to the MuJoCo scene XML (floor, lights, robot include). Used when driver_type is "mujoco".  <a href="structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7">More...</a><br /></td></tr>
 <tr class="separator:af034c7f47cfcea2c4bea783247dd8bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad230ad2d4e45e2fa9e975abba0d471cd"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd">robot_model_path</a></td></tr>
 <tr class="memdesc:ad230ad2d4e45e2fa9e975abba0d471cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Path to the robot-only URDF or MJCF for Pinocchio kinematics.  <a href="structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd">More...</a><br /></td></tr>
@@ -126,6 +126,15 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a66a577a23d2d038dceb4390cbd49a3ac"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac">control_frequency_hz</a> = 500.0</td></tr>
 <tr class="memdesc:a66a577a23d2d038dceb4390cbd49a3ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target control loop frequency [Hz] for update(); caller should invoke update() at this rate.  <a href="structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac">More...</a><br /></td></tr>
 <tr class="separator:a66a577a23d2d038dceb4390cbd49a3ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77c35664a8582d9a56fc54c4404a6218"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a77c35664a8582d9a56fc54c4404a6218">driver_type</a> = &quot;serial_servo&quot;</td></tr>
+<tr class="memdesc:a77c35664a8582d9a56fc54c4404a6218"><td class="mdescLeft">&#160;</td><td class="mdescRight">Driver for hardware: "mujoco" (simulation) or "serial_servo" (real robot, e.g.  <a href="structtorq_1_1RobotConfig.html#a77c35664a8582d9a56fc54c4404a6218">More...</a><br /></td></tr>
+<tr class="separator:a77c35664a8582d9a56fc54c4404a6218"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a8ee53f93de148493c86afab68c41aa"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a2a8ee53f93de148493c86afab68c41aa">driver_connection</a></td></tr>
+<tr class="memdesc:a2a8ee53f93de148493c86afab68c41aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connection for real robot: serial port (e.g.  <a href="structtorq_1_1RobotConfig.html#a2a8ee53f93de148493c86afab68c41aa">More...</a><br /></td></tr>
+<tr class="separator:a2a8ee53f93de148493c86afab68c41aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa91fd616a7878c0f259e76afffc64672"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#aa91fd616a7878c0f259e76afffc64672">active_control</a> = false</td></tr>
+<tr class="memdesc:aa91fd616a7878c0f259e76afffc64672"><td class="mdescLeft">&#160;</td><td class="mdescRight">When true (default), send position commands to real hardware.  <a href="structtorq_1_1RobotConfig.html#aa91fd616a7878c0f259e76afffc64672">More...</a><br /></td></tr>
+<tr class="separator:aa91fd616a7878c0f259e76afffc64672"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">Configuration</a> for initialising a <a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">RobotSystem</a>. </p>
@@ -143,7 +152,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Path to the MuJoCo scene XML (floor, lights, robot include). </p>
+<p>Path to the MuJoCo scene XML (floor, lights, robot include). Used when driver_type is "mujoco". </p>
 
 </div>
 </div>
@@ -242,6 +251,57 @@ Public Attributes</h2></td></tr>
 
 <p>Target control loop frequency [Hz] for update(); caller should invoke update() at this rate. </p>
 <p>Typical 200–1000 for IK. Default 500. </p>
+
+</div>
+</div>
+<a id="a77c35664a8582d9a56fc54c4404a6218"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77c35664a8582d9a56fc54c4404a6218">&#9670;&nbsp;</a></span>driver_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string torq::RobotConfig::driver_type = &quot;serial_servo&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Driver for hardware: "mujoco" (simulation) or "serial_servo" (real robot, e.g. </p>
+<p>ST3215 servo). Default "mujoco". </p>
+
+</div>
+</div>
+<a id="a2a8ee53f93de148493c86afab68c41aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a8ee53f93de148493c86afab68c41aa">&#9670;&nbsp;</a></span>driver_connection</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string torq::RobotConfig::driver_connection</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Connection for real robot: serial port (e.g. </p>
+<p>/dev/ttyUSB0) or path to a driver config file. Used when driver_type is "serial_servo". </p>
+
+</div>
+</div>
+<a id="aa91fd616a7878c0f259e76afffc64672"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa91fd616a7878c0f259e76afffc64672">&#9670;&nbsp;</a></span>active_control</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool torq::RobotConfig::active_control = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>When true (default), send position commands to real hardware. </p>
+<p>When false (passive mode), only read positions and mirror to display — e.g. move by hand and observe in GUI. Ignored when driver_type is "mujoco". </p>
 
 </div>
 </div>
