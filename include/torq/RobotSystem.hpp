@@ -206,7 +206,7 @@ namespace torq {
             /** @brief True if active control is enabled (commands sent to hardware). */
             bool isActiveControl() const { return active_control_; }
 
-            /** @brief True if the current hardware driver is real (e.g. DynamixelDriver). Use to show passive/active toggle only for real robots. */
+            /** @brief True if the current hardware driver is real (e.g. ServoDriver). Use to show passive/active toggle only for real robots. */
             bool isRealRobot() const;
 
             /** @brief Toggle gripper between open and closed. */
