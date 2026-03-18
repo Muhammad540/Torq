@@ -5,7 +5,7 @@
 
 static Logger logger;
 
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
     std::filesystem::path root(PROJECT_ROOT);
 
     torq::RobotConfig config;
@@ -13,6 +13,13 @@ int main(int argc, char** argv){
     config.robot_model_path = (root / "workspace/models/SO101/so101_new_calib.urdf").string();
     config.end_effector_frame = "gripper_frame_link";
     config.locked_joints = {"gripper"};
+
+    std::string conf_path = (root / "workspace/so101/so101.conf").string();
+    if (argc >= 2)
+        conf_path = argv[1];
+    config.driver_connection = conf_path;
+    config.driver_type = "serial_servo";
+    config.active_control = false;
 
     torq::RobotSystem robot;
     if (!robot.initialize(config)){
