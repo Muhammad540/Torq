@@ -45,8 +45,9 @@ int main() {
 | @subpage qp_formulation | Full QP derivation — objective, constraints, solver |
 | @subpage tasks_page | Task types with mathematical derivations |
 | @subpage limits_page | Limit types with constraint formulations |
-| @subpage barriers_page | Planned barrier (CBF) system |
+| @subpage barriers_page | Barrier (CBF) system |
 | @subpage tuning_guide | Parameter reference and tuning recipes |
+| @subpage sim_to_real | Sim-to-real: ServoDriver, limits, and real robot setup |
 
 ## Key design choices
 
