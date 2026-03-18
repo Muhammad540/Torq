@@ -1,5 +1,6 @@
 #include "torq/RobotSystem.hpp"
 #include "torq/MujocoDriver.hpp"
+#include "torq/ServoDriver.hpp"
 #include "torq/PinocchioModel.hpp"
 #include <Eigen/Geometry>
 
@@ -7,7 +8,6 @@
 #include <iostream>
 #include <memory>
 
-// Set to true to print actual end-effector displacement after each physics step.
 static constexpr bool IK_ACTUAL_MOTION_DIAGNOSTICS = false;
 
 namespace torq {
@@ -21,11 +21,25 @@ namespace torq {
     }
 
     bool RobotSystem::initialize(const RobotConfig& config) {
+        const bool use_real_driver = (config.driver_type == "serial_servo");
+
+        if (use_real_driver) {
+            if (config.driver_connection.empty()) {
+                log_.error() << "[RobotSystem] driver_connection is required when driver_type is " << config.driver_type;
+                return false;
+            }
+            hardware_.reset();
+            hardware_ = std::make_unique<ServoDriver>();
+            controller_->setHardwareInterface(hardware_.get());
+        }
+
         if (!hardware_) {
             log_.error() << "[RobotSystem] Hardware abstraction not initialized";
             return false;
         }
-        if (!hardware_->connect(config.scene_path)) {
+
+        const std::string connection_path = use_real_driver ? config.driver_connection : config.scene_path;
+        if (!hardware_->connect(connection_path)) {
             log_.error() << "[RobotSystem] Failed to connect Hardware";
             return false;
         }
@@ -37,16 +51,46 @@ namespace torq {
         end_effector_frame_ = config.end_effector_frame;
         max_tracking_error_ = config.max_tracking_error;
         control_frequency_hz_ = config.control_frequency_hz;
+        if (use_real_driver)
+            active_control_ = config.active_control;
 
-        auto* physics = getPhysics();
-        mjModel* m = physics->getModel();
-        mjData*  d = physics->getData();
-        int gripper_idx = config.gripper_actuator_idx;
-        if (gripper_idx < 0) gripper_idx = m->nu - 1;
-        double low  = m->actuator_ctrlrange[2 * gripper_idx];
-        double high = m->actuator_ctrlrange[2 * gripper_idx + 1];
-        double current = d->ctrl[gripper_idx];
-        controller_->setGripperConfig(gripper_idx, high, low, current);
+        // When using real hardware, optionally load MuJoCo scene as a display
+        // mirror so the GUI can still render the 3D robot model. The display
+        // model is never stepped — only its qpos is overwritten from the real
+        // robot each update().
+        if (use_real_driver && !config.scene_path.empty()) {
+            display_physics_ = std::make_unique<MujocoDriver>();
+            if (!display_physics_->connect(config.scene_path)) {
+                log_.warning() << "[RobotSystem] Could not load display scene '" << config.scene_path
+                               << "'; GUI 3D view will be unavailable.";
+                display_physics_.reset();
+            } else {
+                Eigen::VectorXd q_real = hardware_->getJointPositions();
+                int nq_display = display_physics_->getModel()->nq;
+                if (q_real.size() == nq_display) {
+                    display_physics_->overrideJointPositions(q_real);
+                } else if (q_real.size() < nq_display) {
+                    Eigen::VectorXd q_padded = Eigen::VectorXd::Zero(nq_display);
+                    q_padded.head(q_real.size()) = q_real;
+                    display_physics_->overrideJointPositions(q_padded);
+                } else {
+                    display_physics_->overrideJointPositions(q_real.head(nq_display));
+                }
+                log_.info() << "[RobotSystem] Display mirror loaded from '" << config.scene_path << "'";
+            }
+        }
+
+        MujocoDriver* physics = getPhysics();
+        if (physics && physics->getModel() && physics->getData()) {
+            mjModel* m = physics->getModel();
+            mjData*  d = physics->getData();
+            int gripper_idx = config.gripper_actuator_idx;
+            if (gripper_idx < 0) gripper_idx = m->nu - 1;
+            double low  = m->actuator_ctrlrange[2 * gripper_idx];
+            double high = m->actuator_ctrlrange[2 * gripper_idx + 1];
+            double current = d->ctrl[gripper_idx];
+            controller_->setGripperConfig(gripper_idx, high, low, current);
+        }
         return true;
     }
 
@@ -82,7 +126,6 @@ namespace torq {
              capture_actual = true;
           }
 
-          // Stepping Simulation (applies ctrl set in previous update)
           hardware_->step();
 
           if (capture_actual) {
@@ -92,7 +135,7 @@ namespace torq {
                        << actual_dp.transpose() << "] dz=" << actual_dp(2) << std::endl;
           }
 
-          if (controller_) {
+          if (controller_ && active_control_) {
             std::vector<Task*> user_task_ptrs;
             user_task_ptrs.reserve(user_tasks_.size());
             for (const auto& p : user_tasks_) user_task_ptrs.push_back(p.get());
@@ -104,10 +147,28 @@ namespace torq {
             for (const auto& p : user_barriers_) user_barrier_ptrs.push_back(p.get());
             controller_->update(user_task_ptrs, user_limit_ptrs, user_barrier_ptrs);
           }
+
+          // Mirror real robot state into the display-only MuJoCo model so
+          // the GUI viewport reflects actual hardware joint positions.
+          if (display_physics_) {
+             Eigen::VectorXd q_real = hardware_->getJointPositions();
+             int nq_display = display_physics_->getModel()->nq;
+             if (q_real.size() == nq_display) {
+                display_physics_->overrideJointPositions(q_real);
+             } else if (q_real.size() < nq_display) {
+                Eigen::VectorXd q_padded = Eigen::VectorXd::Zero(nq_display);
+                q_padded.head(q_real.size()) = q_real;
+                display_physics_->overrideJointPositions(q_padded);
+             } else {
+                display_physics_->overrideJointPositions(q_real.head(nq_display));
+             }
+          }
        }
     }
 
     MujocoDriver* RobotSystem::getPhysics() {
+        if (display_physics_)
+            return display_physics_.get();
         return dynamic_cast<MujocoDriver*>(hardware_.get());
     }
 
@@ -201,6 +262,10 @@ namespace torq {
       if (controller_) return controller_->isGripperOpen();
       log_.warning() << "[RobotSystem] controller not set up properly";
       return true;
+    }
+
+    bool RobotSystem::isRealRobot() const {
+        return dynamic_cast<ServoDriver*>(hardware_.get()) != nullptr;
     }
 
     void RobotSystem::setFrameTaskPositionCost(double cost) {

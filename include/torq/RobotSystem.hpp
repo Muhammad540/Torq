@@ -1,8 +1,9 @@
 #ifndef ROBOT_SYSTEM_HPP
 #define ROBOT_SYSTEM_HPP
 
-#include "MujocoDriver.hpp"
 #include "HardwareInterface.hpp"
+#include "MujocoDriver.hpp"
+#include "ServoDriver.hpp"
 #include "logger.hpp"
 #include "PinocchioModel.hpp"
 #include "Controller.hpp"
@@ -23,7 +24,7 @@ namespace torq {
      * end-effector frame, and joint-locking / gripper setup.
      */
     struct RobotConfig {
-        std::string scene_path;              ///< Path to the MuJoCo scene XML (floor, lights, robot include).
+        std::string scene_path;              ///< Path to the MuJoCo scene XML (floor, lights, robot include). Used when driver_type is "mujoco".
         std::string robot_model_path;        ///< Path to the robot-only URDF or MJCF for Pinocchio kinematics.
         std::string end_effector_frame;      ///< Name of the end-effector frame in the Pinocchio model.
         std::vector<std::string> locked_joints; ///< Joint names to freeze (removed from the reduced model).
@@ -32,6 +33,13 @@ namespace torq {
         double max_tracking_error = 0.05;
         /** Target control loop frequency [Hz] for update(); caller should invoke update() at this rate. Typical 200–1000 for IK. Default 500. */
         double control_frequency_hz = 500.0;
+
+        /** Driver for hardware: "mujoco" (simulation) or "serial_servo" (real robot, e.g. ST3215 servo). Default "mujoco". */
+        std::string driver_type = "serial_servo";
+        /** Connection for real robot: serial port (e.g. /dev/ttyUSB0) or path to a driver config file. Used when driver_type is "serial_servo". */
+        std::string driver_connection;
+        /** When true (default), send position commands to real hardware. When false (passive mode), only read positions and mirror to display — e.g. move by hand and observe in GUI. Ignored when driver_type is "mujoco". */
+        bool active_control = false;
     };
 
     class HardwareInterface;
@@ -99,8 +107,14 @@ namespace torq {
             void update();
             
             /**
-             * @brief Raw pointer to the MuJoCo driver (for the GUI viewport).
-             * @note Intended for internal use by Gui.
+             * @brief Raw pointer to a MuJoCo driver suitable for GUI rendering.
+             *
+             * When using MujocoDriver as the primary hardware, returns that driver.
+             * When using a real hardware driver (e.g. ServoDriver) with a
+             * display model loaded (scene_path provided), returns the display-only
+             * MujocoDriver whose state is synced from the real robot each update().
+             *
+             * @return nullptr if no MuJoCo model is available for rendering.
              */
             MujocoDriver* getPhysics();
 
@@ -177,6 +191,23 @@ namespace torq {
             double controlFrequencyHz() const { return control_frequency_hz_; }
             /** @brief Control period [s] = 1 / controlFrequencyHz(), for rate limiting. */
             double controlPeriodSec() const { return 1.0 / control_frequency_hz_; }
+
+            /**
+             * @brief Enable or disable active control (real robot only).
+             *
+             * When disabled (passive mode), update() still reads joint positions from
+             * hardware and mirrors them to the display model, but no commands are
+             * sent to the servos. Use this to move the robot by hand and see the
+             * pose in the GUI, then enable active control when ready.
+             *
+             * @param active  True to send IK/position commands; false for display-only.
+             */
+            void setActiveControl(bool active) { active_control_ = active; }
+            /** @brief True if active control is enabled (commands sent to hardware). */
+            bool isActiveControl() const { return active_control_; }
+
+            /** @brief True if the current hardware driver is real (e.g. DynamixelDriver). Use to show passive/active toggle only for real robots. */
+            bool isRealRobot() const;
 
             /** @brief Toggle gripper between open and closed. */
             void toggleGripper();
@@ -266,6 +297,11 @@ namespace torq {
             std::unique_ptr<KinematicsEngine> kinematics_;
             std::unique_ptr<Controller> controller_;
 
+            /// Display-only MuJoCo model used to mirror real robot state in the GUI.
+            /// Created when driver_type is real hardware and scene_path is provided.
+            /// Never used for control — only for rendering via getPhysics().
+            std::unique_ptr<MujocoDriver> display_physics_;
+
             /// User-added tasks/limits/barriers (RobotSystem owns these)
             std::vector<std::unique_ptr<Task>> user_tasks_;
             std::vector<std::unique_ptr<Limit>> user_limits_;
@@ -282,6 +318,7 @@ namespace torq {
             std::string last_jog_frame_;
             double max_tracking_error_ = 0.05;
             double control_frequency_hz_ = 500.0;
+            bool active_control_ = false;  ///< When false (passive mode), no commands sent to real hardware.
     };
 }
 

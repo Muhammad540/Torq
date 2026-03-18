@@ -79,7 +79,10 @@ namespace torq{
      */
     Controller(KinematicsEngine* kinematics, HardwareInterface* hardware);
     ~Controller();
-    
+
+    /** @brief Set the hardware interface (e.g. when switching from sim to real driver). Must outlive the Controller. */
+    void setHardwareInterface(HardwareInterface* hardware) { hardware_ = hardware; }
+
     /**
      * @brief Set a Cartesian target and switch to TASK_SPACE mode.
      *
