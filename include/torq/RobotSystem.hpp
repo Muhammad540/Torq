@@ -35,11 +35,11 @@ namespace torq {
         double control_frequency_hz = 500.0;
 
         /** Driver for hardware: "mujoco" (simulation) or "serial_servo" (real robot, e.g. ST3215 servo). Default "mujoco". */
-        std::string driver_type = "serial_servo";
+        std::string driver_type = "mujoco";
         /** Connection for real robot: serial port (e.g. /dev/ttyUSB0) or path to a driver config file. Used when driver_type is "serial_servo". */
         std::string driver_connection;
         /** When true (default), send position commands to real hardware. When false (passive mode), only read positions and mirror to display — e.g. move by hand and observe in GUI. Ignored when driver_type is "mujoco". */
-        bool active_control = false;
+        bool active_control = true;
     };
 
     class HardwareInterface;

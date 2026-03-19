@@ -18,12 +18,12 @@ int main(int argc, char** argv) {
     if (argc >= 2)
         conf_path = argv[1];
     config.driver_connection = conf_path;
-    config.driver_type = "serial_servo";
-    config.active_control = false;
+    config.driver_type = "mujoco";
+    config.active_control = true;
 
     torq::RobotSystem robot;
     if (!robot.initialize(config)){
-        logger.error() << "Failed to load model";
+        logger.error() << "[S0101] Failed to load model";
         return 1;
     }
 

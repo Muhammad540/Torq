@@ -51,8 +51,7 @@ namespace torq {
         end_effector_frame_ = config.end_effector_frame;
         max_tracking_error_ = config.max_tracking_error;
         control_frequency_hz_ = config.control_frequency_hz;
-        if (use_real_driver)
-            active_control_ = config.active_control;
+        active_control_ = use_real_driver ? config.active_control : true;
 
         // When using real hardware, optionally load MuJoCo scene as a display
         // mirror so the GUI can still render the 3D robot model. The display
