@@ -47,7 +47,7 @@ digraph SystemDiagram {
     fillcolor="#E8E8E8";
     style="rounded,filled";
 
-    MujocoDriver [label="MujocoDriver\n(HAL)\nq, v sync", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
+    HardwareDriver [label="HardwareDriver\n(HAL)\nq, v sync", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
     KinematicsEngine [label="KinematicsEngine\nConfiguration\nFK, Jacobians", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
     Controller [label="Controller\nIK + Tasks + Limits\nOSQP solve", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
     Gui [label="Gui\nImGui viewport\njoint / cartesian / IK panel", shape=box, style="rounded,filled", fillcolor="#B8E6B8"];
@@ -75,12 +75,12 @@ digraph SystemDiagram {
   PinocchioModel -> RobotSystem;
   MujocoModel -> RobotSystem;
 
-  RobotSystem -> MujocoDriver;
+  RobotSystem -> HardwareDriver;
   RobotSystem -> KinematicsEngine;
   RobotSystem -> Controller;
   RobotSystem -> Gui;
 
-  MujocoDriver -> Commands;
+  HardwareDriver -> Commands;
   Controller -> Commands;
   Gui -> Rendered;
 }

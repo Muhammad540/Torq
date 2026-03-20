@@ -1,7 +1,8 @@
 # QP Formulation {#qp_formulation}
 
+[update qp formulation has missing barriers]
 Torq solves differential inverse kinematics as a @b Quadratic Program (QP) @b at
-every control tick.  This page derives the complete formulation — how tasks,
+every control tick.  This page derives the complete formulation explaining how tasks,
 limits, and damping compose into a single optimisation problem.
 
 ## Overview
@@ -9,7 +10,7 @@ limits, and damping compose into a single optimisation problem.
 Given the current robot configuration \f$q\f$, the IK solver finds a
 displacement \f$\Delta q \in \mathbb{R}^{n_v}\f$ (tangent-space velocity
 \f$\times\,\Delta t\f$) that best satisfies all active tasks while respecting
-physical limits:
+physical limits and defined barriers.
 
 \f[
 \begin{aligned}
@@ -19,7 +20,7 @@ physical limits:
 \f]
 
 where \f$P\f$ (positive semi-definite) and \f$c\f$ accumulate task objectives,
-and the rows of \f$(G, h)\f$ encode limit constraints.
+and the rows of \f$(G, h)\f$ encode limit and barrier constraints. [update: check again]
 
 ---
 
@@ -34,7 +35,7 @@ Every task \f$i\f$ defines:
 | \f$w_i\f$ | Cost (weight) vector | \f$k_i \times 1\f$ |
 | \f$\alpha_i\f$ | Gain \f$\in (0, 1]\f$ | scalar |
 | \f$\mu_i\f$ | Levenberg–Marquardt damping | scalar |
-
+[update: add a column briefly describing the contribution]
 ### Weight matrix
 
 The diagonal weight matrix \f$W_i = \operatorname{diag}(w_i)\f$ scales each

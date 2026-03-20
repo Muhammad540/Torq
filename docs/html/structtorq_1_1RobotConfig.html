@@ -126,13 +126,13 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a66a577a23d2d038dceb4390cbd49a3ac"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac">control_frequency_hz</a> = 500.0</td></tr>
 <tr class="memdesc:a66a577a23d2d038dceb4390cbd49a3ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target control loop frequency [Hz] for update(); caller should invoke update() at this rate.  <a href="structtorq_1_1RobotConfig.html#a66a577a23d2d038dceb4390cbd49a3ac">More...</a><br /></td></tr>
 <tr class="separator:a66a577a23d2d038dceb4390cbd49a3ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77c35664a8582d9a56fc54c4404a6218"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a77c35664a8582d9a56fc54c4404a6218">driver_type</a> = &quot;serial_servo&quot;</td></tr>
+<tr class="memitem:a77c35664a8582d9a56fc54c4404a6218"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a77c35664a8582d9a56fc54c4404a6218">driver_type</a> = &quot;mujoco&quot;</td></tr>
 <tr class="memdesc:a77c35664a8582d9a56fc54c4404a6218"><td class="mdescLeft">&#160;</td><td class="mdescRight">Driver for hardware: "mujoco" (simulation) or "serial_servo" (real robot, e.g.  <a href="structtorq_1_1RobotConfig.html#a77c35664a8582d9a56fc54c4404a6218">More...</a><br /></td></tr>
 <tr class="separator:a77c35664a8582d9a56fc54c4404a6218"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a8ee53f93de148493c86afab68c41aa"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#a2a8ee53f93de148493c86afab68c41aa">driver_connection</a></td></tr>
 <tr class="memdesc:a2a8ee53f93de148493c86afab68c41aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connection for real robot: serial port (e.g.  <a href="structtorq_1_1RobotConfig.html#a2a8ee53f93de148493c86afab68c41aa">More...</a><br /></td></tr>
 <tr class="separator:a2a8ee53f93de148493c86afab68c41aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa91fd616a7878c0f259e76afffc64672"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#aa91fd616a7878c0f259e76afffc64672">active_control</a> = false</td></tr>
+<tr class="memitem:aa91fd616a7878c0f259e76afffc64672"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structtorq_1_1RobotConfig.html#aa91fd616a7878c0f259e76afffc64672">active_control</a> = true</td></tr>
 <tr class="memdesc:aa91fd616a7878c0f259e76afffc64672"><td class="mdescLeft">&#160;</td><td class="mdescRight">When true (default), send position commands to real hardware.  <a href="structtorq_1_1RobotConfig.html#aa91fd616a7878c0f259e76afffc64672">More...</a><br /></td></tr>
 <tr class="separator:aa91fd616a7878c0f259e76afffc64672"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -261,7 +261,7 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::string torq::RobotConfig::driver_type = &quot;serial_servo&quot;</td>
+          <td class="memname">std::string torq::RobotConfig::driver_type = &quot;mujoco&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -295,7 +295,7 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool torq::RobotConfig::active_control = false</td>
+          <td class="memname">bool torq::RobotConfig::active_control = true</td>
         </tr>
       </table>
 </div><div class="memdoc">

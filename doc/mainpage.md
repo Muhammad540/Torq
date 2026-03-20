@@ -8,6 +8,8 @@ behind a concise API.  The library solves differential inverse kinematics as a
 Quadratic Program at every control tick, supporting configurable tasks, limits,
 and (planned) barrier functions.
 
+It is planned to extend support to sim-to-real training pipelines, evaluating end-to-end robot policies in simulation and testing on real robot.
+
 ---
 
 ## Quick start
@@ -23,6 +25,10 @@ int main() {
     config.end_effector_frame    = "ee_frame";
     config.locked_joints         = {"joint_6"};
     config.gripper_actuator_idx  = -1;
+    // For so101 arm (uses serial servo comm) provide additional conf file if need to control real robot
+    config.driver_connection = "path/to/.conf file";
+    config.driver_type = "serial_servo"; // or mujoco
+    config.active_control = false;       // if false mimics real robot in sim
 
     torq::RobotSystem robot;
     robot.initialize(config);
@@ -42,24 +48,24 @@ int main() {
 | Page | Contents |
 |------|----------|
 | @subpage architecture | System diagram, class hierarchy, data flow |
-| @subpage qp_formulation | Full QP derivation — objective, constraints, solver |
+| @subpage qp_formulation | Full QP derivation that includes objective, constraints, solver |
 | @subpage tasks_page | Task types with mathematical derivations |
 | @subpage limits_page | Limit types with constraint formulations |
 | @subpage barriers_page | Barrier (CBF) system |
-| @subpage tuning_guide | Parameter reference and tuning recipes |
-| @subpage sim_to_real | Sim-to-real: ServoDriver, limits, and real robot setup |
+| @subpage tuning_guide | Parameter reference and tuning guide |
+| @subpage sim_to_real | ServoDriver, limits, and real robot setup |
 
 ## Key design choices
 
-- @b Single entry point @b — Library users interact only with `torq::RobotSystem`.
+- @b Single entry point @b : Library users interact only with `torq::RobotSystem`.
   The Controller and IK solver are internal; all control, task/limit/barrier
   composition, and tuning go through RobotSystem with a clear ownership model.
-- @b Library + workspace @b — `libtorq` is a shared library; robot-specific apps
+- @b Library + workspace @b : `libtorq` is a shared library; robot-specific apps
   in `workspace/` link against it.
-- @b HAL (Hardware Abstraction Layer) @b — control code targets
+- @b HAL (Hardware Abstraction Layer) @b : control code targets
   `torq::HardwareInterface`; swap `MujocoDriver` for a real driver without
-  touching control logic.
-- @b Zero-allocation hot path @b — the IK solver reuses pre-allocated Eigen
+  changing control logic.
+- @b Zero-allocation hot path @b : the IK solver reuses pre-allocated Eigen
   matrices; no heap allocation per tick.
-- @b Runtime-configurable IK @b — every task cost, gain, damping, and limit gain
+- @b Runtime-configurable IK @b : every task cost, gain, damping, and limit gain
   is adjustable at runtime through the API and the built-in ImGui tuning panel.

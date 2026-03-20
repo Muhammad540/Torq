@@ -25,9 +25,11 @@
 [] velocity clamping 
 [] in configuration check_limits() before
 [] add more tasks/limits/barriers
+[] there should be no built in tasks/limits/barriers (all should be defined and passed by the user), the library will interpret it solve the qp problem accordingly and expose the configuration via GUI at runtime
+[] remove the redundant setControl freq methods (the update rate is decided by the user application's update speed)
 
 ## MEDIUM 
-[] Dynamixel Driver
+[] Servo Driver
 [] caching to reuse pose estiamtes btw frames
 [] Behavior Tree Example
 [] Display force contacts
@@ -35,7 +37,7 @@
 [] verify the warmstarting of the QP solver (to avoid recomputation every time)
 [] return proper error codes from all cirtical methods (create a struct of all possible error codes, should be documented)
 [] add visualization for contact points
- 
+[] update docs
 
 ## LOW
 [] startup is a bit slow, debug this (add compilation time monitoring)

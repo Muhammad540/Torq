@@ -94,14 +94,14 @@ $(document).ready(function(){initNavTree('qp_formulation.html',''); initResizabl
 <div class="title">QP Formulation </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_doc_qp_formulation"></a> Torq solves differential inverse kinematics as a <b>Quadratic</b> Program (QP) <b>at</b> every control tick. This page derives the complete formulation — how tasks, limits, and damping compose into a single optimisation problem.</p>
+<div class="textblock"><p><a class="anchor" id="md_doc_qp_formulation"></a> [update qp formulation has missing barriers] Torq solves differential inverse kinematics as a <b>Quadratic</b> Program (QP) <b>at</b> every control tick. This page derives the complete formulation explaining how tasks, limits, and damping compose into a single optimisation problem.</p>
 <h1><a class="anchor" id="autotoc_md50"></a>
 Overview</h1>
-<p>Given the current robot configuration \(q\), the IK solver finds a displacement \(\Delta q \in \mathbb{R}^{n_v}\) (tangent-space velocity \(\times\,\Delta t\)) that best satisfies all active tasks while respecting physical limits:</p>
+<p>Given the current robot configuration \(q\), the IK solver finds a displacement \(\Delta q \in \mathbb{R}^{n_v}\) (tangent-space velocity \(\times\,\Delta t\)) that best satisfies all active tasks while respecting physical limits and defined barriers.</p>
 <p class="formulaDsp">
 \[ \begin{aligned} \min_{\Delta q} \quad &amp; \tfrac{1}{2}\,\Delta q^\top P\,\Delta q + c^\top \Delta q \\ \text{s.t.} \quad &amp; G\,\Delta q \le h \end{aligned} \]
 </p>
-<p>where \(P\) (positive semi-definite) and \(c\) accumulate task objectives, and the rows of \((G, h)\) encode limit constraints.</p>
+<p>where \(P\) (positive semi-definite) and \(c\) accumulate task objectives, and the rows of \((G, h)\) encode limit and barrier constraints. [update: check again]</p>
 <hr  />
 <h1><a class="anchor" id="autotoc_md52"></a>
 Per-task contribution</h1>
@@ -120,6 +120,7 @@ Per-task contribution</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">\(\mu_i\)   </td><td class="markdownTableBodyNone">Levenberg–Marquardt damping   </td><td class="markdownTableBodyNone">scalar   </td></tr>
 </table>
+<p>[update: add a column briefly describing the contribution] </p>
 <h2><a class="anchor" id="autotoc_md53"></a>
 Weight matrix</h2>
 <p>The diagonal weight matrix \(W_i = \operatorname{diag}(w_i)\) scales each component of the error independently. For <code>FrameTask</code> the 6-D weight vector is \([w_{\text{pos}}^{(3)},\; w_{\text{ori}}^{(3)}]\).</p>

@@ -96,6 +96,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="mainpage"></a> <b>High</b> performance C++ framework for Robot Control and Training.</p>
 <p>Torq combines <a href="https://mujoco.org/">MuJoCo</a> (physics simulation) and <a href="https://github.com/stack-of-tasks/pinocchio">Pinocchio</a> (rigid-body kinematics &amp; dynamics) behind a concise API. The library solves differential inverse kinematics as a Quadratic Program at every control tick, supporting configurable tasks, limits, and (planned) barrier functions.</p>
+<p>It is planned to extend support to sim-to-real training pipelines, evaluating end-to-end robot policies in simulation and testing on real robot.</p>
 <hr  />
 <h1><a class="anchor" id="autotoc_md47"></a>
 Quick start</h1>
@@ -109,6 +110,10 @@ Quick start</h1>
 <div class="line">    config.<a class="code" href="structtorq_1_1RobotConfig.html#abf39d0547e9806a341e8f7129fab68c7">end_effector_frame</a>    = <span class="stringliteral">&quot;ee_frame&quot;</span>;</div>
 <div class="line">    config.<a class="code" href="structtorq_1_1RobotConfig.html#ac6b9ccaad2f9ff364fa5277fd1358f0c">locked_joints</a>         = {<span class="stringliteral">&quot;joint_6&quot;</span>};</div>
 <div class="line">    config.<a class="code" href="structtorq_1_1RobotConfig.html#a44a180e01fafeab6e8285fe892e9a2cd">gripper_actuator_idx</a>  = -1;</div>
+<div class="line">    <span class="comment">// For so101 arm (uses serial servo comm) provide additional conf file if need to control real robot</span></div>
+<div class="line">    config.<a class="code" href="structtorq_1_1RobotConfig.html#a2a8ee53f93de148493c86afab68c41aa">driver_connection</a> = <span class="stringliteral">&quot;path/to/.conf file&quot;</span>;</div>
+<div class="line">    config.<a class="code" href="structtorq_1_1RobotConfig.html#a77c35664a8582d9a56fc54c4404a6218">driver_type</a> = <span class="stringliteral">&quot;serial_servo&quot;</span>; <span class="comment">// or mujoco</span></div>
+<div class="line">    config.<a class="code" href="structtorq_1_1RobotConfig.html#aa91fd616a7878c0f259e76afffc64672">active_control</a> = <span class="keyword">false</span>;       <span class="comment">// if false mimics real robot in sim</span></div>
 <div class="line"> </div>
 <div class="line">    <a class="code" href="classtorq_1_1RobotSystem.html">torq::RobotSystem</a> robot;</div>
 <div class="line">    robot.<a class="code" href="classtorq_1_1RobotSystem.html#af3c29b688692d2c5f96da67a0a6a8555">initialize</a>(config);</div>
@@ -131,7 +136,10 @@ Quick start</h1>
 <div class="ttc" id="aclasstorq_1_1RobotSystem_html_a47c6dd4b4562e2adee434ab424a95638"><div class="ttname"><a href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638">torq::RobotSystem::update</a></div><div class="ttdeci">void update()</div><div class="ttdoc">Execute one control + physics tick.</div></div>
 <div class="ttc" id="aclasstorq_1_1RobotSystem_html_af3c29b688692d2c5f96da67a0a6a8555"><div class="ttname"><a href="classtorq_1_1RobotSystem.html#af3c29b688692d2c5f96da67a0a6a8555">torq::RobotSystem::initialize</a></div><div class="ttdeci">bool initialize(const RobotConfig &amp;config)</div><div class="ttdoc">Initialise the robot from a configuration.</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html"><div class="ttname"><a href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a></div><div class="ttdoc">Configuration for initialising a RobotSystem.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:26</div></div>
+<div class="ttc" id="astructtorq_1_1RobotConfig_html_a2a8ee53f93de148493c86afab68c41aa"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#a2a8ee53f93de148493c86afab68c41aa">torq::RobotConfig::driver_connection</a></div><div class="ttdeci">std::string driver_connection</div><div class="ttdoc">Connection for real robot: serial port (e.g.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:40</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html_a44a180e01fafeab6e8285fe892e9a2cd"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#a44a180e01fafeab6e8285fe892e9a2cd">torq::RobotConfig::gripper_actuator_idx</a></div><div class="ttdeci">int gripper_actuator_idx</div><div class="ttdoc">MuJoCo actuator index for the gripper (-1 = last actuator).</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:31</div></div>
+<div class="ttc" id="astructtorq_1_1RobotConfig_html_a77c35664a8582d9a56fc54c4404a6218"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#a77c35664a8582d9a56fc54c4404a6218">torq::RobotConfig::driver_type</a></div><div class="ttdeci">std::string driver_type</div><div class="ttdoc">Driver for hardware: &quot;mujoco&quot; (simulation) or &quot;serial_servo&quot; (real robot, e.g.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:38</div></div>
+<div class="ttc" id="astructtorq_1_1RobotConfig_html_aa91fd616a7878c0f259e76afffc64672"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#aa91fd616a7878c0f259e76afffc64672">torq::RobotConfig::active_control</a></div><div class="ttdeci">bool active_control</div><div class="ttdoc">When true (default), send position commands to real hardware.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:42</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html_abf39d0547e9806a341e8f7129fab68c7"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#abf39d0547e9806a341e8f7129fab68c7">torq::RobotConfig::end_effector_frame</a></div><div class="ttdeci">std::string end_effector_frame</div><div class="ttdoc">Name of the end-effector frame in the Pinocchio model.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:29</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html_ac6b9ccaad2f9ff364fa5277fd1358f0c"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#ac6b9ccaad2f9ff364fa5277fd1358f0c">torq::RobotConfig::locked_joints</a></div><div class="ttdeci">std::vector&lt; std::string &gt; locked_joints</div><div class="ttdoc">Joint names to freeze (removed from the reduced model).</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:30</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html_ad230ad2d4e45e2fa9e975abba0d471cd"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd">torq::RobotConfig::robot_model_path</a></div><div class="ttdeci">std::string robot_model_path</div><div class="ttdoc">Path to the robot-only URDF or MJCF for Pinocchio kinematics.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:28</div></div>
@@ -144,7 +152,7 @@ Documentation topics</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a class="el" href="architecture.html">Architecture</a>   </td><td class="markdownTableBodyNone">System diagram, class hierarchy, data flow    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><a class="el" href="qp_formulation.html">QP Formulation</a>   </td><td class="markdownTableBodyNone">Full QP derivation — objective, constraints, solver    </td></tr>
+<td class="markdownTableBodyNone"><a class="el" href="qp_formulation.html">QP Formulation</a>   </td><td class="markdownTableBodyNone">Full QP derivation that includes objective, constraints, solver    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a class="el" href="tasks_page.html">Tasks</a>   </td><td class="markdownTableBodyNone">Task types with mathematical derivations    </td></tr>
 <tr class="markdownTableRowEven">
@@ -152,18 +160,18 @@ Documentation topics</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a class="el" href="barriers_page.html">Barriers</a>   </td><td class="markdownTableBodyNone">Barrier (CBF) system    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><a class="el" href="tuning_guide.html">Parameter Tuning Guide</a>   </td><td class="markdownTableBodyNone">Parameter reference and tuning recipes    </td></tr>
+<td class="markdownTableBodyNone"><a class="el" href="tuning_guide.html">Parameter Tuning Guide</a>   </td><td class="markdownTableBodyNone">Parameter reference and tuning guide    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><a class="el" href="sim_to_real.html">Sim-to-real with Torq</a>   </td><td class="markdownTableBodyNone">Sim-to-real: ServoDriver, limits, and real robot setup   </td></tr>
+<td class="markdownTableBodyNone"><a class="el" href="sim_to_real.html">Sim-to-real with Torq</a>   </td><td class="markdownTableBodyNone">ServoDriver, limits, and real robot setup   </td></tr>
 </table>
 <h1><a class="anchor" id="autotoc_md49"></a>
 Key design choices</h1>
 <ul>
-<li><b>Single</b> entry point <b>—</b> Library users interact only with <code><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">torq::RobotSystem</a></code>. The Controller and IK solver are internal; all control, task/limit/barrier composition, and tuning go through RobotSystem with a clear ownership model.</li>
-<li><b>Library</b> + workspace <b>—</b> <code>libtorq</code> is a shared library; robot-specific apps in <code>workspace/</code> link against it.</li>
-<li><b>HAL</b> (Hardware Abstraction Layer) <b>—</b> control code targets <code><a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">torq::HardwareInterface</a></code>; swap <code>MujocoDriver</code> for a real driver without touching control logic.</li>
-<li><b>Zero-allocation</b> hot path <b>—</b> the IK solver reuses pre-allocated Eigen matrices; no heap allocation per tick.</li>
-<li><b>Runtime-configurable</b> IK <b>—</b> every task cost, gain, damping, and limit gain is adjustable at runtime through the API and the built-in ImGui tuning panel. </li>
+<li><b>Single</b> entry point <b></b>: Library users interact only with <code><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">torq::RobotSystem</a></code>. The Controller and IK solver are internal; all control, task/limit/barrier composition, and tuning go through RobotSystem with a clear ownership model.</li>
+<li><b>Library</b> + workspace <b></b>: <code>libtorq</code> is a shared library; robot-specific apps in <code>workspace/</code> link against it.</li>
+<li><b>HAL</b> (Hardware Abstraction Layer) <b></b>: control code targets <code><a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">torq::HardwareInterface</a></code>; swap <code>MujocoDriver</code> for a real driver without changing control logic.</li>
+<li><b>Zero-allocation</b> hot path <b></b>: the IK solver reuses pre-allocated Eigen matrices; no heap allocation per tick.</li>
+<li><b>Runtime-configurable</b> IK <b></b>: every task cost, gain, damping, and limit gain is adjustable at runtime through the API and the built-in ImGui tuning panel. </li>
 </ul>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
