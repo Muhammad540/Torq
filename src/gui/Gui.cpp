@@ -37,6 +37,14 @@ namespace torq {
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 
+        if (!pip_cameras_.empty() && display_pip){
+            for (auto& pip : pip_cameras_) {
+                if (pip.texture) glDeleteTextures(1, &pip.texture);
+                if (pip.rbo_depth) glDeleteRenderbuffers(1, &pip.rbo_depth);
+                if (pip.fbo) glDeleteFramebuffers(1, &pip.fbo);
+            }
+        }
+
         destroyFBO();
 
         if (ctx_) mjr_freeContext(ctx_.get());
@@ -103,7 +111,24 @@ namespace torq {
 
         lin_step_ = static_cast<float>(robot_->jogLinearStep());
         ang_step_ = static_cast<float>(robot_->jogAngularStep());
-        
+
+
+        if (display_pip){
+            for (int i = 0; i < model_->ncam; ++i) {
+                PiPCamera pip;
+                pip.name = mj_id2name(model_, mjOBJ_CAMERA, i);
+                pip.camera_id = i;
+                pip.cam = std::make_unique<mjvCamera>();
+                mjv_defaultCamera(pip.cam.get());
+                pip.cam->type = mjCAMERA_FIXED;
+                pip.cam->fixedcamid = i;
+                pip_cameras_.push_back(std::move(pip));
+            }
+            if (!pip_cameras_.empty()) {
+                logger.info() << "[Gui] Discovered " << pip_cameras_.size() << " PiP camera(s)";
+            }
+        }
+
         return true;
     }
     
@@ -139,8 +164,52 @@ namespace torq {
 
         //     tps.clear();
         // #endif
-        mjr_render(mjr_viewport,scn_.get(),ctx_.get());
+        mjr_render(mjr_viewport, scn_.get(), ctx_.get());
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        if (display_pip){
+            // pip size is scaled down version of the full viewport
+            int pip_w = std::max(1, static_cast<int>(viewport_width_ * pip_scale_));
+            int pip_h = std::max(1, static_cast<int>(viewport_height_ * pip_scale_));
+            for (auto& pip : pip_cameras_) {
+                if (pip.width != pip_w || pip.height != pip_h) {
+                    if (pip.fbo) {
+                        glDeleteFramebuffers(1, &pip.fbo);
+                        glDeleteTextures(1, &pip.texture);
+                        glDeleteRenderbuffers(1, &pip.rbo_depth);
+                    }
+                    pip.width = pip_w;
+                    pip.height = pip_h;
+
+                    glGenFramebuffers(1, &pip.fbo);
+                    glBindFramebuffer(GL_FRAMEBUFFER, pip.fbo);
+
+                    glGenTextures(1, &pip.texture);
+                    glBindTexture(GL_TEXTURE_2D, pip.texture);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pip_w, pip_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pip.texture, 0);
+
+                    glGenRenderbuffers(1, &pip.rbo_depth);
+                    glBindRenderbuffer(GL_RENDERBUFFER, pip.rbo_depth);
+                    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, pip_w, pip_h);
+                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pip.rbo_depth);
+                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                }
+
+                glBindFramebuffer(GL_FRAMEBUFFER, pip.fbo);
+                glViewport(0, 0, pip_w, pip_h);
+                mjrRect pip_rect = {0, 0, pip_w, pip_h};
+                mjv_updateScene(model_, data_, opt_.get(), NULL, pip.cam.get(), mjCAT_ALL, scn_.get());
+                mjr_render(pip_rect, scn_.get(), ctx_.get());
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+
+            if (!pip_cameras_.empty()) {
+                mjv_updateScene(model_, data_, opt_.get(), NULL, cam_.get(), mjCAT_ALL, scn_.get());
+            }
+        }
         glfwPollEvents();
         
         ImGui_ImplOpenGL3_NewFrame();
@@ -244,7 +313,68 @@ namespace torq {
             ImVec2(1.0f, 0.0f)  // UV bottom right (flipped)
         );
 
-        if (ImGui::IsItemHovered()){
+        bool viewport_hovered = ImGui::IsItemHovered();
+        ImVec2 img_origin = ImGui::GetItemRectMin();
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        {
+            int pip_pad = 6;
+            for (int i = 0; i < static_cast<int>(pip_cameras_.size()); ++i) {
+                auto& pip = pip_cameras_[i];
+                if (!pip.texture || pip.width <= 0 || pip.height <= 0) continue;
+
+                float fx = static_cast<float>(viewport_width_ - pip.width - pip_pad);
+                float fy = static_cast<float>(i * (pip.height + pip_pad + 16) + pip_pad);
+                ImVec2 p0(img_origin.x + fx, img_origin.y + fy);
+                ImVec2 p1(p0.x + pip.width, p0.y + pip.height);
+
+                draw_list->AddRectFilled(p0, p1, IM_COL32(0, 0, 0, 200));
+                draw_list->AddImage(
+                    (ImTextureID)(intptr_t)pip.texture,
+                    p0, p1,
+                    ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f)
+                );
+                draw_list->AddRect(p0, p1, IM_COL32(255, 255, 255, 200), 0.0f, 0, 2.0f);
+
+                ImVec2 label_pos(p0.x + 4.0f, p1.y + 1.0f);
+                draw_list->AddText(label_pos, IM_COL32(255, 255, 255, 220), pip.name.c_str());
+            }
+        }
+
+        {
+            mjvGLCamera* glcam = scn_->camera;
+            mjtNum fwd[3], up[3], right[3];
+            mju_f2n(fwd, glcam[0].forward, 3);
+            mju_f2n(up, glcam[0].up, 3);
+            mju_cross(right, fwd, up);
+            double cx = (glcam[0].pos[0] + glcam[1].pos[0]) * 0.5;
+            double cy = (glcam[0].pos[1] + glcam[1].pos[1]) * 0.5;
+            double cz = (glcam[0].pos[2] + glcam[1].pos[2]) * 0.5;
+
+            ImVec2 img_end = ImGui::GetItemRectMax();
+            ImVec2 btn_pos(img_origin.x + 8.0f, img_end.y - 28.0f);
+            ImGui::SetCursorScreenPos(btn_pos);
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.15f, 0.85f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.9f));
+            if (ImGui::SmallButton("Copy Camera Spec")) {
+                char spec[512];
+                std::snprintf(spec, sizeof(spec),
+                    "<camera pos=\"%.4f %.4f %.4f\" xyaxes=\"%.4f %.4f %.4f %.4f %.4f %.4f\"/>",
+                    cx, cy, cz,
+                    right[0], right[1], right[2],
+                    up[0], up[1], up[2]);
+                ImGui::SetClipboardText(spec);
+                logger.info() << "[Gui] Copied to clipboard: " << spec;
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("pos=(%.3f, %.3f, %.3f)\nxyaxes=(%.3f %.3f %.3f, %.3f %.3f %.3f)",
+                    cx, cy, cz, right[0], right[1], right[2], up[0], up[1], up[2]);
+            }
+            ImGui::PopStyleColor(2);
+            ImGui::PopStyleVar();
+        }
+
+        if (viewport_hovered){
             float wheel = ImGui::GetIO().MouseWheel;
             if (wheel != 0.0f){
                 mjv_moveCamera(model_, mjMOUSE_ZOOM, 0, -0.05 * wheel, scn_.get(), cam_.get());

@@ -26,6 +26,17 @@ using mjData = struct mjData_;
 
 namespace torq {
     class RobotSystem;
+
+    struct PiPCamera {
+        std::string name;
+        int camera_id = -1;
+        std::unique_ptr<mjvCamera> cam;
+        unsigned int fbo = 0;
+        unsigned int texture = 0;
+        unsigned int rbo_depth = 0;
+        int width = 0;
+        int height = 0;
+    };
     
     #ifdef ENABLE_TRACKING_POINTS
     /**
@@ -107,6 +118,10 @@ namespace torq {
             void drawJointControlPanel();
             void drawCartesianPanel();
             void drawIKTuningPanel();
+
+            std::vector<PiPCamera> pip_cameras_;
+            float pip_scale_ = 0.25f;
+            bool display_pip = true;
 
             std::vector<float> joint_targets_;
             std::string ik_frame_name_;
