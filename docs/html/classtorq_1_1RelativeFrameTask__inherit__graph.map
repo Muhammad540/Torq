@@ -1,4 +1,0 @@
-<map id="torq::RelativeFrameTask" name="torq::RelativeFrameTask">
-<area shape="rect" id="node1" title="Regulate the pose of a frame relative to another frame." alt="" coords="5,80,185,107"/>
-<area shape="rect" id="node2" href="$classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective." alt="" coords="53,5,138,32"/>
-</map>

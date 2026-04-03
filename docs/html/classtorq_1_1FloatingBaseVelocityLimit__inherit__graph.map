@@ -1,4 +1,0 @@
-<map id="torq::FloatingBaseVelocityLimit" name="torq::FloatingBaseVelocityLimit">
-<area shape="rect" id="node1" title="Floating&#45;base twist limits for mobile/legged robots." alt="" coords="5,80,199,121"/>
-<area shape="rect" id="node2" href="$classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints)." alt="" coords="57,5,147,32"/>
-</map>

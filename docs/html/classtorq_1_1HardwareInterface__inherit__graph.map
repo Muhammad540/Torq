@@ -1,5 +1,0 @@
-<map id="torq::HardwareInterface" name="torq::HardwareInterface">
-<area shape="rect" id="node1" title="Abstract hardware abstraction layer for any robot driver (simulation or real)." alt="" coords="69,5,247,32"/>
-<area shape="rect" id="node2" href="$classtorq_1_1MujocoDriver.html" title=" " alt="" coords="5,80,148,107"/>
-<area shape="rect" id="node3" href="$classtorq_1_1ServoDriver.html" title="Hardware driver for ST/STS/SMS serial bus servos (e.g." alt="" coords="173,80,306,107"/>
-</map>

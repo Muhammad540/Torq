@@ -1,6 +1,0 @@
-<map id="torq::Barrier" name="torq::Barrier">
-<area shape="rect" id="node1" title="Abstract base class for Control Barrier Functions (CBFs)." alt="" coords="249,5,349,32"/>
-<area shape="rect" id="node2" href="$classtorq_1_1BodySphericalBarrier.html" title="Minimum&#45;distance barrier between two frames (spherical approximation)." alt="" coords="5,80,199,107"/>
-<area shape="rect" id="node3" href="$classtorq_1_1PositionBarrier.html" title="Cartesian position barrier on a robot frame." alt="" coords="223,80,375,107"/>
-<area shape="rect" id="node4" href="$classtorq_1_1SelfCollisionBarrier.html" title="Self&#45;collision avoidance barrier using Pinocchio geometry distances." alt="" coords="399,80,581,107"/>
-</map>

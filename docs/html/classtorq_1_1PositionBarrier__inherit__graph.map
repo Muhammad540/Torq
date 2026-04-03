@@ -1,4 +1,0 @@
-<map id="torq::PositionBarrier" name="torq::PositionBarrier">
-<area shape="rect" id="node1" title="Cartesian position barrier on a robot frame." alt="" coords="5,80,157,107"/>
-<area shape="rect" id="node2" href="$classtorq_1_1Barrier.html" title="Abstract base class for Control Barrier Functions (CBFs)." alt="" coords="31,5,131,32"/>
-</map>

@@ -1,4 +1,0 @@
-<map id="torq::ServoDriver" name="torq::ServoDriver">
-<area shape="rect" id="node1" title="Hardware driver for ST/STS/SMS serial bus servos (e.g." alt="" coords="27,80,161,107"/>
-<area shape="rect" id="node2" href="$classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real)." alt="" coords="5,5,183,32"/>
-</map>

@@ -1,5 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real)." alt="" coords="5,31,183,57"/>
-<area shape="rect" id="node2" href="$classtorq_1_1MujocoDriver.html" title=" " alt="" coords="231,5,373,32"/>
-<area shape="rect" id="node3" href="$classtorq_1_1ServoDriver.html" title="Hardware driver for ST/STS/SMS serial bus servos (e.g." alt="" coords="235,56,369,83"/>
-</map>

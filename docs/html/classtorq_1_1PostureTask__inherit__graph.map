@@ -1,4 +1,0 @@
-<map id="torq::PostureTask" name="torq::PostureTask">
-<area shape="rect" id="node1" title="Regulate joint angles toward a desired posture." alt="" coords="5,80,140,107"/>
-<area shape="rect" id="node2" href="$classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective." alt="" coords="30,5,115,32"/>
-</map>
