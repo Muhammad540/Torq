@@ -1,5 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints)." alt="" coords="5,31,95,57"/>
-<area shape="rect" id="node2" href="$classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits." alt="" coords="143,5,319,32"/>
-<area shape="rect" id="node3" href="$classtorq_1_1VelocityLimit.html" title="Joint velocity limits." alt="" coords="160,56,301,83"/>
-</map>

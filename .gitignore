@@ -17,3 +17,6 @@ Torq.md
 pink/
 
 workspace/imgui.ini
+.cursor/
+thirdparty/
+docs/
