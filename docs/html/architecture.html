@@ -103,7 +103,7 @@ System diagram</h1>
 </p>
 <h1><a class="anchor" id="autotoc_md6"></a>
 Public API and ownership</h1>
-<p>Library users interact only with <b><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">torq::RobotSystem</a></b> <b></b>. The Controller and InverseKinematics classes are internal implementation details and are not exposed in the public API. All manipulation (setTaskSpaceTarget, addTask, addLimit, addBarrier, IK tuning, update) goes through RobotSystem.</p>
+<p>Library users interact only with <b><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">torq::RobotSystem</a></b>. The Controller and InverseKinematics classes are internal implementation details and are not exposed in the public API. All manipulation (setTaskSpaceTarget, addTask, addLimit, addBarrier, IK tuning, update) goes through RobotSystem.</p>
 <h2><a class="anchor" id="autotoc_md7"></a>
 Ownership hierarchy</h2>
 <table class="markdownTable">
@@ -112,7 +112,7 @@ Ownership hierarchy</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>RobotSystem</b>   </td><td class="markdownTableBodyNone"><code>HardwareInterface</code>, <code>KinematicsEngine</code>, <code>Controller</code>   </td><td class="markdownTableBodyNone">Sole owner of main components.    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>RobotSystem</b>   </td><td class="markdownTableBodyNone">User-added tasks, limits, barriers   </td><td class="markdownTableBodyNone">Objects passed to <code>addTask()</code> / <code>addLimit()</code> / <code>addBarrier()</code> are owned by RobotSystem and destroyed on <code>remove*()</code> or when RobotSystem is destroyed (passed as unique ptrs).    </td></tr>
+<td class="markdownTableBodyNone"><b>RobotSystem</b>   </td><td class="markdownTableBodyNone">User-added tasks, limits, barriers   </td><td class="markdownTableBodyNone">Objects passed to <code>addTask()</code> / <code>addLimit()</code> / <code>addBarrier()</code> are owned by RobotSystem and destroyed on <code>remove*()</code> or when RobotSystem is destroyed (passed as <code>unique_ptr</code>).    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Controller</b>   </td><td class="markdownTableBodyNone"><code>InverseKinematics</code> solver   </td><td class="markdownTableBodyNone">Created and used internally.    </td></tr>
 <tr class="markdownTableRowEven">
@@ -128,57 +128,67 @@ Class hierarchy</h1>
 <h2><a class="anchor" id="autotoc_md9"></a>
 Core</h2>
 <ul>
-<li><b><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">torq::RobotSystem</a></b> <b></b>: Single entry point for all robot operations. Owns <code>HardwareInterface</code>, <code>KinematicsEngine</code>, <code>Controller</code>, and any user-added tasks/limits/barriers. Exposes manipulation, IK tuning, and update().</li>
-<li><b><a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">torq::Controller</a></b> <b></b>: Internal. Manages control modes (<code>IDLE</code>, <code>JOINT_SPACE</code>, <code>TASK_SPACE</code>), owns the IK solver and <em>built-in</em> task/limit instances, holds <code>IKConfig</code>. Invoked only by RobotSystem; receives user task/limit/barrier pointers each tick.</li>
-<li><b><a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">torq::InverseKinematics</a></b> <b></b>: Internal. Assembles the QP from tasks, limits, and barriers; delegates to OSQP.</li>
+<li><b><a class="el" href="classtorq_1_1RobotSystem.html" title="Top-level user-facing API and sole owner of all main components.">torq::RobotSystem</a></b> : Single entry point for all robot operations. Owns <code>HardwareInterface</code>, <code>KinematicsEngine</code>, <code>Controller</code>, and any user-added tasks/limits/barriers. Exposes manipulation, IK tuning, and <code>update()</code>.</li>
+<li><b><a class="el" href="classtorq_1_1Controller.html" title="Internal component: control modes, built-in IK tasks/limits, QP solver.">torq::Controller</a></b> : Internal. Manages control modes (<code>IDLE</code>, <code>JOINT_SPACE</code>, <code>TASK_SPACE</code>), owns the IK solver and built-in task/limit instances, holds <code>IKConfig</code>. Invoked only by RobotSystem; receives user task/limit/barrier pointers each tick.</li>
+<li><b><a class="el" href="classtorq_1_1InverseKinematics.html" title="QP-based differential inverse kinematics solver.">torq::InverseKinematics</a></b> : Internal. Assembles the QP from tasks, limits, and barriers; delegates to OSQP.</li>
 </ul>
 <h2><a class="anchor" id="autotoc_md10"></a>
 Kinematics</h2>
 <ul>
-<li><b><a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">torq::KinematicsEngine</a></b> <b></b>: loads URDF or MJCF, builds full and reduced Pinocchio models.</li>
-<li><b><a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">torq::Configuration</a></b> <b></b>: immutable snapshot of the robot state at a given \(q\). Provides frame transforms, Jacobians, and manifold-aware integration.</li>
+<li><b><a class="el" href="classtorq_1_1KinematicsEngine.html" title="Loads and owns the Pinocchio model; creates Configuration objects.">torq::KinematicsEngine</a></b> : Loads URDF or MJCF, builds full and reduced Pinocchio models.</li>
+<li><b><a class="el" href="classtorq_1_1Configuration.html" title="Snapshot of a robot configuration with pre-computed forward kinematics.">torq::Configuration</a></b> : Immutable snapshot of the robot state at a given \(q\). Provides frame transforms, Jacobians, CoM computation, collision queries, and manifold-aware integration. See <a class="el" href="conventions.html">Conventions and Notation</a> for manifold operations.</li>
 </ul>
 <h2><a class="anchor" id="autotoc_md11"></a>
-Tasks (QP objective)</h2>
+Tasks (QP objective) — see @ref tasks_page</h2>
 <ul>
-<li><b><a class="el" href="classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective.">torq::Task</a></b> <b></b>(abstract) : defines <code>computeError()</code>, <code>computeJacobian()</code>, <code>computeQPObjective()</code>.<ul>
-<li><b><a class="el" href="classtorq_1_1FrameTask.html" title="Regulate the SE(3) pose of a robot frame to a desired target.">torq::FrameTask</a></b> <b></b>: regulate end-effector SE(3) pose (built-in).</li>
-<li><b><a class="el" href="classtorq_1_1PostureTask.html" title="Regulate joint angles toward a desired posture.">torq::PostureTask</a></b> <b></b>: regulate joint angles toward a reference (built-in).</li>
-<li><b><a class="el" href="classtorq_1_1DampingTask.html" title="Minimise joint velocities — viscous damping.">torq::DampingTask</a></b> <b></b>: penalize joint velocities (built-in).</li>
-<li><b><a class="el" href="classtorq_1_1ComTask.html" title="Regulate the center of mass position.">torq::ComTask</a></b> <b></b>, <b><a class="el" href="classtorq_1_1RelativeFrameTask.html" title="Regulate the pose of a frame relative to another frame.">torq::RelativeFrameTask</a></b> <b></b>, <b><a class="el" href="classtorq_1_1LinearHolonomicTask.html" title="Linear holonomic constraint: .">torq::LinearHolonomicTask</a></b> <b></b>, <b><a class="el" href="classtorq_1_1JointCouplingTask.html" title="Coupling constraint between revolute joints.">torq::JointCouplingTask</a></b> <b></b>, <b><a class="el" href="classtorq_1_1JointVelocityTask.html" title="Track reference joint velocities.">torq::JointVelocityTask</a></b> <b></b>, <b><a class="el" href="classtorq_1_1LowAccelerationTask.html" title="Minimize joint accelerations: .">torq::LowAccelerationTask</a></b> <b></b>: Use the RobotSystem::addTask() api for custom IK where you wish to add any of these Tasks (e.g. humanoids, quadrupeds).</li>
+<li><p class="startli"><b><a class="el" href="classtorq_1_1Task.html" title="Abstract base class for kinematic tasks that contribute to the QP objective.">torq::Task</a></b> (abstract) : defines <code>computeError()</code>, <code>computeJacobian()</code>, <code>computeQPObjective()</code>.</p><ul>
+<li><b><a class="el" href="classtorq_1_1FrameTask.html" title="Regulate the SE(3) pose of a robot frame to a desired target.">torq::FrameTask</a></b> : Regulate end-effector SE(3) pose (built-in).</li>
+<li><b><a class="el" href="classtorq_1_1PostureTask.html" title="Regulate joint angles toward a desired posture.">torq::PostureTask</a></b> : Regulate joint angles toward a reference (built-in).</li>
+<li><b><a class="el" href="classtorq_1_1DampingTask.html" title="Minimise joint velocities — viscous damping.">torq::DampingTask</a></b> : Penalise joint velocities (built-in).</li>
+<li><b><a class="el" href="classtorq_1_1ComTask.html" title="Regulate the center of mass position.">torq::ComTask</a></b> : Centre-of-mass regulation.</li>
+<li><b><a class="el" href="classtorq_1_1RelativeFrameTask.html" title="Regulate the pose of a frame relative to another frame.">torq::RelativeFrameTask</a></b> : Pose of one frame relative to another.</li>
+<li><b><a class="el" href="classtorq_1_1LinearHolonomicTask.html" title="Linear holonomic constraint: .">torq::LinearHolonomicTask</a></b> : General linear constraint \(A(q_0 \ominus q) = b\).</li>
+<li><b><a class="el" href="classtorq_1_1JointCouplingTask.html" title="Coupling constraint between revolute joints.">torq::JointCouplingTask</a></b> : Couple joint angles via ratios (extends <code>LinearHolonomicTask</code>).</li>
+<li><b><a class="el" href="classtorq_1_1JointVelocityTask.html" title="Track reference joint velocities.">torq::JointVelocityTask</a></b> : Track reference joint velocities.</li>
+<li><b><a class="el" href="classtorq_1_1LowAccelerationTask.html" title="Minimize joint accelerations: .">torq::LowAccelerationTask</a></b> : Minimise joint accelerations.</li>
 </ul>
+<p class="startli">Use <code>RobotSystem::addTask()</code> for any user tasks (e.g. humanoids, quadrupeds).</p>
 </li>
 </ul>
 <h2><a class="anchor" id="autotoc_md12"></a>
-Limits (QP inequality constraints)</h2>
+Limits (QP inequality constraints) — see @ref limits_page</h2>
 <ul>
-<li><b><a class="el" href="classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints).">torq::Limit</a></b> <b></b>(abstract) : defines <code>computeQPInequalities()</code>.<ul>
-<li><b><a class="el" href="classtorq_1_1VelocityLimit.html" title="Joint velocity limits.">torq::VelocityLimit</a></b> <b></b>, <b><a class="el" href="classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits.">torq::ConfigurationLimit</a></b> <b></b>: built-in.</li>
-<li><b><a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">torq::FloatingBaseVelocityLimit</a></b> <b></b>, <b><a class="el" href="classtorq_1_1AccelerationLimit.html" title="Joint acceleration limits with braking-distance bounds.">torq::AccelerationLimit</a></b> <b></b>: Add via RobotSystem::addLimit().</li>
+<li><b><a class="el" href="classtorq_1_1Limit.html" title="Abstract base class for kinematic limits (QP inequality constraints).">torq::Limit</a></b> (abstract) : defines <code>computeQPInequalities()</code>.<ul>
+<li><b><a class="el" href="classtorq_1_1VelocityLimit.html" title="Joint velocity limits.">torq::VelocityLimit</a></b>, <b><a class="el" href="classtorq_1_1ConfigurationLimit.html" title="Joint position (configuration) limits.">torq::ConfigurationLimit</a></b> : Built-in.</li>
+<li><b><a class="el" href="classtorq_1_1FloatingBaseVelocityLimit.html" title="Floating-base twist limits for mobile/legged robots.">torq::FloatingBaseVelocityLimit</a></b> : For floating-base robots. Add via <code>RobotSystem::addLimit()</code>.</li>
+<li><b><a class="el" href="classtorq_1_1AccelerationLimit.html" title="Joint acceleration limits with braking-distance bounds.">torq::AccelerationLimit</a></b> : Acceleration + braking-distance bounds. Add via <code>RobotSystem::addLimit()</code>.</li>
 </ul>
 </li>
 </ul>
 <h2><a class="anchor" id="autotoc_md13"></a>
-Barriers (CBF inequality + optional objective)</h2>
+Barriers (CBF inequality + optional objective) — see @ref barriers_page</h2>
 <ul>
-<li><b><a class="el" href="classtorq_1_1Barrier.html" title="Abstract base class for Control Barrier Functions (CBFs).">torq::Barrier</a></b> <b></b>(abstract) : defines <code>computeBarrier()</code>, <code>computeJacobian()</code>, <code>computeQPInequalities()</code>, <code>computeQPObjective()</code>.<ul>
-<li><b><a class="el" href="classtorq_1_1PositionBarrier.html" title="Cartesian position barrier on a robot frame.">torq::PositionBarrier</a></b> <b></b>, <b><a class="el" href="classtorq_1_1BodySphericalBarrier.html" title="Minimum-distance barrier between two frames (spherical approximation).">torq::BodySphericalBarrier</a></b> <b></b>, <b><a class="el" href="classtorq_1_1SelfCollisionBarrier.html" title="Self-collision avoidance barrier using Pinocchio geometry distances.">torq::SelfCollisionBarrier</a></b> <b></b>: add via RobotSystem::addBarrier(); owned by RobotSystem.</li>
+<li><p class="startli"><b><a class="el" href="classtorq_1_1Barrier.html" title="Abstract base class for Control Barrier Functions (CBFs).">torq::Barrier</a></b> (abstract) : defines <code>computeBarrier()</code>, <code>computeJacobian()</code>, <code>computeQPInequalities()</code>, <code>computeQPObjective()</code>.</p><ul>
+<li><b><a class="el" href="classtorq_1_1PositionBarrier.html" title="Cartesian position barrier on a robot frame.">torq::PositionBarrier</a></b> : Cartesian position bounds on a frame.</li>
+<li><b><a class="el" href="classtorq_1_1BodySphericalBarrier.html" title="Minimum-distance barrier between two frames (spherical approximation).">torq::BodySphericalBarrier</a></b> : Minimum distance between two frames.</li>
+<li><b><a class="el" href="classtorq_1_1SelfCollisionBarrier.html" title="Self-collision avoidance barrier using Pinocchio geometry distances.">torq::SelfCollisionBarrier</a></b> : Self-collision avoidance via geometry model.</li>
 </ul>
+<p class="startli">All barriers are added via <code>RobotSystem::addBarrier()</code> and owned by RobotSystem.</p>
 </li>
 </ul>
 <h2><a class="anchor" id="autotoc_md14"></a>
 Hardware abstraction</h2>
 <ul>
-<li><b><a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">torq::HardwareInterface</a></b> <b></b>(abstract) : <code>connect</code>, <code>step</code>, <code>getJointPositions</code>, <code>setJointPositions</code>, …<ul>
-<li><b><a class="el" href="classtorq_1_1MujocoDriver.html">torq::MujocoDriver</a></b> <b></b>: Simulation backend wrapping <code>mjModel</code> / <code>mjData</code>.</li>
-<li><b><a class="el" href="classtorq_1_1ServoDriver.html" title="Hardware driver for ST/STS/SMS serial bus servos (e.g.">torq::ServoDriver</a></b> <b></b>: Interacts with the servos attached to the robot.</li>
+<li><b><a class="el" href="classtorq_1_1HardwareInterface.html" title="Abstract hardware abstraction layer for any robot driver (simulation or real).">torq::HardwareInterface</a></b> (abstract) : <code>connect</code>, <code>step</code>, <code>getJointPositions</code>, <code>setJointPositions</code>, …<ul>
+<li><b><a class="el" href="classtorq_1_1MujocoDriver.html">torq::MujocoDriver</a></b> : Simulation backend wrapping <code>mjModel</code> / <code>mjData</code>.</li>
+<li><b><a class="el" href="classtorq_1_1ServoDriver.html" title="Hardware driver for ST/STS/SMS serial bus servos (e.g.">torq::ServoDriver</a></b> : Serial servo communication (ST3215/STS/SMS) for real robots.</li>
 </ul>
 </li>
 </ul>
 <h2><a class="anchor" id="autotoc_md15"></a>
 GUI</h2>
 <ul>
-<li><b><a class="el" href="classtorq_1_1Gui.html" title="ImGui + GLFW + OpenGL3 docking GUI for Torq.">torq::Gui</a></b> <b></b>: ImGui + GLFW + OpenGL3 docking interface. Panels for joint control, Cartesian jog, IK parameter tuning, and a 3D viewport rendering MuJoCo scenes.</li>
+<li><b><a class="el" href="classtorq_1_1Gui.html" title="ImGui + GLFW + OpenGL3 docking GUI for Torq.">torq::Gui</a></b> : ImGui + GLFW + OpenGL3 docking interface. Panels for joint control, Cartesian jog, IK parameter tuning, and a 3D viewport rendering MuJoCo scenes.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md16"></a>
 Ownership diagram</h1>
@@ -190,22 +200,23 @@ Ownership diagram</h1>
 Control loop frequencies</h1>
 <p>Typical frequencies:</p>
 <ul>
-<li><b>Task planner / user input</b> (e.g. GUI jog, programmatic setTaskSpaceTarget): ~60 Hz or event-driven. Target and jog step are set here.</li>
-<li><b>RobotSystem::update()</b> and <b>Controller::update()</b> (IK layer): 200–1000 Hz. The user application must call update() at this rate.</li>
-<li><b>Hardware step</b> : Same as the control loop (one step per update()). Physics timestep is set in the MJCF/XML.</li>
-<li><b>Joint controller</b>: [update]</li>
+<li><b>Task planner / user input</b> (e.g. GUI jog, programmatic <code>setTaskSpaceTarget</code>): ~60 Hz or event-driven.</li>
+<li><b>RobotSystem::update()</b> and <b>Controller::update()</b> (IK layer): 200–1000 Hz. The user application must call <code>update()</code> at this rate.</li>
+<li><b>Hardware step</b>: Same as the control loop (one step per <code>update()</code>). Physics timestep is set in the MJCF/XML.</li>
+<li><b>Joint controller (real hardware)</b>: Internal to the servo (e.g. ST3215 runs a PID loop internally at ~1 kHz). Torq sends position setpoints at the control rate; the servo tracks them.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md18"></a>
 Data flow per tick</h1>
 <ol type="1">
 <li>The application calls <code>RobotSystem::update()</code> at the configured control frequency.</li>
-<li><code>HardwareDriver::step()</code> advances the physics by one timestep (applying the previous tick’s commands).</li>
+<li><code>HardwareDriver::step()</code> advances the physics by one timestep (applying the previous tick's commands).</li>
 <li>In TASK_SPACE, the Controller uses its <b>internal kinematic state</b> (not the physics state) to build a <code>Configuration</code>.</li>
-<li>Each <b>Task</b> <b>computes</b> its error and Jacobian from that <code>Configuration</code>.</li>
-<li>Each <b>Limit</b> <b>computes</b> its inequality rows from the <code>Configuration</code>.</li>
-<li>Each <b>Barrier</b> <b>computes</b> its inequality rows from the <code>Configuration</code>.</li>
-<li><code>InverseKinematics::solve()</code> assembles the QP and calls OSQP.</li>
-<li>The resulting \(\Delta q\) is integrated on the manifold [update add explanation about manifold]; the new \(q\) is stored as the internal kinematic state and written to the hardware interface.</li>
+<li>Each <b>Task</b> computes its error \(e_i(q)\) and Jacobian \(J_i(q)\) from that <code>Configuration</code>.</li>
+<li>Each <b>Limit</b> computes its inequality rows \((G_j, h_j)\) from the <code>Configuration</code> and \(\Delta t\).</li>
+<li>Each <b>Barrier</b> computes its inequality rows and optional objective terms from the <code>Configuration</code>.</li>
+<li><code>InverseKinematics::solve()</code> assembles the QP (tasks + barriers → objective; limits + barriers → constraints) and calls OSQP.</li>
+<li>The resulting \(\Delta q\) is integrated on the manifold using <code>pinocchio::integrate</code>: \(q_{\text{new}} = q \oplus \Delta q\). This correctly handles quaternion joints (floating base) by using exponential integration, while reducing to simple addition for revolute/prismatic joints. See <a class="el" href="conventions.html">Conventions and Notation</a> for details.</li>
+<li>The new \(q\) is stored as the internal kinematic state and written to the hardware interface as the next commanded position.</li>
 </ol>
 <h1><a class="anchor" id="autotoc_md19"></a>
 Adding a new robot</h1>
@@ -213,8 +224,9 @@ Adding a new robot</h1>
 <li>Place model files (URDF/MJCF + meshes) under <code>workspace/models/</code>.</li>
 <li>Create <code>workspace/&lt;name&gt;/src/main.cpp</code> — fill a <code><a class="el" href="structtorq_1_1RobotConfig.html" title="Configuration for initialising a RobotSystem.">torq::RobotConfig</a></code> and run the loop.</li>
 <li>Add <code>workspace/&lt;name&gt;/CMakeLists.txt</code> with <code>target_link_libraries(&lt;name&gt; PRIVATE torq)</code>.</li>
-<li>Add <code>add_subdirectory(workspace/&lt;name&gt;)</code> to the root <code>CMakeLists.txt</code>. </li>
+<li>Add <code>add_subdirectory(workspace/&lt;name&gt;)</code> to the root <code>CMakeLists.txt</code>.</li>
 </ol>
+<p>See <a class="el" href="quickstart_page.html">Getting Started</a> for a step-by-step walkthrough. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

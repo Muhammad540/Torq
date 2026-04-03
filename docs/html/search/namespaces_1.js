@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['scservo_360',['scservo',['../namespacetorq_1_1scservo.html',1,'torq']]],
-  ['torq_361',['torq',['../namespacetorq.html',1,'']]]
+  ['scservo_378',['scservo',['../namespacetorq_1_1scservo.html',1,'torq']]],
+  ['torq_379',['torq',['../namespacetorq.html',1,'']]]
 ];

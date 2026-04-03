@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['parameter_20tuning_20guide_670',['Parameter Tuning Guide',['../tuning_guide.html',1,'index']]]
+  ['extending_20torq_700',['Extending Torq',['../extending_page.html',1,'index']]]
 ];

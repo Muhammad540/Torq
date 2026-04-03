@@ -7,6 +7,7 @@ var namespacetorq =
     [ "SelfCollisionBarrier", "classtorq_1_1SelfCollisionBarrier.html", "classtorq_1_1SelfCollisionBarrier" ],
     [ "IKConfig", "structtorq_1_1IKConfig.html", "structtorq_1_1IKConfig" ],
     [ "Controller", "classtorq_1_1Controller.html", "classtorq_1_1Controller" ],
+    [ "PiPCamera", "structtorq_1_1PiPCamera.html", "structtorq_1_1PiPCamera" ],
     [ "Gui", "classtorq_1_1Gui.html", "classtorq_1_1Gui" ],
     [ "HardwareInterface", "classtorq_1_1HardwareInterface.html", "classtorq_1_1HardwareInterface" ],
     [ "QPProblem", "structtorq_1_1QPProblem.html", "structtorq_1_1QPProblem" ],

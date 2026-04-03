@@ -95,7 +95,7 @@ $(document).ready(function(){initNavTree('sim_to_real.html',''); initResizable()
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md_doc_sim_to_real"></a> Torq is designed so that the same control code (IK, tasks, limits, barriers) runs in simulation and on real hardware. You switch only the <b>HardwareInterface</b> implementation.</p>
-<h1><a class="anchor" id="autotoc_md69"></a>
+<h1><a class="anchor" id="autotoc_md185"></a>
 Architecture</h1>
 <ul>
 <li><b>Simulation:</b> <code>MujocoDriver</code> implements <code>HardwareInterface</code>; <code>connect(config_path)</code> loads an MJCF scene; <code>getJointPositions()</code> / <code>setJointPositions()</code> use MuJoCo state and <code>ctrl</code>.</li>
@@ -107,10 +107,10 @@ Architecture</h1>
 <li><code>driver_type = "serial_servo"</code>: use <code>ServoDriver</code>; <code>connect(driver_connection)</code> where <code>driver_connection</code> is the serial port (e.g. <code>/dev/ttyUSB0</code>) or a path to a driver config file (e.g. <code>workspace/so101/so101.conf</code>).</li>
 </ul>
 <p>The same URDF, limits, barriers, and IK parameters can be used in both cases. Tune limits and barriers <b>stricter</b> for the real robot so the commanded motion is safe.</p>
-<h1><a class="anchor" id="autotoc_md70"></a>
+<h1><a class="anchor" id="autotoc_md186"></a>
 Real robot: ServoDriver (ST3215 / ST/STS/SMS)</h1>
 <p>The <b>ServoDriver</b> supports ST/STS/SMS series servos (e.g. Waveshare/Feetech ST3215) using the SCServo protocol: 1 Mbps serial, 12-bit position 0–4095, 360° absolute. Used for the SO101 arm with 6× ST3215 servos. The driver uses a bottom-up stack: <b>SCSPort</b> (transport, POSIX serial; extensible to ESP32) → <b>SMS_STS_Port</b> (protocol, memory map, SyncWrite/Read) → <b>ServoDriver</b> (config, radian conversion, HardwareInterface). See <code><a class="el" href="ServoDriver_8hpp.html" title="Real-hardware driver for ST/STS/SMS serial bus servos (e.g.">ServoDriver.hpp</a></code> and <code>include/torq/scservo/</code> for details.</p>
-<h2><a class="anchor" id="autotoc_md71"></a>
+<h2><a class="anchor" id="autotoc_md187"></a>
 Connection</h2>
 <ul>
 <li><b>Option A — port only:</b> Set <code>driver_connection</code> to the serial port (e.g. <code>/dev/ttyUSB0</code> on Linux, <code>COM3</code> on Windows). ServoDriver uses ST3215 defaults: baud 1000000, control_period 0.002, servo IDs 1–6.</li>
@@ -137,7 +137,7 @@ Connection</h2>
 <div class="fragment"><div class="line">port=/dev/ttyUSB0</div>
 <div class="line">baud_rate=1000000</div>
 <div class="line">servo_ids=1 2 3 4 5 6</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md72"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md188"></a>
 SO101 real robot example</h2>
 <p>Use the same URDF and end-effector frame as in sim; only the driver and connection change:</p>
 <div class="fragment"><div class="line"><a class="code" href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a> config;</div>
@@ -169,7 +169,7 @@ SO101 real robot example</h2>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html_abf39d0547e9806a341e8f7129fab68c7"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#abf39d0547e9806a341e8f7129fab68c7">torq::RobotConfig::end_effector_frame</a></div><div class="ttdeci">std::string end_effector_frame</div><div class="ttdoc">Name of the end-effector frame in the Pinocchio model.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:29</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html_ac6b9ccaad2f9ff364fa5277fd1358f0c"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#ac6b9ccaad2f9ff364fa5277fd1358f0c">torq::RobotConfig::locked_joints</a></div><div class="ttdeci">std::vector&lt; std::string &gt; locked_joints</div><div class="ttdoc">Joint names to freeze (removed from the reduced model).</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:30</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html_ad230ad2d4e45e2fa9e975abba0d471cd"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd">torq::RobotConfig::robot_model_path</a></div><div class="ttdeci">std::string robot_model_path</div><div class="ttdoc">Path to the robot-only URDF or MJCF for Pinocchio kinematics.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:28</div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md73"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md189"></a>
 GUI with real robot (display mirror)</h2>
 <p>When using <code>driver_type = "serial_servo"</code>, if you also provide <code>scene_path</code> pointing to the MuJoCo scene XML, <code>RobotSystem</code> loads a <b>display-only</b> MuJoCo model alongside the real hardware driver. Each <code>update()</code> call copies the real robot's joint positions into this model via <code>overrideJointPositions()</code> (no physics step — purely kinematic). The GUI then renders from this display model, so the 3D viewport shows the real robot's actual pose.</p>
 <div class="fragment"><div class="line"><a class="code" href="structtorq_1_1RobotConfig.html">torq::RobotConfig</a> config;</div>
@@ -192,13 +192,13 @@ GUI with real robot (display mirror)</h2>
 <div class="line">    robot.<a class="code" href="classtorq_1_1RobotSystem.html#a47c6dd4b4562e2adee434ab424a95638">update</a>();   <span class="comment">// reads real servos, optionally runs IK, mirrors state to display model</span></div>
 <div class="line">    gui.<a class="code" href="classtorq_1_1Gui.html#a4272a4aa17018b4d29e3e94c9b38e701">render</a>();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclasstorq_1_1Gui_html"><div class="ttname"><a href="classtorq_1_1Gui.html">torq::Gui</a></div><div class="ttdoc">ImGui + GLFW + OpenGL3 docking GUI for Torq.</div><div class="ttdef"><b>Definition:</b> Gui.hpp:50</div></div>
+<div class="ttc" id="aclasstorq_1_1Gui_html"><div class="ttname"><a href="classtorq_1_1Gui.html">torq::Gui</a></div><div class="ttdoc">ImGui + GLFW + OpenGL3 docking GUI for Torq.</div><div class="ttdef"><b>Definition:</b> Gui.hpp:61</div></div>
 <div class="ttc" id="aclasstorq_1_1Gui_html_a378d5f8283289d9cb8380f21c1b8317a"><div class="ttname"><a href="classtorq_1_1Gui.html#a378d5f8283289d9cb8380f21c1b8317a">torq::Gui::initialize</a></div><div class="ttdeci">bool initialize(RobotSystem *robot_system, const std::string &amp;title=&quot;Torq GUI&quot;)</div><div class="ttdoc">Initialise the GUI window and attach to a RobotSystem.</div></div>
 <div class="ttc" id="aclasstorq_1_1Gui_html_a4272a4aa17018b4d29e3e94c9b38e701"><div class="ttname"><a href="classtorq_1_1Gui.html#a4272a4aa17018b4d29e3e94c9b38e701">torq::Gui::render</a></div><div class="ttdeci">void render()</div><div class="ttdoc">Render one frame.</div></div>
 <div class="ttc" id="aclasstorq_1_1Gui_html_a46252df38fcfe3b6fd1444cf2b3506f9"><div class="ttname"><a href="classtorq_1_1Gui.html#a46252df38fcfe3b6fd1444cf2b3506f9">torq::Gui::windowIsOpen</a></div><div class="ttdeci">bool windowIsOpen() const</div><div class="ttdoc">True while the window has not been closed.</div></div>
 <div class="ttc" id="astructtorq_1_1RobotConfig_html_af034c7f47cfcea2c4bea783247dd8bc7"><div class="ttname"><a href="structtorq_1_1RobotConfig.html#af034c7f47cfcea2c4bea783247dd8bc7">torq::RobotConfig::scene_path</a></div><div class="ttdeci">std::string scene_path</div><div class="ttdoc">Path to the MuJoCo scene XML (floor, lights, robot include). Used when driver_type is &quot;mujoco&quot;.</div><div class="ttdef"><b>Definition:</b> RobotSystem.hpp:27</div></div>
 </div><!-- fragment --><p>If <code>scene_path</code> is omitted, <code>getPhysics()</code> returns null and the GUI 3D view is unavailable; you can still run headless or with a minimal UI.</p>
-<h2><a class="anchor" id="autotoc_md74"></a>
+<h2><a class="anchor" id="autotoc_md190"></a>
 Passive mode (display only, move by hand)</h2>
 <p>You do <b>not</b> need to enable active control immediately. Use <b>passive mode</b> to move the robot by hand and see its pose in the GUI; when satisfied, enable active control to send commands.</p>
 <ul>
@@ -206,7 +206,7 @@ Passive mode (display only, move by hand)</h2>
 <li><b>At runtime:</b> call <code>robot.setActiveControl(false)</code> to stop sending commands, or <code>robot.setActiveControl(true)</code> to enable. The GUI shows an "Active control" checkbox in the Joint Control panel when connected to a real robot; uncheck to enter passive mode, check to enable control.</li>
 </ul>
 <p>In passive mode, <code>update()</code> still calls <code>hardware_-&gt;step()</code> (ServoDriver reads positions from the bus), then mirrors <code>hardware_-&gt;getJointPositions()</code> into the display model. No position or velocity commands are sent because <code>controller_-&gt;update()</code> is not called.</p>
-<h2><a class="anchor" id="autotoc_md75"></a>
+<h2><a class="anchor" id="autotoc_md191"></a>
 Calibration and joint/velocity limits</h2>
 <p>You do <b>not</b> need to calibrate the real robot before using Torq for basic operation. Recommended approach:</p>
 <ul>
@@ -214,10 +214,10 @@ Calibration and joint/velocity limits</h2>
 <li><b>Velocity limits:</b> Set in the <b>VelocityLimit</b> (or in the model) to safe values for the ST3215 (see the servo datasheet for max speed). This keeps the IK from commanding unrealistic velocities. No separate "calibration" step is required; use conservative limits at first and tune if needed.</li>
 </ul>
 <p>So: start with the same URDF and limits as in sim; optionally tighten velocity from the ST3215 manual; adjust position_zero/position_scale only if you notice a constant offset (via code or a future config key).</p>
-<h2><a class="anchor" id="autotoc_md76"></a>
+<h2><a class="anchor" id="autotoc_md192"></a>
 ST/STS/SMS protocol (SCSPort + SMS_STS_Port)</h2>
 <p>ServoDriver uses the in-tree <b>SCSPort</b> and <b>SMS_STS_Port</b> layers (see <code><a class="el" href="SCSPort_8hpp.html" title="Platform transport for SCServo (SC/STS/SMS) protocol — bottom layer of the servo stack.">include/torq/scservo/SCSPort.hpp</a></code>, <code><a class="el" href="SMS__STS__Port_8hpp.html" title="ST/STS/SMS series protocol on top of SCSPort — middle layer of the servo stack.">SMS_STS_Port.hpp</a></code>). SCSPort implements the SCS virtual read/write interface over a POSIX serial fd (Linux/macOS); the same interface can be implemented on ESP32 with an UART driver. SMS_STS_Port provides the ST/STS/SMS memory map and instructions: goal position, present position, torque enable, SyncWritePosEx, ReadPos, Ping, etc. Packet layout matches the SCServo/Waveshare manual: header <code>0xFF 0xFF</code>, instructions READ, WRITE, SYNC WRITE, SYNC READ; register addresses (e.g. goal at ACC 41, present position at 56–57) as in <code><a class="el" href="SMS__STS__Port_8hpp.html" title="ST/STS/SMS series protocol on top of SCSPort — middle layer of the servo stack.">SMS_STS_Port.hpp</a></code>. No Arduino dependency; the stack runs on the host and can be extended to embedded by swapping the transport in SCSPort.</p>
-<h1><a class="anchor" id="autotoc_md77"></a>
+<h1><a class="anchor" id="autotoc_md193"></a>
 Limits and barriers for real hardware</h1>
 <p>To avoid dangerous velocities and torques on the real robot:</p>
 <ol type="1">
@@ -227,7 +227,7 @@ Limits and barriers for real hardware</h1>
 <li><b>Barriers</b> — Use <b>PositionBarrier</b> (e.g. workspace bounds, CoM height) or <b>BodySphericalBarrier</b> (minimum distance between links) to keep the robot away from unsafe regions. Add via <code>RobotSystem::addBarrier()</code>.</li>
 </ol>
 <p>The servos (e.g. ST3215) usually have internal position (and sometimes velocity) control. Torq sends <b>position setpoints</b> at the control rate; the servo's internal controller tracks them. So the "output" from Torq is desired joint positions; the HAL turns that into serial commands. Limiting the IK output (velocity, acceleration, configuration) keeps those setpoints safe.</p>
-<h1><a class="anchor" id="autotoc_md78"></a>
+<h1><a class="anchor" id="autotoc_md194"></a>
 Checklist for real robot</h1>
 <ul>
 <li>[ ] Same URDF (and calibration) as in sim.</li>

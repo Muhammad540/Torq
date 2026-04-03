@@ -1,5 +1,6 @@
 var Gui_8hpp =
 [
+    [ "PiPCamera", "structtorq_1_1PiPCamera.html", "structtorq_1_1PiPCamera" ],
     [ "Gui", "classtorq_1_1Gui.html", "classtorq_1_1Gui" ],
     [ "mjvCamera", "Gui_8hpp.html#a94984d02687059001a34987ac9224ad8", null ],
     [ "mjvOption", "Gui_8hpp.html#aeefd2b6632122bb033bfb32b9e0c0d5e", null ],

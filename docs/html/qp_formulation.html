@@ -94,37 +94,48 @@ $(document).ready(function(){initNavTree('qp_formulation.html',''); initResizabl
 <div class="title">QP Formulation </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_doc_qp_formulation"></a> [update qp formulation has missing barriers] Torq solves differential inverse kinematics as a <b>Quadratic</b> Program (QP) <b>at</b> every control tick. This page derives the complete formulation explaining how tasks, limits, and damping compose into a single optimisation problem.</p>
-<h1><a class="anchor" id="autotoc_md50"></a>
-Overview</h1>
-<p>Given the current robot configuration \(q\), the IK solver finds a displacement \(\Delta q \in \mathbb{R}^{n_v}\) (tangent-space velocity \(\times\,\Delta t\)) that best satisfies all active tasks while respecting physical limits and defined barriers.</p>
-<p class="formulaDsp">
-\[ \begin{aligned} \min_{\Delta q} \quad &amp; \tfrac{1}{2}\,\Delta q^\top P\,\Delta q + c^\top \Delta q \\ \text{s.t.} \quad &amp; G\,\Delta q \le h \end{aligned} \]
-</p>
-<p>where \(P\) (positive semi-definite) and \(c\) accumulate task objectives, and the rows of \((G, h)\) encode limit and barrier constraints. [update: check again]</p>
+<div class="textblock"><p><a class="anchor" id="md_doc_qp_formulation"></a> Torq solves differential inverse kinematics as a <b>Quadratic</b> Program (QP) at every control tick. This page derives the complete formulation, showing how tasks, limits, and barriers compose into a single optimisation problem.</p>
+<p>See <a class="el" href="conventions.html">Conventions and Notation</a> for notation and <a class="el" href="tasks_page.html">Tasks</a>, <a class="el" href="limits_page.html">Limits</a>, <a class="el" href="barriers_page.html">Barriers</a> for the per-component derivations.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md52"></a>
+<h1><a class="anchor" id="autotoc_md140"></a>
+Overview</h1>
+<p>Given the current robot configuration \(q\), the IK solver finds a displacement \(\Delta q \in \mathbb{R}^{n_v}\) (tangent-space velocity \(\times\,\Delta t\)) that best satisfies all active tasks while respecting physical limits and safety barriers:</p>
+<p class="formulaDsp">
+\[ \boxed{ \begin{aligned} \min_{\Delta q} \quad &amp; \tfrac{1}{2}\,\Delta q^\top P\,\Delta q + c^\top \Delta q \\ \text{s.t.} \quad &amp; G\,\Delta q \le h \end{aligned} } \]
+</p>
+<p>where:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Component   </th><th class="markdownTableHeadNone">Source   </th><th class="markdownTableHeadNone">Role    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">\(P\) (positive semi-definite)   </td><td class="markdownTableBodyNone">Tasks + barrier objectives + Tikhonov damping   </td><td class="markdownTableBodyNone">Quadratic cost on \(\Delta q\)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">\(c\)   </td><td class="markdownTableBodyNone">Tasks + barrier objectives   </td><td class="markdownTableBodyNone">Linear cost on \(\Delta q\)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">\(G, h\)   </td><td class="markdownTableBodyNone">Limits + barrier inequalities   </td><td class="markdownTableBodyNone">Hard inequality constraints   </td></tr>
+</table>
+<hr  />
+<h1><a class="anchor" id="autotoc_md142"></a>
 Per-task contribution</h1>
 <p>Every task \(i\) defines:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Symbol   </th><th class="markdownTableHeadNone">Meaning   </th><th class="markdownTableHeadNone">Shape    </th></tr>
+<th class="markdownTableHeadNone">Symbol   </th><th class="markdownTableHeadNone">Meaning   </th><th class="markdownTableHeadNone">Shape   </th><th class="markdownTableHeadNone">Contribution    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">\(e_i(q)\)   </td><td class="markdownTableBodyNone">Task error   </td><td class="markdownTableBodyNone">\(k_i \times 1\)    </td></tr>
+<td class="markdownTableBodyNone">\(e_i(q)\)   </td><td class="markdownTableBodyNone">Task error   </td><td class="markdownTableBodyNone">\(k_i \times 1\)   </td><td class="markdownTableBodyNone">Drives the objective gradient    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">\(J_i(q)\)   </td><td class="markdownTableBodyNone">Task Jacobian   </td><td class="markdownTableBodyNone">\(k_i \times n_v\)    </td></tr>
+<td class="markdownTableBodyNone">\(J_i(q)\)   </td><td class="markdownTableBodyNone">Task Jacobian   </td><td class="markdownTableBodyNone">\(k_i \times n_v\)   </td><td class="markdownTableBodyNone">Maps \(\Delta q\) to task-space changes    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">\(w_i\)   </td><td class="markdownTableBodyNone">Cost (weight) vector   </td><td class="markdownTableBodyNone">\(k_i \times 1\)    </td></tr>
+<td class="markdownTableBodyNone">\(w_i\)   </td><td class="markdownTableBodyNone">Cost (weight) vector   </td><td class="markdownTableBodyNone">\(k_i \times 1\)   </td><td class="markdownTableBodyNone">Scales error and Jacobian components    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">\(\alpha_i\)   </td><td class="markdownTableBodyNone">Gain \(\in (0, 1]\)   </td><td class="markdownTableBodyNone">scalar    </td></tr>
+<td class="markdownTableBodyNone">\(\alpha_i\)   </td><td class="markdownTableBodyNone">Gain \(\in (0, 1]\)   </td><td class="markdownTableBodyNone">scalar   </td><td class="markdownTableBodyNone">Controls convergence speed    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">\(\mu_i\)   </td><td class="markdownTableBodyNone">Levenberg–Marquardt damping   </td><td class="markdownTableBodyNone">scalar   </td></tr>
+<td class="markdownTableBodyNone">\(\mu_i\)   </td><td class="markdownTableBodyNone">LM damping   </td><td class="markdownTableBodyNone">scalar   </td><td class="markdownTableBodyNone">Regularises near singularities   </td></tr>
 </table>
-<p>[update: add a column briefly describing the contribution] </p>
-<h2><a class="anchor" id="autotoc_md53"></a>
+<h2><a class="anchor" id="autotoc_md143"></a>
 Weight matrix</h2>
 <p>The diagonal weight matrix \(W_i = \operatorname{diag}(w_i)\) scales each component of the error independently. For <code>FrameTask</code> the 6-D weight vector is \([w_{\text{pos}}^{(3)},\; w_{\text{ori}}^{(3)}]\).</p>
-<h2><a class="anchor" id="autotoc_md54"></a>
+<h2><a class="anchor" id="autotoc_md144"></a>
 Weighted quantities</h2>
 <p class="formulaDsp">
 \[ \bar{J}_i = W_i \, J_i, \qquad \bar{e}_i = W_i \left(-\alpha_i \, e_i\right) \]
@@ -133,50 +144,85 @@ Weighted quantities</h2>
 <p class="formulaDsp">
 \[ \min_{\Delta q}\; \tfrac{1}{2}\left\|\bar{J}_i\,\Delta q - \bar{e}_i\right\|^2 \]
 </p>
-<h2><a class="anchor" id="autotoc_md55"></a>
-Levenberg–Marquardt damping</h2>
+<h2><a class="anchor" id="autotoc_md145"></a>
+Levenberg-Marquardt damping</h2>
 <p>When the target is unreachable the error can be large and the solver may produce huge velocities. LM damping adds a configuration-space regularisation proportional to the task's own residual:</p>
 <p class="formulaDsp">
 \[ \mu_i^{\text{eff}} = \mu_i \cdot \bar{e}_i^\top \bar{e}_i \]
 </p>
-<h2><a class="anchor" id="autotoc_md56"></a>
+<p>This is adaptive: the damping is strong when the residual is large (unreachable target) and vanishes when the error is small.</p>
+<h2><a class="anchor" id="autotoc_md146"></a>
 Per-task Hessian and gradient</h2>
 <p class="formulaDsp">
 \[ H_i = \bar{J}_i^\top \bar{J}_i + \mu_i^{\text{eff}}\, I_{n_v}, \qquad c_i = -\bar{J}_i^\top \bar{e}_i \]
 </p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md58"></a>
+<h1><a class="anchor" id="autotoc_md148"></a>
 Composing multiple tasks</h1>
 <p>Because tasks live in the same \(\Delta q\) space, the QP Hessian and gradient are simply summed:</p>
 <p class="formulaDsp">
-\[ P = \sum_{i} H_i, \qquad c = \sum_{i} c_i \]
+\[ P_{\text{tasks}} = \sum_{i} H_i, \qquad c_{\text{tasks}} = \sum_{i} c_i \]
 </p>
 <p>The relative importance of each task is encoded in its weight vector \(w_i\). Higher cost → the solver prioritises that task more aggressively.</p>
+<p>For the default built-in tasks:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Task   </th><th class="markdownTableHeadNone">Typical cost   </th><th class="markdownTableHeadNone">Effect    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">FrameTask   </td><td class="markdownTableBodyNone">1.0   </td><td class="markdownTableBodyNone">Primary objective: track end-effector    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">PostureTask   </td><td class="markdownTableBodyNone">\(10^{-3}\)   </td><td class="markdownTableBodyNone">Regularisation: stay near home    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">DampingTask   </td><td class="markdownTableBodyNone">\(10^{-4}\)   </td><td class="markdownTableBodyNone">Smoothing: minimise motion   </td></tr>
+</table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md60"></a>
+<h1><a class="anchor" id="autotoc_md150"></a>
 Tikhonov (solver) damping</h1>
 <p>A small global regularisation \(\lambda\) (default \(10^{-12}\)) is added to the diagonal of \(P\) to guarantee positive definiteness even when tasks do not fully constrain all DOFs:</p>
 <p class="formulaDsp">
 \[ P \leftarrow P + \lambda \, I_{n_v} \]
 </p>
-<p>Unlike LM damping (per-task, error-dependent), Tikhonov damping is a constant background term.</p>
+<p>Unlike LM damping (per-task, error-dependent), Tikhonov damping is a constant background term that ensures the QP is always solvable.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md62"></a>
+<h1><a class="anchor" id="autotoc_md152"></a>
 Inequality constraints from limits</h1>
 <p>Each <code>Limit</code> produces rows \((G_j, h_j)\) such that \(G_j\,\Delta q \le h_j\).</p>
 <p>All limit rows are stacked vertically:</p>
 <p class="formulaDsp">
-\[ G = \begin{bmatrix} G_1 \\ G_2 \\ \vdots \end{bmatrix}, \qquad h = \begin{bmatrix} h_1 \\ h_2 \\ \vdots \end{bmatrix} \]
+\[ G_{\text{limits}} = \begin{bmatrix} G_1 \\ G_2 \\ \vdots \end{bmatrix}, \qquad h_{\text{limits}} = \begin{bmatrix} h_1 \\ h_2 \\ \vdots \end{bmatrix} \]
 </p>
 <p>See <a class="el" href="limits_page.html">Limits</a> for the exact derivation of each limit type.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md64"></a>
-The complete QP</h1>
+<h1><a class="anchor" id="autotoc_md154"></a>
+Barrier contributions</h1>
+<p>Each <code>Barrier</code> contributes to <b>both</b> <b>the</b> objective and the constraints:</p>
+<h2><a class="anchor" id="autotoc_md155"></a>
+Barrier inequality rows</h2>
+<p>The CBF condition for barrier \(j\):</p>
 <p class="formulaDsp">
-\[ \boxed{ \begin{aligned} \min_{\Delta q} \quad &amp; \tfrac{1}{2}\,\Delta q^\top \left[\sum_i H_i + \lambda I\right] \Delta q + \left[\sum_i c_i\right]^\top \Delta q \\[4pt] \text{s.t.} \quad &amp; G\,\Delta q \le h \end{aligned} } \]
+\[ G_j = -\frac{1}{\Delta t}\,\frac{\partial h_j}{\partial q}, \qquad h_j^{\text{rhs}} = \alpha_j \cdot g\!\left(h_j(q)\right) \]
+</p>
+<p>where \(g(\cdot)\) is the barrier's gain function (default: identity).</p>
+<p>Barrier rows are stacked alongside limit rows:</p>
+<p class="formulaDsp">
+\[ G = \begin{bmatrix} G_{\text{limits}} \\ G_{\text{barriers}} \end{bmatrix}, \qquad h = \begin{bmatrix} h_{\text{limits}} \\ h_{\text{barriers}} \end{bmatrix} \]
+</p>
+<h2><a class="anchor" id="autotoc_md156"></a>
+Barrier objective terms</h2>
+<p>If the safe-displacement gain \(\kappa_j &gt; 0\):</p>
+<p class="formulaDsp">
+\[ H_j^{\text{barrier}} = \frac{\kappa_j}{\|J_j\|_F^2}\,I_{n_v}, \qquad c_j^{\text{barrier}} = -\frac{\kappa_j}{\|J_j\|_F^2}\,\Delta q_{\text{safe},j} \]
+</p>
+<p>These are summed into the QP objective alongside task contributions.</p>
+<hr  />
+<h1><a class="anchor" id="autotoc_md158"></a>
+The complete QP</h1>
+<p>Putting it all together:</p>
+<p class="formulaDsp">
+\[ \boxed{ \begin{aligned} \min_{\Delta q} \quad &amp; \tfrac{1}{2}\,\Delta q^\top \underbrace{\left[ \lambda I + \sum_{i \in \text{tasks}} H_i + \sum_{j \in \text{barriers}} H_j^{\text{barrier}} \right]}_{P}\,\Delta q + \underbrace{\left[ \sum_{i \in \text{tasks}} c_i + \sum_{j \in \text{barriers}} c_j^{\text{barrier}} \right]^\top}_{c^\top}\,\Delta q \\[8pt] \text{s.t.} \quad &amp; \underbrace{\begin{bmatrix} G_{\text{limits}} \\ G_{\text{barriers}} \end{bmatrix}}_{G}\,\Delta q \;\le\; \underbrace{\begin{bmatrix} h_{\text{limits}} \\ h_{\text{barriers}} \end{bmatrix}}_{h} \end{aligned} } \]
 </p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md66"></a>
+<h1><a class="anchor" id="autotoc_md160"></a>
 OSQP solver</h1>
 <p>Torq uses <a href="https://osqp.org/">OSQP</a> via <a href="https://github.com/robotology/osqp-eigen">OsqpEigen</a>. OSQP expects the standard form:</p>
 <p class="formulaDsp">
@@ -197,15 +243,36 @@ OSQP solver</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">\(h\)   </td><td class="markdownTableBodyNone">\(u\)   </td></tr>
 </table>
-<p>The solver is warm-started across ticks: the sparsity pattern is set once and only the numerical values are updated on subsequent solves.</p>
+<p>The solver is warm-started across ticks: the sparsity pattern is set once and only the numerical values are updated on subsequent solves. When there are no inequality constraints ( \(m = 0\)), Torq uses a direct LDLT decomposition instead of OSQP for better performance.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md68"></a>
+<h1><a class="anchor" id="autotoc_md162"></a>
 Manifold-aware integration</h1>
 <p>The solved \(\Delta q\) is a tangent vector. For joints with manifold structure (e.g. floating-base quaternions) Torq uses Pinocchio's <code>pinocchio::integrate</code> instead of simple addition:</p>
 <p class="formulaDsp">
 \[ q_{\text{new}} = q \oplus \Delta q \]
 </p>
-<p>For revolute and prismatic joints \(\oplus\) reduces to ordinary addition, so there is no overhead for fixed-base arms. </p>
+<p>For revolute and prismatic joints \(\oplus\) reduces to ordinary addition, so there is no overhead for fixed-base arms. For floating-base robots, the quaternion component is updated using the exponential map, maintaining the unit-norm constraint and avoiding gimbal lock.</p>
+<p>See <a class="el" href="conventions.html">Conventions and Notation</a> for a full explanation of manifold operations.</p>
+<hr  />
+<h1><a class="anchor" id="autotoc_md164"></a>
+Velocity output</h1>
+<p>The QP solves for a displacement \(\Delta q\). The corresponding generalised velocity is:</p>
+<p class="formulaDsp">
+\[ v = \frac{\Delta q}{\Delta t} \]
+</p>
+<p>This velocity is returned to the caller and used by limits (which scale their bounds by \(\Delta t\)) and by <code>Configuration::integrate()</code>.</p>
+<hr  />
+<h1><a class="anchor" id="autotoc_md166"></a>
+Summary of the assembly pipeline</h1>
+<ol type="1">
+<li><b>Tikhonov</b>: \(P = \lambda I\), \(c = 0\).</li>
+<li><b>Tasks</b>: For each task, compute \((H_i, c_i)\) → \(P \mathrel{+}= H_i\), \(c \mathrel{+}= c_i\).</li>
+<li><b>Barrier objectives</b>: For each barrier with \(\kappa &gt; 0\), compute \((H_j, c_j)\) → \(P \mathrel{+}= H_j\), \(c \mathrel{+}= c_j\).</li>
+<li><b>Limits</b>: For each limit, compute \((G_j, h_j)\) → stack into \((G, h)\).</li>
+<li><b>Barrier inequalities</b>: For each barrier, compute \((G_j, h_j)\) → stack into \((G, h)\).</li>
+<li><b>Solve</b>: If \(m &gt; 0\) use OSQP; else use direct LDLT.</li>
+<li><b>Integrate</b>: \(q_{\text{new}} = q \oplus \Delta q\). </li>
+</ol>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

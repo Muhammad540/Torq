@@ -38,6 +38,8 @@
 [] return proper error codes from all cirtical methods (create a struct of all possible error codes, should be documented)
 [] add visualization for contact points
 [] update docs
+[] dsplay the eef pose in gui
+[] displlay axes in gui
 
 ## LOW
 [] startup is a bit slow, debug this (add compilation time monitoring)

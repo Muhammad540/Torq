@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['red_622',['RED',['../namespaceColor.html#a29bfda93a0cf8b1ec0fb44cf989d7eb0',1,'Color']]],
-  ['reset_623',['RESET',['../namespaceColor.html#a5f17e30618539f55680290c9be31967d',1,'Color']]],
-  ['robot_5fmodel_5fpath_624',['robot_model_path',['../structtorq_1_1RobotConfig.html#ad230ad2d4e45e2fa9e975abba0d471cd',1,'torq::RobotConfig']]]
+  ['q0_5f_648',['q0_',['../classtorq_1_1LinearHolonomicTask.html#a495abf59e9a9580a0586c6adf9c20eb0',1,'torq::LinearHolonomicTask']]]
 ];

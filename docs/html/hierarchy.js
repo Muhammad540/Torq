@@ -23,6 +23,7 @@ var hierarchy =
     ] ],
     [ "Logger", "classLogger.html", null ],
     [ "Logger::LogStream", "classLogger_1_1LogStream.html", null ],
+    [ "torq::PiPCamera", "structtorq_1_1PiPCamera.html", null ],
     [ "torq::QPProblem", "structtorq_1_1QPProblem.html", null ],
     [ "torq::RobotConfig", "structtorq_1_1RobotConfig.html", null ],
     [ "torq::RobotSystem", "classtorq_1_1RobotSystem.html", null ],
