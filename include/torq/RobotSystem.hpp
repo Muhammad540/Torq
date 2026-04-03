@@ -238,6 +238,20 @@ namespace torq {
             bool ikReady() const;
             /** @} */
 
+            /**
+             * @brief Load collision geometry for self-collision avoidance.
+             *
+             * Forwards to KinematicsEngine::loadCollisionModel(). Call after
+             * initialize(). Required before adding a SelfCollisionBarrier.
+             * Accepts both URDF and MJCF files (auto-detected by extension).
+             *
+             * @param model_path Path to the URDF or MJCF file with collision geometry.
+             * @param srdf_path  Optional SRDF for filtering collision pairs.
+             * @return True on success.
+             */
+            bool loadCollisionModel(const std::string& model_path,
+                                    const std::string& srdf_path = "");
+
             /** @name User task / limit / barrier composition
              *  RobotSystem owns all objects added here. They are included in
              *  every IK solve alongside the built-in tasks/limits. Use for

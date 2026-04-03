@@ -187,17 +187,18 @@ namespace torq {
             bool initialize(const std::string& model_path, const std::vector<std::string>& locked_joint_names = {});
 
             /**
-             * @brief Load collision geometry from a URDF file.
+             * @brief Load collision geometry from a URDF or MJCF file.
              *
              * Call after initialize().  The geometry model is used by
              * SelfCollisionBarrier.  Optionally load an SRDF to filter
-             * collision pairs.
+             * collision pairs.  File type is auto-detected by extension
+             * (.urdf vs .xml).
              *
-             * @param urdf_path  Path to the URDF (same as or different from model_path).
+             * @param model_path Path to the URDF or MJCF file with collision geometry.
              * @param srdf_path  Optional SRDF file for collision pair filtering. Empty = use all pairs.
              * @return True on success.
              */
-            bool loadCollisionModel(const std::string& urdf_path,
+            bool loadCollisionModel(const std::string& model_path,
                                     const std::string& srdf_path = "");
 
             /** @brief True if a model has been loaded successfully. */
@@ -240,6 +241,7 @@ namespace torq {
             std::unique_ptr<pinocchio::Model> model_ = nullptr;
             std::unique_ptr<pinocchio::Model> full_model_ = nullptr;
             std::shared_ptr<pinocchio::GeometryModel> collision_model_ = nullptr;
+            std::shared_ptr<pinocchio::GeometryData>  collision_data_  = nullptr;
             std::vector<pinocchio::JointIndex> locked_joint_ids_;
             std::vector<int> q_idx_map_;
     };

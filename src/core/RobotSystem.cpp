@@ -93,6 +93,15 @@ namespace torq {
         return true;
     }
 
+    bool RobotSystem::loadCollisionModel(const std::string& model_path,
+                                          const std::string& srdf_path) {
+        if (!kinematics_) {
+            log_.error() << "[RobotSystem] KinematicsEngine not initialized";
+            return false;
+        }
+        return kinematics_->loadCollisionModel(model_path, srdf_path);
+    }
+
     void RobotSystem::setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, std::string frame_name) {
       if (controller_) {
         persistent_target_pose_ = target_pose;
