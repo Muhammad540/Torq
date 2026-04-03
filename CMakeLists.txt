@@ -48,7 +48,7 @@ FetchContent_Declare(
 FetchContent_Declare(
     implot
     GIT_REPOSITORY https://github.com/epezent/implot.git
-    GIT_TAG v0.17
+    GIT_TAG master
 )
 
 find_package(osqp REQUIRED)
