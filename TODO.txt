@@ -27,6 +27,7 @@
 [] add more tasks/limits/barriers
 [] there should be no built in tasks/limits/barriers (all should be defined and passed by the user), the library will interpret it solve the qp problem accordingly and expose the configuration via GUI at runtime
 [] remove the redundant setControl freq methods (the update rate is decided by the user application's update speed)
+[] completely decouple the gripper joint control from task space (i observed that when i change gripper positioi via joint control it is not retained and as i switch to task space it jumps to the position of gripper which was before i used the joint control to move it)
 
 ## MEDIUM 
 [] Servo Driver
