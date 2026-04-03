@@ -303,6 +303,13 @@ namespace torq {
              * @return Configuration vector \f$q \in \mathbb{R}^{n_q}\f$.
              */
             Eigen::VectorXd getJointPositions();
+
+            /**
+             * @brief Get the current joint velocities.
+             * @return Velocity vector \f$\dot{q} \in \mathbb{R}^{n_v}\f$.
+             *         For real hardware this is a finite-difference estimate.
+             */
+            Eigen::VectorXd getJointVelocities();
             /** @} */
 
         private:

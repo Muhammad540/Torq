@@ -19,6 +19,7 @@ int main(int argc, char** argv) {
         conf_path = argv[1];
     config.driver_connection = conf_path;
     config.driver_type = "mujoco";
+    // config.driver_type = "serial_servo";
     config.active_control = true;
 
     torq::RobotSystem robot;

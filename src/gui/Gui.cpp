@@ -23,6 +23,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "implot.h"
 
 namespace torq {
     Gui::Gui(): 
@@ -35,6 +36,7 @@ namespace torq {
     Gui::~Gui() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
+        ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
         if (!pip_cameras_.empty() && display_pip){
@@ -94,6 +96,7 @@ namespace torq {
         
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -108,6 +111,8 @@ namespace torq {
         
         int nj = model_->nu;
         joint_targets_.resize(nj, 0.0f);
+        pos_history_.resize(nj);
+        vel_history_.resize(nj);
 
         lin_step_ = static_cast<float>(robot_->jogLinearStep());
         ang_step_ = static_cast<float>(robot_->jogAngularStep());
@@ -223,12 +228,11 @@ namespace torq {
             first_frame_ = false;
         }
 
-        // drawMenuBar();
         drawViewport();
         drawJointControlPanel();
+        drawJointPlots();
         drawCartesianPanel();
         drawIKTuningPanel();
-        // drawInfoPanel();    
         
         ImGui::Render();
         int display_w, display_h;
@@ -282,8 +286,12 @@ namespace torq {
         ImGuiID dock_right_top, dock_right_bottom;
         ImGui::DockBuilderSplitNode(dock_right, ImGuiDir_Down, 0.55f, &dock_right_bottom, &dock_right_top);
 
+        ImGuiID dock_left_top, dock_left_bottom;
+        ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Down, 0.55f, &dock_left_bottom, &dock_left_top);
+
         ImGui::DockBuilderDockWindow("Viewport", dock_center);
-        ImGui::DockBuilderDockWindow("Joint Control", dock_left);
+        ImGui::DockBuilderDockWindow("Joint Control", dock_left_top);
+        ImGui::DockBuilderDockWindow("Joint Plots", dock_left_bottom);
         ImGui::DockBuilderDockWindow("Cartesian Control", dock_right_top);
         ImGui::DockBuilderDockWindow("IK Tuning", dock_right_bottom);
         ImGui::DockBuilderFinish(dockerspace_id);
@@ -582,6 +590,61 @@ namespace torq {
         if (ImGui::CollapsingHeader("Limits", ImGuiTreeNodeFlags_DefaultOpen)) {
             if (ImGui::SliderFloat("Config Limit Gain", &ik_config_limit_gain_, 0.01f, 1.0f, "%.3f"))
                 robot_->setConfigLimitGain(ik_config_limit_gain_);
+        }
+
+        ImGui::End();
+    }
+
+    void Gui::drawJointPlots(){
+        ImGui::Begin("Joint Plots");
+
+        float t = static_cast<float>(ImGui::GetTime());
+        Eigen::VectorXd q  = robot_->getJointPositions();
+        Eigen::VectorXd qd = robot_->getJointVelocities();
+
+        int nj = static_cast<int>(pos_history_.size());
+        int nq = static_cast<int>(q.size());
+        int nv = static_cast<int>(qd.size());
+
+        for (int i = 0; i < nj && i < nq; ++i)
+            pos_history_[i].addPoint(t, static_cast<float>(q[i]));
+        for (int i = 0; i < nj && i < nv; ++i)
+            vel_history_[i].addPoint(t, static_cast<float>(qd[i]));
+
+        ImGui::SliderFloat("History (s)", &plot_history_s_, 1.0f, 30.0f, "%.1f");
+
+        float plot_h = (ImGui::GetContentRegionAvail().y - ImGui::GetFrameHeightWithSpacing()) * 0.5f;
+
+        if (ImPlot::BeginPlot("Positions", ImVec2(-1, plot_h))) {
+            ImPlot::SetupAxes("time (s)", "rad");
+            ImPlot::SetupAxisLimits(ImAxis_X1, t - plot_history_s_, t, ImPlotCond_Always);
+            for (int i = 0; i < nj; ++i) {
+                const char* name = mj_id2name(model_, mjOBJ_ACTUATOR, i);
+                std::string label = name ? name : ("j" + std::to_string(i));
+                auto& buf = pos_history_[i];
+                if (buf.size() > 0) {
+                    ImPlotSpec spec;
+                    spec.Offset = buf.offset;
+                    ImPlot::PlotLine(label.c_str(), buf.time.data(), buf.data.data(), buf.size(), spec);
+                }
+            }
+            ImPlot::EndPlot();
+        }
+
+        if (ImPlot::BeginPlot("Velocities", ImVec2(-1, plot_h))) {
+            ImPlot::SetupAxes("time (s)", "rad/s");
+            ImPlot::SetupAxisLimits(ImAxis_X1, t - plot_history_s_, t, ImPlotCond_Always);
+            for (int i = 0; i < nj; ++i) {
+                const char* name = mj_id2name(model_, mjOBJ_ACTUATOR, i);
+                std::string label = name ? name : ("j" + std::to_string(i));
+                auto& buf = vel_history_[i];
+                if (buf.size() > 0) {
+                    ImPlotSpec spec;
+                    spec.Offset = buf.offset;
+                    ImPlot::PlotLine(label.c_str(), buf.time.data(), buf.data.data(), buf.size(), spec);
+                }
+            }
+            ImPlot::EndPlot();
         }
 
         ImGui::End();

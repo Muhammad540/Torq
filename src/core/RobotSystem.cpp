@@ -328,6 +328,10 @@ namespace torq {
       return hardware_->getJointPositions();
     }
 
+    Eigen::VectorXd RobotSystem::getJointVelocities(){
+      return hardware_->getJointVelocities();
+    }
+
     void RobotSystem::addTask(std::unique_ptr<Task> task) {
         if (task)
             user_tasks_.push_back(std::move(task));

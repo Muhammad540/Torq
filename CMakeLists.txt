@@ -45,10 +45,16 @@ FetchContent_Declare(
     GIT_TAG docking
 )
 
+FetchContent_Declare(
+    implot
+    GIT_REPOSITORY https://github.com/epezent/implot.git
+    GIT_TAG v0.17
+)
+
 find_package(osqp REQUIRED)
 find_package(OsqpEigen REQUIRED)
 
-FetchContent_MakeAvailable(imgui)
+FetchContent_MakeAvailable(imgui implot)
 add_library(imgui_lib STATIC
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
@@ -57,11 +63,14 @@ add_library(imgui_lib STATIC
     ${imgui_SOURCE_DIR}/imgui_demo.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+    ${implot_SOURCE_DIR}/implot.cpp
+    ${implot_SOURCE_DIR}/implot_items.cpp
 )
 
 target_include_directories(imgui_lib PUBLIC
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
+    ${implot_SOURCE_DIR}
 )
 
 target_link_libraries(imgui_lib PUBLIC glfw)
