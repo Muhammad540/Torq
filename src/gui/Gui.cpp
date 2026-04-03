@@ -23,6 +23,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "implot.h"
 
 namespace torq {
     Gui::Gui(): 
@@ -35,7 +36,16 @@ namespace torq {
     Gui::~Gui() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
+        ImPlot::DestroyContext();
         ImGui::DestroyContext();
+
+        if (!pip_cameras_.empty() && display_pip){
+            for (auto& pip : pip_cameras_) {
+                if (pip.texture) glDeleteTextures(1, &pip.texture);
+                if (pip.rbo_depth) glDeleteRenderbuffers(1, &pip.rbo_depth);
+                if (pip.fbo) glDeleteFramebuffers(1, &pip.fbo);
+            }
+        }
 
         destroyFBO();
 
@@ -52,6 +62,11 @@ namespace torq {
     bool Gui::initialize(RobotSystem* robot, const std::string& title) {
         if (!robot) return false;
         robot_ = robot;
+        if (!robot->getPhysics()) {
+            logger.error() << "[Gui] No MuJoCo model available for rendering. "
+                              "Use driver_type=\"mujoco\", or provide scene_path with driver_type=\"serial_servo\" for display mirror.";
+            return false;
+        }
         model_ = static_cast<mjModel*>(robot->getPhysics()->getModel());
         data_ = static_cast<mjData*>(robot->getPhysics()->getData());
 
@@ -81,6 +96,7 @@ namespace torq {
         
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -95,10 +111,29 @@ namespace torq {
         
         int nj = model_->nu;
         joint_targets_.resize(nj, 0.0f);
+        pos_history_.resize(nj);
+        vel_history_.resize(nj);
 
         lin_step_ = static_cast<float>(robot_->jogLinearStep());
         ang_step_ = static_cast<float>(robot_->jogAngularStep());
-        
+
+
+        if (display_pip){
+            for (int i = 0; i < model_->ncam; ++i) {
+                PiPCamera pip;
+                pip.name = mj_id2name(model_, mjOBJ_CAMERA, i);
+                pip.camera_id = i;
+                pip.cam = std::make_unique<mjvCamera>();
+                mjv_defaultCamera(pip.cam.get());
+                pip.cam->type = mjCAMERA_FIXED;
+                pip.cam->fixedcamid = i;
+                pip_cameras_.push_back(std::move(pip));
+            }
+            if (!pip_cameras_.empty()) {
+                logger.info() << "[Gui] Discovered " << pip_cameras_.size() << " PiP camera(s)";
+            }
+        }
+
         return true;
     }
     
@@ -134,8 +169,52 @@ namespace torq {
 
         //     tps.clear();
         // #endif
-        mjr_render(mjr_viewport,scn_.get(),ctx_.get());
+        mjr_render(mjr_viewport, scn_.get(), ctx_.get());
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        if (display_pip){
+            // pip size is scaled down version of the full viewport
+            int pip_w = std::max(1, static_cast<int>(viewport_width_ * pip_scale_));
+            int pip_h = std::max(1, static_cast<int>(viewport_height_ * pip_scale_));
+            for (auto& pip : pip_cameras_) {
+                if (pip.width != pip_w || pip.height != pip_h) {
+                    if (pip.fbo) {
+                        glDeleteFramebuffers(1, &pip.fbo);
+                        glDeleteTextures(1, &pip.texture);
+                        glDeleteRenderbuffers(1, &pip.rbo_depth);
+                    }
+                    pip.width = pip_w;
+                    pip.height = pip_h;
+
+                    glGenFramebuffers(1, &pip.fbo);
+                    glBindFramebuffer(GL_FRAMEBUFFER, pip.fbo);
+
+                    glGenTextures(1, &pip.texture);
+                    glBindTexture(GL_TEXTURE_2D, pip.texture);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pip_w, pip_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pip.texture, 0);
+
+                    glGenRenderbuffers(1, &pip.rbo_depth);
+                    glBindRenderbuffer(GL_RENDERBUFFER, pip.rbo_depth);
+                    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, pip_w, pip_h);
+                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pip.rbo_depth);
+                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                }
+
+                glBindFramebuffer(GL_FRAMEBUFFER, pip.fbo);
+                glViewport(0, 0, pip_w, pip_h);
+                mjrRect pip_rect = {0, 0, pip_w, pip_h};
+                mjv_updateScene(model_, data_, opt_.get(), NULL, pip.cam.get(), mjCAT_ALL, scn_.get());
+                mjr_render(pip_rect, scn_.get(), ctx_.get());
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+
+            if (!pip_cameras_.empty()) {
+                mjv_updateScene(model_, data_, opt_.get(), NULL, cam_.get(), mjCAT_ALL, scn_.get());
+            }
+        }
         glfwPollEvents();
         
         ImGui_ImplOpenGL3_NewFrame();
@@ -149,12 +228,11 @@ namespace torq {
             first_frame_ = false;
         }
 
-        // drawMenuBar();
         drawViewport();
         drawJointControlPanel();
+        drawJointPlots();
         drawCartesianPanel();
         drawIKTuningPanel();
-        // drawInfoPanel();    
         
         ImGui::Render();
         int display_w, display_h;
@@ -208,8 +286,12 @@ namespace torq {
         ImGuiID dock_right_top, dock_right_bottom;
         ImGui::DockBuilderSplitNode(dock_right, ImGuiDir_Down, 0.55f, &dock_right_bottom, &dock_right_top);
 
+        ImGuiID dock_left_top, dock_left_bottom;
+        ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Down, 0.55f, &dock_left_bottom, &dock_left_top);
+
         ImGui::DockBuilderDockWindow("Viewport", dock_center);
-        ImGui::DockBuilderDockWindow("Joint Control", dock_left);
+        ImGui::DockBuilderDockWindow("Joint Control", dock_left_top);
+        ImGui::DockBuilderDockWindow("Joint Plots", dock_left_bottom);
         ImGui::DockBuilderDockWindow("Cartesian Control", dock_right_top);
         ImGui::DockBuilderDockWindow("IK Tuning", dock_right_bottom);
         ImGui::DockBuilderFinish(dockerspace_id);
@@ -239,7 +321,68 @@ namespace torq {
             ImVec2(1.0f, 0.0f)  // UV bottom right (flipped)
         );
 
-        if (ImGui::IsItemHovered()){
+        bool viewport_hovered = ImGui::IsItemHovered();
+        ImVec2 img_origin = ImGui::GetItemRectMin();
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        {
+            int pip_pad = 6;
+            for (int i = 0; i < static_cast<int>(pip_cameras_.size()); ++i) {
+                auto& pip = pip_cameras_[i];
+                if (!pip.texture || pip.width <= 0 || pip.height <= 0) continue;
+
+                float fx = static_cast<float>(viewport_width_ - pip.width - pip_pad);
+                float fy = static_cast<float>(i * (pip.height + pip_pad + 16) + pip_pad);
+                ImVec2 p0(img_origin.x + fx, img_origin.y + fy);
+                ImVec2 p1(p0.x + pip.width, p0.y + pip.height);
+
+                draw_list->AddRectFilled(p0, p1, IM_COL32(0, 0, 0, 200));
+                draw_list->AddImage(
+                    (ImTextureID)(intptr_t)pip.texture,
+                    p0, p1,
+                    ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f)
+                );
+                draw_list->AddRect(p0, p1, IM_COL32(255, 255, 255, 200), 0.0f, 0, 2.0f);
+
+                ImVec2 label_pos(p0.x + 4.0f, p1.y + 1.0f);
+                draw_list->AddText(label_pos, IM_COL32(255, 255, 255, 220), pip.name.c_str());
+            }
+        }
+
+        {
+            mjvGLCamera* glcam = scn_->camera;
+            mjtNum fwd[3], up[3], right[3];
+            mju_f2n(fwd, glcam[0].forward, 3);
+            mju_f2n(up, glcam[0].up, 3);
+            mju_cross(right, fwd, up);
+            double cx = (glcam[0].pos[0] + glcam[1].pos[0]) * 0.5;
+            double cy = (glcam[0].pos[1] + glcam[1].pos[1]) * 0.5;
+            double cz = (glcam[0].pos[2] + glcam[1].pos[2]) * 0.5;
+
+            ImVec2 img_end = ImGui::GetItemRectMax();
+            ImVec2 btn_pos(img_origin.x + 8.0f, img_end.y - 28.0f);
+            ImGui::SetCursorScreenPos(btn_pos);
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.15f, 0.85f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.9f));
+            if (ImGui::SmallButton("Copy Camera Spec")) {
+                char spec[512];
+                std::snprintf(spec, sizeof(spec),
+                    "<camera pos=\"%.4f %.4f %.4f\" xyaxes=\"%.4f %.4f %.4f %.4f %.4f %.4f\"/>",
+                    cx, cy, cz,
+                    right[0], right[1], right[2],
+                    up[0], up[1], up[2]);
+                ImGui::SetClipboardText(spec);
+                logger.info() << "[Gui] Copied to clipboard: " << spec;
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("pos=(%.3f, %.3f, %.3f)\nxyaxes=(%.3f %.3f %.3f, %.3f %.3f %.3f)",
+                    cx, cy, cz, right[0], right[1], right[2], up[0], up[1], up[2]);
+            }
+            ImGui::PopStyleColor(2);
+            ImGui::PopStyleVar();
+        }
+
+        if (viewport_hovered){
             float wheel = ImGui::GetIO().MouseWheel;
             if (wheel != 0.0f){
                 mjv_moveCamera(model_, mjMOUSE_ZOOM, 0, -0.05 * wheel, scn_.get(), cam_.get());
@@ -275,6 +418,18 @@ namespace torq {
 
     void Gui::drawJointControlPanel(){
         ImGui::Begin("Joint Control");
+
+        if (robot_->isRealRobot()) {
+            bool active = robot_->isActiveControl();
+            if (ImGui::Checkbox("Active control", &active)) {
+                robot_->setActiveControl(active);
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Off: only read positions and show in 3D (move by hand). On: send commands to robot.");
+            }
+            ImGui::Separator();
+        }
+
         ImGui::Text("Forward Kinematics - Joint Jog");
         ImGui::Separator();
         
@@ -435,6 +590,61 @@ namespace torq {
         if (ImGui::CollapsingHeader("Limits", ImGuiTreeNodeFlags_DefaultOpen)) {
             if (ImGui::SliderFloat("Config Limit Gain", &ik_config_limit_gain_, 0.01f, 1.0f, "%.3f"))
                 robot_->setConfigLimitGain(ik_config_limit_gain_);
+        }
+
+        ImGui::End();
+    }
+
+    void Gui::drawJointPlots(){
+        ImGui::Begin("Joint Plots");
+
+        float t = static_cast<float>(ImGui::GetTime());
+        Eigen::VectorXd q  = robot_->getJointPositions();
+        Eigen::VectorXd qd = robot_->getJointVelocities();
+
+        int nj = static_cast<int>(pos_history_.size());
+        int nq = static_cast<int>(q.size());
+        int nv = static_cast<int>(qd.size());
+
+        for (int i = 0; i < nj && i < nq; ++i)
+            pos_history_[i].addPoint(t, static_cast<float>(q[i]));
+        for (int i = 0; i < nj && i < nv; ++i)
+            vel_history_[i].addPoint(t, static_cast<float>(qd[i]));
+
+        ImGui::SliderFloat("History (s)", &plot_history_s_, 1.0f, 30.0f, "%.1f");
+
+        float plot_h = (ImGui::GetContentRegionAvail().y - ImGui::GetFrameHeightWithSpacing()) * 0.5f;
+
+        if (ImPlot::BeginPlot("Positions", ImVec2(-1, plot_h))) {
+            ImPlot::SetupAxes("time (s)", "rad");
+            ImPlot::SetupAxisLimits(ImAxis_X1, t - plot_history_s_, t, ImPlotCond_Always);
+            for (int i = 0; i < nj; ++i) {
+                const char* name = mj_id2name(model_, mjOBJ_ACTUATOR, i);
+                std::string label = name ? name : ("j" + std::to_string(i));
+                auto& buf = pos_history_[i];
+                if (buf.size() > 0) {
+                    ImPlotSpec spec;
+                    spec.Offset = buf.offset;
+                    ImPlot::PlotLine(label.c_str(), buf.time.data(), buf.data.data(), buf.size(), spec);
+                }
+            }
+            ImPlot::EndPlot();
+        }
+
+        if (ImPlot::BeginPlot("Velocities", ImVec2(-1, plot_h))) {
+            ImPlot::SetupAxes("time (s)", "rad/s");
+            ImPlot::SetupAxisLimits(ImAxis_X1, t - plot_history_s_, t, ImPlotCond_Always);
+            for (int i = 0; i < nj; ++i) {
+                const char* name = mj_id2name(model_, mjOBJ_ACTUATOR, i);
+                std::string label = name ? name : ("j" + std::to_string(i));
+                auto& buf = vel_history_[i];
+                if (buf.size() > 0) {
+                    ImPlotSpec spec;
+                    spec.Offset = buf.offset;
+                    ImPlot::PlotLine(label.c_str(), buf.time.data(), buf.data.data(), buf.size(), spec);
+                }
+            }
+            ImPlot::EndPlot();
         }
 
         ImGui::End();

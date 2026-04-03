@@ -1,6 +1,7 @@
 #include "torq/PinocchioModel.hpp"
 #include "torq/utils.hpp"
 
+#include <algorithm>
 #include <set>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/mjcf.hpp>
@@ -9,6 +10,7 @@
 #include <pinocchio/algorithm/geometry.hpp>
 #include <pinocchio/collision/collision.hpp>
 #include <pinocchio/collision/distance.hpp>
+#include <pinocchio/parsers/srdf.hpp>
 
 namespace torq {
     Configuration::Configuration(
@@ -82,6 +84,20 @@ namespace torq {
 	Eigen::MatrixXd J(6, model_.nv);
         J.setZero();
         pinocchio::getFrameJacobian(model_, const_cast<pinocchio::Data&>(data_), frame_id, pinocchio::LOCAL, J);
+        return J;
+    }
+
+    Eigen::MatrixXd Configuration::getFrameJacobianWorldAligned(const std::string& frame) const {
+        if (!model_.existFrame(frame)){
+            last_error_ = ErrorCode::FrameNotFound;
+            log_.warning() << "[Configuration] Frame not found";
+            return Eigen::MatrixXd::Zero(6, model_.nv);
+        }
+
+        auto frame_id = model_.getFrameId(frame);
+        Eigen::MatrixXd J(6, model_.nv);
+        J.setZero();
+        pinocchio::getFrameJacobian(model_, const_cast<pinocchio::Data&>(data_), frame_id, pinocchio::LOCAL_WORLD_ALIGNED, J);
         return J;
     }
 
@@ -168,9 +184,43 @@ namespace torq {
         }
     }
 
+    bool KinematicsEngine::loadCollisionModel(const std::string& model_path,
+                                               const std::string& srdf_path) {
+        if (!model_) {
+            log_.error() << "[KinematicsEngine] Model must be loaded before collision model.";
+            return false;
+        }
+        try {
+            auto geom_model = std::make_shared<pinocchio::GeometryModel>();
+
+            bool is_urdf = (model_path.rfind(".urdf") != std::string::npos);
+            if (is_urdf) {
+                pinocchio::urdf::buildGeom(*model_, model_path, pinocchio::COLLISION, *geom_model);
+            } else {
+                pinocchio::mjcf::buildGeom(*model_, model_path, pinocchio::COLLISION, *geom_model);
+            }
+
+            geom_model->addAllCollisionPairs();
+
+            if (!srdf_path.empty()) {
+                pinocchio::srdf::removeCollisionPairs(*model_, *geom_model, srdf_path);
+                log_.info() << "[KinematicsEngine] Filtered collision pairs from SRDF: " << srdf_path;
+            }
+            collision_model_ = geom_model;
+            collision_data_ = std::make_shared<pinocchio::GeometryData>(*collision_model_);
+            log_.info() << "[KinematicsEngine] Collision model loaded with "
+                        << collision_model_->collisionPairs.size() << " collision pairs";
+            return true;
+        } catch (const std::exception& e) {
+            log_.error() << "[KinematicsEngine] Error loading collision model: " << e.what();
+            collision_model_.reset();
+            return false;
+        }
+    }
+
     Configuration KinematicsEngine::makeConfiguration(const Eigen::VectorXd& q) const {
         pinocchio::Data data(*model_);
-        return Configuration(*model_, data, q);
+        return Configuration(*model_, data, q, true, collision_model_, collision_data_);
     }
 
     void KinematicsEngine::buildQMapping() {

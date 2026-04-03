@@ -26,7 +26,7 @@ namespace torq {
      * actuator-command interface (setJointPositions writes to `ctrl`) and
      * direct state overrides (overrideJointPositions writes to `qpos`).
      *
-     * Step frequency: step() is called from RobotSystem::update() at the
+p     * Step frequency: step() is called from RobotSystem::update() at the
      * application control frequency (see RobotSystem::controlFrequencyHz()).
      * The physics timestep (getTimestep()) is set in the MJCF/XML model;
      * typical values yield 500–2000 Hz physics. The control loop usually

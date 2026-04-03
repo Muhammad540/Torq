@@ -1,12 +1,13 @@
 #include "torq/RobotSystem.hpp"
 #include "torq/MujocoDriver.hpp"
+#include "torq/ServoDriver.hpp"
 #include "torq/PinocchioModel.hpp"
 #include <Eigen/Geometry>
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 
-// Set to true to print actual end-effector displacement after each physics step.
 static constexpr bool IK_ACTUAL_MOTION_DIAGNOSTICS = false;
 
 namespace torq {
@@ -20,11 +21,25 @@ namespace torq {
     }
 
     bool RobotSystem::initialize(const RobotConfig& config) {
+        const bool use_real_driver = (config.driver_type == "serial_servo");
+
+        if (use_real_driver) {
+            if (config.driver_connection.empty()) {
+                log_.error() << "[RobotSystem] driver_connection is required when driver_type is " << config.driver_type;
+                return false;
+            }
+            hardware_.reset();
+            hardware_ = std::make_unique<ServoDriver>();
+            controller_->setHardwareInterface(hardware_.get());
+        }
+
         if (!hardware_) {
             log_.error() << "[RobotSystem] Hardware abstraction not initialized";
             return false;
         }
-        if (!hardware_->connect(config.scene_path)) {
+
+        const std::string connection_path = use_real_driver ? config.driver_connection : config.scene_path;
+        if (!hardware_->connect(connection_path)) {
             log_.error() << "[RobotSystem] Failed to connect Hardware";
             return false;
         }
@@ -36,17 +51,55 @@ namespace torq {
         end_effector_frame_ = config.end_effector_frame;
         max_tracking_error_ = config.max_tracking_error;
         control_frequency_hz_ = config.control_frequency_hz;
+        active_control_ = use_real_driver ? config.active_control : true;
 
-        auto* physics = getPhysics();
-        mjModel* m = physics->getModel();
-        mjData*  d = physics->getData();
-        int gripper_idx = config.gripper_actuator_idx;
-        if (gripper_idx < 0) gripper_idx = m->nu - 1;
-        double low  = m->actuator_ctrlrange[2 * gripper_idx];
-        double high = m->actuator_ctrlrange[2 * gripper_idx + 1];
-        double current = d->ctrl[gripper_idx];
-        controller_->setGripperConfig(gripper_idx, high, low, current);
+        // When using real hardware, optionally load MuJoCo scene as a display
+        // mirror so the GUI can still render the 3D robot model. The display
+        // model is never stepped — only its qpos is overwritten from the real
+        // robot each update().
+        if (use_real_driver && !config.scene_path.empty()) {
+            display_physics_ = std::make_unique<MujocoDriver>();
+            if (!display_physics_->connect(config.scene_path)) {
+                log_.warning() << "[RobotSystem] Could not load display scene '" << config.scene_path
+                               << "'; GUI 3D view will be unavailable.";
+                display_physics_.reset();
+            } else {
+                Eigen::VectorXd q_real = hardware_->getJointPositions();
+                int nq_display = display_physics_->getModel()->nq;
+                if (q_real.size() == nq_display) {
+                    display_physics_->overrideJointPositions(q_real);
+                } else if (q_real.size() < nq_display) {
+                    Eigen::VectorXd q_padded = Eigen::VectorXd::Zero(nq_display);
+                    q_padded.head(q_real.size()) = q_real;
+                    display_physics_->overrideJointPositions(q_padded);
+                } else {
+                    display_physics_->overrideJointPositions(q_real.head(nq_display));
+                }
+                log_.info() << "[RobotSystem] Display mirror loaded from '" << config.scene_path << "'";
+            }
+        }
+
+        MujocoDriver* physics = getPhysics();
+        if (physics && physics->getModel() && physics->getData()) {
+            mjModel* m = physics->getModel();
+            mjData*  d = physics->getData();
+            int gripper_idx = config.gripper_actuator_idx;
+            if (gripper_idx < 0) gripper_idx = m->nu - 1;
+            double low  = m->actuator_ctrlrange[2 * gripper_idx];
+            double high = m->actuator_ctrlrange[2 * gripper_idx + 1];
+            double current = d->ctrl[gripper_idx];
+            controller_->setGripperConfig(gripper_idx, high, low, current);
+        }
         return true;
+    }
+
+    bool RobotSystem::loadCollisionModel(const std::string& model_path,
+                                          const std::string& srdf_path) {
+        if (!kinematics_) {
+            log_.error() << "[RobotSystem] KinematicsEngine not initialized";
+            return false;
+        }
+        return kinematics_->loadCollisionModel(model_path, srdf_path);
     }
 
     void RobotSystem::setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, std::string frame_name) {
@@ -75,13 +128,12 @@ namespace torq {
           Eigen::Vector3d pos_after;
           std::string diag_frame;
           bool capture_actual = false;
-          if (IK_ACTUAL_MOTION_DIAGNOSTICS && controller_ && controller_->ikReady() && controller_->frameTask()) {
-             diag_frame = controller_->frameTask()->frame();
+          if (IK_ACTUAL_MOTION_DIAGNOSTICS && controller_ && controller_->ikReady()) {
+             diag_frame = end_effector_frame_;
              pos_before = getFramePose(diag_frame).block<3, 1>(0, 3);
              capture_actual = true;
           }
 
-          // Stepping Simulation (applies ctrl set in previous update)
           hardware_->step();
 
           if (capture_actual) {
@@ -91,14 +143,40 @@ namespace torq {
                        << actual_dp.transpose() << "] dz=" << actual_dp(2) << std::endl;
           }
 
-          if (controller_) {
-            // updating physics
-            controller_->update();
+          if (controller_ && active_control_) {
+            std::vector<Task*> user_task_ptrs;
+            user_task_ptrs.reserve(user_tasks_.size());
+            for (const auto& p : user_tasks_) user_task_ptrs.push_back(p.get());
+            std::vector<Limit*> user_limit_ptrs;
+            user_limit_ptrs.reserve(user_limits_.size());
+            for (const auto& p : user_limits_) user_limit_ptrs.push_back(p.get());
+            std::vector<Barrier*> user_barrier_ptrs;
+            user_barrier_ptrs.reserve(user_barriers_.size());
+            for (const auto& p : user_barriers_) user_barrier_ptrs.push_back(p.get());
+            controller_->update(user_task_ptrs, user_limit_ptrs, user_barrier_ptrs);
+          }
+
+          // Mirror real robot state into the display-only MuJoCo model so
+          // the GUI viewport reflects actual hardware joint positions.
+          if (display_physics_) {
+             Eigen::VectorXd q_real = hardware_->getJointPositions();
+             int nq_display = display_physics_->getModel()->nq;
+             if (q_real.size() == nq_display) {
+                display_physics_->overrideJointPositions(q_real);
+             } else if (q_real.size() < nq_display) {
+                Eigen::VectorXd q_padded = Eigen::VectorXd::Zero(nq_display);
+                q_padded.head(q_real.size()) = q_real;
+                display_physics_->overrideJointPositions(q_padded);
+             } else {
+                display_physics_->overrideJointPositions(q_real.head(nq_display));
+             }
           }
        }
     }
 
     MujocoDriver* RobotSystem::getPhysics() {
+        if (display_physics_)
+            return display_physics_.get();
         return dynamic_cast<MujocoDriver*>(hardware_.get());
     }
 
@@ -194,6 +272,10 @@ namespace torq {
       return true;
     }
 
+    bool RobotSystem::isRealRobot() const {
+        return dynamic_cast<ServoDriver*>(hardware_.get()) != nullptr;
+    }
+
     void RobotSystem::setFrameTaskPositionCost(double cost) {
       if (controller_) controller_->setFrameTaskPositionCost(cost);
     }
@@ -245,5 +327,47 @@ namespace torq {
     Eigen::VectorXd RobotSystem::getJointPositions(){
       return hardware_->getJointPositions();
     }
-  
+
+    Eigen::VectorXd RobotSystem::getJointVelocities(){
+      return hardware_->getJointVelocities();
+    }
+
+    void RobotSystem::addTask(std::unique_ptr<Task> task) {
+        if (task)
+            user_tasks_.push_back(std::move(task));
+    }
+
+    void RobotSystem::removeTask(Task* task) {
+        if (!task) return;
+        user_tasks_.erase(
+            std::remove_if(user_tasks_.begin(), user_tasks_.end(),
+                [task](const std::unique_ptr<Task>& p) { return p.get() == task; }),
+            user_tasks_.end());
+    }
+
+    void RobotSystem::addLimit(std::unique_ptr<Limit> limit) {
+        if (limit)
+            user_limits_.push_back(std::move(limit));
+    }
+
+    void RobotSystem::removeLimit(Limit* limit) {
+        if (!limit) return;
+        user_limits_.erase(
+            std::remove_if(user_limits_.begin(), user_limits_.end(),
+                [limit](const std::unique_ptr<Limit>& p) { return p.get() == limit; }),
+            user_limits_.end());
+    }
+
+    void RobotSystem::addBarrier(std::unique_ptr<Barrier> barrier) {
+        if (barrier)
+            user_barriers_.push_back(std::move(barrier));
+    }
+
+    void RobotSystem::removeBarrier(Barrier* barrier) {
+        if (!barrier) return;
+        user_barriers_.erase(
+            std::remove_if(user_barriers_.begin(), user_barriers_.end(),
+                [barrier](const std::unique_ptr<Barrier>& p) { return p.get() == barrier; }),
+            user_barriers_.end());
+    }
 }

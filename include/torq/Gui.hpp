@@ -26,6 +26,17 @@ using mjData = struct mjData_;
 
 namespace torq {
     class RobotSystem;
+
+    struct PiPCamera {
+        std::string name;
+        int camera_id = -1;
+        std::unique_ptr<mjvCamera> cam;
+        unsigned int fbo = 0;
+        unsigned int texture = 0;
+        unsigned int rbo_depth = 0;
+        int width = 0;
+        int height = 0;
+    };
     
     #ifdef ENABLE_TRACKING_POINTS
     /**
@@ -38,12 +49,36 @@ namespace torq {
     };
     #endif
 
+    struct ScrollingBuffer {
+        int max_size;
+        int offset;
+        std::vector<float> time;
+        std::vector<float> data;
+        ScrollingBuffer(int max_sz = 2000) : max_size(max_sz), offset(0) {
+            time.reserve(max_sz);
+            data.reserve(max_sz);
+        }
+        void addPoint(float t, float v) {
+            if (static_cast<int>(time.size()) < max_size) {
+                time.push_back(t);
+                data.push_back(v);
+            } else {
+                time[offset] = t;
+                data[offset] = v;
+                offset = (offset + 1) % max_size;
+            }
+        }
+        void clear() { time.clear(); data.clear(); offset = 0; }
+        int size() const { return static_cast<int>(time.size()); }
+    };
+
     /**
      * @brief ImGui + GLFW + OpenGL3 docking GUI for Torq.
      *
      * Provides a 3D MuJoCo viewport, joint-control panel, Cartesian jog panel,
-     * and an IK tuning panel.  The GUI does not own the RobotSystem — it only
-     * holds a non-owning pointer and reads/writes through the public API.
+     * real-time joint plots, and an IK tuning panel.  The GUI does
+     * not own the RobotSystem — it only holds a non-owning pointer and
+     * reads/writes through the public API.
      *
      * @see RobotSystem
      */
@@ -107,6 +142,11 @@ namespace torq {
             void drawJointControlPanel();
             void drawCartesianPanel();
             void drawIKTuningPanel();
+            void drawJointPlots();
+
+            std::vector<PiPCamera> pip_cameras_;
+            float pip_scale_ = 0.25f;
+            bool display_pip = true;
 
             std::vector<float> joint_targets_;
             std::string ik_frame_name_;
@@ -126,6 +166,10 @@ namespace torq {
             float ik_solver_damping_ = 1e-12f;
             float ik_config_limit_gain_ = 0.5f;
 	
+            std::vector<ScrollingBuffer> pos_history_;
+            std::vector<ScrollingBuffer> vel_history_;
+            float plot_history_s_ = 5.0f;
+
             static Gui* getGui(GLFWwindow* window);
 
             mutable Logger logger;

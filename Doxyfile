@@ -129,3 +129,11 @@ GENERATE_DOCBOOK       = NO
 USE_MDFILE_AS_MAINPAGE = doc/mainpage.md
 MARKDOWN_SUPPORT       = YES
 AUTOLINK_SUPPORT       = YES
+
+# ---------------------------------------------------------------------------
+# HTML extras (video files, custom CSS, etc.)
+# Place tutorial videos in doc/videos/ and reference them from Markdown pages
+# using \htmlonly <video> ... </video> \endhtmlonly blocks.
+# ---------------------------------------------------------------------------
+HTML_EXTRA_STYLESHEET  =
+HTML_EXTRA_FILES       =

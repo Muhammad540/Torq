@@ -7,8 +7,8 @@ digraph OwnershipDiagram {
   RobotSystem [label="RobotSystem"];
 
   subgraph cluster_owned {
-    label="unique_ptr<>";
-    HAL [label="HardwareInterface\n(MujocoDriver)"];
+    label="unique_ptr";
+    HAL [label="HardwareInterface"];
     KinematicsEngine [label="KinematicsEngine"];
     Controller [label="Controller"];
   }

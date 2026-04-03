@@ -2,6 +2,7 @@
 #include "torq/PinocchioModel.hpp"
 #include "torq/Tasks.hpp"
 #include "torq/Limits.hpp"
+#include "torq/Barriers.hpp"
 #include "torq/logger.hpp"
 
 namespace torq {
@@ -28,7 +29,8 @@ namespace torq {
        const std::vector<Task*>& tasks,
        double dt,
        double damping,
-       const std::vector<Limit*>& limits){
+       const std::vector<Limit*>& limits,
+       const std::vector<Barrier*>& barriers){
     int nv = config.nv();
     QPProblem qp;
 
@@ -40,6 +42,13 @@ namespace torq {
       auto [H_task, c_task] = task->computeQPObjective(config);
       qp.H += H_task;
       qp.c += c_task;
+    }
+
+    // Barrier objective contributions (safe-displacement regularisation)
+    for (const auto* barrier: barriers){
+      auto [H_cbf, c_cbf] = barrier->computeQPObjective(config);
+      qp.H += H_cbf;
+      qp.c += c_cbf;
     }
 
     // Inequality constraints from limits
@@ -54,6 +63,14 @@ namespace torq {
         h_blocks.push_back(result->second);
         total_rows += static_cast<int>(result->first.rows());
       }
+    }
+
+    // Inequality constraints from barriers
+    for (const auto* barrier: barriers){
+      auto [G_b, h_b] = barrier->computeQPInequalities(config, dt);
+      G_blocks.push_back(G_b);
+      h_blocks.push_back(h_b);
+      total_rows += static_cast<int>(G_b.rows());
     }
 
     if (total_rows > 0){
@@ -122,12 +139,13 @@ namespace torq {
     const std::vector<Task*>& tasks,
     double dt,
     double damping,
-    const std::vector<Limit*>& limits){
+    const std::vector<Limit*>& limits,
+    const std::vector<Barrier*>& barriers){
 
     int nv = config.nv();
     if (nv == 0) return {};
 
-    QPProblem qp = buildIK(config, tasks, dt, damping, limits);
+    QPProblem qp = buildIK(config, tasks, dt, damping, limits, barriers);
 
     if (!qp.has_constraints) {
         Eigen::VectorXd dq = qp.H.ldlt().solve(-qp.c);

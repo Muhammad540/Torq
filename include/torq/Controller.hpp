@@ -3,11 +3,13 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include <Eigen/Dense>
 
 #include "torq/InverseKinematics.hpp"
 #include "torq/Tasks.hpp"
 #include "torq/Limits.hpp"
+#include "torq/Barriers.hpp"
 #include "torq/HardwareInterface.hpp"
 #include "torq/PinocchioModel.hpp"
 #include "torq/logger.hpp"
@@ -26,9 +28,9 @@ namespace torq{
   /**
    * @brief Centralised store for all tunable IK parameters with sensible defaults.
    *
-   * Owned by the Controller; read-only access is available through
-   * `RobotSystem::ikConfig()`.  Every field has a corresponding runtime setter
-   * on both Controller and RobotSystem.
+   * Owned by the Controller. Library users get read-only access via
+   * RobotSystem::ikConfig(); runtime setters are called through RobotSystem
+   * (e.g. setFrameTaskPositionCost, setConfigLimitGain).
    *
    * @see @ref tuning_guide for detailed descriptions and tuning recipes.
    */
@@ -43,29 +45,32 @@ namespace torq{
     double damping_cost          = 1e-4;  ///< DampingTask weight [cost·s/rad].
     double solver_damping        = 1e-12; ///< Tikhonov damping \f$\lambda\f$ on the QP Hessian.
     double config_limit_gain     = 0.5;   ///< ConfigurationLimit gain \f$\gamma \in (0,1]\f$.
+    bool   has_floating_base     = false; ///< Auto-attach FloatingBaseVelocityLimit when true.
+    double max_base_linear_vel   = 1.0;   ///< FloatingBaseVelocityLimit linear bound [m/s].
+    double max_base_angular_vel  = 1.0;   ///< FloatingBaseVelocityLimit angular bound [rad/s].
   };
 
   /**
-   * @brief Manages control modes, IK tasks/limits, and the QP solver.
+   * @brief Internal component: control modes, built-in IK tasks/limits, QP solver.
    *
-   * The Controller owns the InverseKinematics solver and all task/limit instances.
-   * It switches between IDLE, JOINT_SPACE, and TASK_SPACE modes.  In TASK_SPACE
-   * mode it builds and solves the QP every tick via update().
+   * **Ownership:** Controller owns the InverseKinematics solver and all
+   * *built-in* tasks and limits (FrameTask, PostureTask, DampingTask,
+   * VelocityLimit, ConfigurationLimit, optional FloatingBaseVelocityLimit and
+   * AccelerationLimit). It does **not** own user-added tasks/limits/barriers;
+   * those are owned by RobotSystem and passed into update() each tick.
    *
-   * Control loop frequency: update() is invoked at the rate of the caller
-   * (typically RobotSystem::update()). For stable IK, call at 200–1000 Hz.
-   * The kinematic state is integrated internally; no physics feedback is fed
-   * into the IK.
+   * **Separation of concern:** Library users interact only with RobotSystem.
+   * Controller is not part of the public API; RobotSystem forwards
+   * setTaskSpaceTarget, setJointSpaceTarget, IK tuning, and update().
    *
-   * IK tasks and limits are lazily initialised on the first call to
-   * setTaskSpaceTarget().  Parameters from IKConfig are applied both at
-   * construction time and via the runtime setters (which update the live
-   * task/limit objects immediately).
+   * Control loop: update() is invoked by RobotSystem at the control rate
+   * (200–1000 Hz). In TASK_SPACE mode it builds the QP from built-in plus
+   * user-provided task/limit/barrier lists and solves via OSQP.
    *
-   * @see RobotSystem (user-facing wrapper), InverseKinematics, Task, Limit
+   * @see RobotSystem, InverseKinematics, Task, Limit, Barrier
    */
   class Controller {
-  
+
   public:
     /**
      * @brief Construct a Controller.
@@ -74,7 +79,10 @@ namespace torq{
      */
     Controller(KinematicsEngine* kinematics, HardwareInterface* hardware);
     ~Controller();
-    
+
+    /** @brief Set the hardware interface (e.g. when switching from sim to real driver). Must outlive the Controller. */
+    void setHardwareInterface(HardwareInterface* hardware) { hardware_ = hardware; }
+
     /**
      * @brief Set a Cartesian target and switch to TASK_SPACE mode.
      *
@@ -113,13 +121,16 @@ namespace torq{
     /**
      * @brief Execute one control tick.
      *
-     * Runs at the rate of the caller; typical frequency 200–1000 Hz for the
-     * IK layer. In TASK_SPACE mode: builds a Configuration from the internal
-     * kinematic state, solves the QP, integrates the result, and writes the
-     * new joint positions to hardware. In JOINT_SPACE mode: writes
-     * target_joints_ directly. In IDLE mode: does nothing.
+     * Built-in tasks/limits are always used; user_tasks, user_limits, and
+     * user_barriers are appended for this solve only (owned by RobotSystem).
+     *
+     * @param user_tasks   User-added tasks (non-owning; may be empty).
+     * @param user_limits  User-added limits (non-owning; may be empty).
+     * @param user_barriers User-added barriers (non-owning; may be empty).
      */
-    void update();
+    void update(const std::vector<Task*>& user_tasks = {},
+                const std::vector<Limit*>& user_limits = {},
+                const std::vector<Barrier*>& user_barriers = {});
 
     /** @name Runtime IK parameter tuning
      *  These apply immediately to the live task/limit objects (if initialised)
@@ -144,17 +155,6 @@ namespace torq{
     /** @brief True if the IK subsystem has been initialised. */
     bool ikReady() const { return ik_ready_; }
 
-    /** @brief Direct access to the live FrameTask (nullptr before first IK init). */
-    FrameTask* frameTask() { return frame_task_.get(); }
-    /** @brief Direct access to the live PostureTask. */
-    PostureTask* postureTask() { return posture_task_.get(); }
-    /** @brief Direct access to the live DampingTask. */
-    DampingTask* dampingTask() { return damping_task_.get(); }
-    /** @brief Direct access to the live VelocityLimit. */
-    VelocityLimit* velLimit() { return vel_limit_.get(); }
-    /** @brief Direct access to the live ConfigurationLimit. */
-    ConfigurationLimit* cfgLimit() { return cfg_limit_.get(); }
-
   private:
     void initIK();
 
@@ -164,17 +164,23 @@ namespace torq{
     InverseKinematics ik_solver_;
     IKConfig ik_config_;
 
+    // Built-in tasks
     std::unique_ptr<FrameTask> frame_task_;
     std::unique_ptr<PostureTask> posture_task_;
     std::unique_ptr<DampingTask> damping_task_;
+
+    // Built-in limits
     std::unique_ptr<VelocityLimit> vel_limit_;
     std::unique_ptr<ConfigurationLimit> cfg_limit_;
+    std::unique_ptr<FloatingBaseVelocityLimit> floating_base_limit_;
+    std::unique_ptr<AccelerationLimit> accel_limit_;
 
     ControlMode mode_ = ControlMode::IDLE;
     Eigen::VectorXd target_joints_;
     bool ik_ready_ = false;
 
     Eigen::VectorXd ik_configuration_;
+    Eigen::VectorXd prev_velocity_;
     bool ik_config_initialized_ = false;
     double gripper_open_val_ = 0.0;
     double gripper_close_val_ = 0.0;

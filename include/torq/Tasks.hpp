@@ -5,6 +5,7 @@
 #include <utility>
 #include <optional>
 #include <string>
+#include <vector>
 #include <pinocchio/spatial/se3.hpp>
 
 
@@ -249,6 +250,205 @@ namespace torq{
         DampingTask(double cost);
         Eigen::VectorXd computeError(const Configuration& config) const override;
         Eigen::MatrixXd computeJacobian(const Configuration& config) const override;
+    };
+
+    /**
+     * @brief Regulate the center of mass position.
+     *
+     * Error: \f$e = \text{com}_{\text{actual}} - \text{com}_{\text{target}}\f$ (3D).
+     * Jacobian: `pinocchio::jacobianCenterOfMass`.
+     *
+     * Critical for humanoid balance and quadruped stability.
+     * When no target is set the task is inert.
+     */
+    class ComTask : public Task {
+        public:
+            /**
+             * @param cost       Position cost [cost/m]. Scalar or 3-vector.
+             * @param lm_damping Levenberg-Marquardt damping.
+             * @param gain       Task gain \f$\alpha\f$.
+             */
+            ComTask(double cost, double lm_damping = 0.0, double gain = 1.0);
+            ComTask(const Eigen::Vector3d& cost, double lm_damping = 0.0, double gain = 1.0);
+
+            void setTarget(const Eigen::Vector3d& target_com);
+            void setTargetFromConfiguration(const Configuration& config);
+
+            bool hasTarget() const { return target_com_.has_value(); }
+
+            Eigen::VectorXd computeError(const Configuration& config) const override;
+            Eigen::MatrixXd computeJacobian(const Configuration& config) const override;
+
+        private:
+            std::optional<Eigen::Vector3d> target_com_;
+    };
+
+    /**
+     * @brief Regulate the pose of a frame relative to another frame.
+     *
+     * Error: \f$e = \log(T_{\text{target}\to\text{root}}^{-1}\;T_{\text{frame}\to\text{root}})\f$ (6D body twist).
+     * Jacobian: \f$J_{\log6}(T_{ft})\,(J_f - \text{Ad}_{T_{fr}}\,J_r)\f$.
+     *
+     * Essential for specifying foot poses relative to the pelvis in legged robots.
+     * When no target is set the task is inert.
+     */
+    class RelativeFrameTask : public Task {
+        public:
+            /**
+             * @param frame            Frame to control.
+             * @param root             Reference frame.
+             * @param position_cost    Translational cost [cost/m].
+             * @param orientation_cost Rotational cost [cost/rad].
+             * @param lm_damping       Levenberg-Marquardt damping.
+             * @param gain             Task gain \f$\alpha\f$.
+             */
+            RelativeFrameTask(const std::string& frame,
+                              const std::string& root,
+                              double position_cost,
+                              double orientation_cost,
+                              double lm_damping = 0.0,
+                              double gain = 1.0);
+
+            void setTarget(const pinocchio::SE3& transform_target_to_root);
+            void setTargetFromConfiguration(const Configuration& config);
+
+            void setPositionCost(double cost);
+            void setPositionCost(const Eigen::Vector3d& cost);
+            void setOrientationCost(double cost);
+            void setOrientationCost(const Eigen::Vector3d& cost);
+
+            bool hasTarget() const { return target_.has_value(); }
+            const std::string& frame() const { return frame_; }
+            const std::string& root() const { return root_; }
+
+            Eigen::VectorXd computeError(const Configuration& config) const override;
+            Eigen::MatrixXd computeJacobian(const Configuration& config) const override;
+
+        private:
+            std::string frame_;
+            std::string root_;
+            std::optional<pinocchio::SE3> target_;
+    };
+
+    /**
+     * @brief Linear holonomic constraint: \f$A\,(q_0 \ominus q) = b\f$.
+     *
+     * A general linear relationship between configuration variables, expressed
+     * on the tangent space at a reference configuration \f$q_0\f$.
+     *
+     * Used as a base class for JointCouplingTask.
+     */
+    class LinearHolonomicTask : public Task {
+        public:
+            /**
+             * @param A         Constraint matrix (p x nv).
+             * @param b         Target vector (p).
+             * @param q0        Reference configuration (nq).
+             * @param cost      Cost scalar or vector.
+             * @param lm_damping Levenberg-Marquardt damping.
+             * @param gain      Task gain.
+             */
+            LinearHolonomicTask(const Eigen::MatrixXd& A,
+                                const Eigen::VectorXd& b,
+                                const Eigen::VectorXd& q0,
+                                double cost,
+                                double lm_damping = 0.0,
+                                double gain = 1.0);
+
+            Eigen::VectorXd computeError(const Configuration& config) const override;
+            Eigen::MatrixXd computeJacobian(const Configuration& config) const override;
+
+        protected:
+            Eigen::MatrixXd A_;
+            Eigen::VectorXd b_;
+            Eigen::VectorXd q0_;
+    };
+
+    /**
+     * @brief Coupling constraint between revolute joints.
+     *
+     * Enforces \f$\sum_{j \in J} r_j\,q_j = 0\f$ where \f$r_j\f$ are user-specified
+     * ratios.  For example, setting \f$r_1 = 1, r_2 = -1\f$ couples two knees
+     * to the same angle.
+     *
+     * Implemented as a special case of LinearHolonomicTask.
+     */
+    class JointCouplingTask : public LinearHolonomicTask {
+        public:
+            /**
+             * @param joint_names  Joint names forming the coupling constraint.
+             * @param ratios       Ratio per joint (same length as joint_names).
+             * @param cost         Cost weight.
+             * @param config       Configuration (used to build the A matrix from joint indices).
+             * @param lm_damping   Levenberg-Marquardt damping.
+             * @param gain         Task gain.
+             */
+            JointCouplingTask(const std::vector<std::string>& joint_names,
+                              const std::vector<double>& ratios,
+                              double cost,
+                              const Configuration& config,
+                              double lm_damping = 0.0,
+                              double gain = 1.0);
+
+        private:
+            std::vector<std::string> joint_names_;
+            std::vector<double> ratios_;
+    };
+
+    /**
+     * @brief Track reference joint velocities.
+     *
+     * Error: \f$e = v_{\text{ref}} \cdot dt\f$ (target displacement).
+     * Jacobian: identity on actuated joints (excludes floating base).
+     *
+     * Useful for velocity-controlled layers and locomotion controllers.
+     */
+    class JointVelocityTask : public Task {
+        public:
+            /** @param cost Joint velocity cost [cost·s/rad]. */
+            JointVelocityTask(double cost);
+
+            /**
+             * @brief Set reference joint velocity.
+             * @param target_v Reference velocity vector (actuated joints only, excludes root).
+             * @param dt       Integration timestep [s].
+             */
+            void setTarget(const Eigen::VectorXd& target_v, double dt);
+
+            bool hasTarget() const { return target_delta_q_.has_value(); }
+
+            Eigen::VectorXd computeError(const Configuration& config) const override;
+            Eigen::MatrixXd computeJacobian(const Configuration& config) const override;
+
+        private:
+            std::optional<Eigen::VectorXd> target_delta_q_;
+    };
+
+    /**
+     * @brief Minimize joint accelerations: \f$\|v - v_{\text{prev}}\|\f$.
+     *
+     * A special case of PostureTask whose error drives toward the previous
+     * velocity, smoothing motion.  Pair with DampingTask to avoid oscillations.
+     *
+     * Call `setLastIntegration()` each tick with the previous IK velocity.
+     */
+    class LowAccelerationTask : public Task {
+        public:
+            /** @param cost Acceleration cost [cost·s^2/rad]. */
+            LowAccelerationTask(double cost);
+
+            /**
+             * @brief Record the previous velocity for computing acceleration.
+             * @param v_prev Previous velocity from the last IK solve.
+             * @param dt     Integration timestep [s].
+             */
+            void setLastIntegration(const Eigen::VectorXd& v_prev, double dt);
+
+            Eigen::VectorXd computeError(const Configuration& config) const override;
+            Eigen::MatrixXd computeJacobian(const Configuration& config) const override;
+
+        private:
+            std::optional<Eigen::VectorXd> delta_q_prev_;
     };
 }
 
