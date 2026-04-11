@@ -36,8 +36,8 @@ namespace torq {
 
         /** Driver for hardware: "mujoco" (simulation) or "serial_servo" (real robot, e.g. ST3215 servo). Default "mujoco". */
         std::string driver_type = "mujoco";
-        /** Connection for real robot: serial port (e.g. /dev/ttyUSB0) or path to a driver config file. Used when driver_type is "serial_servo". */
-        std::string driver_connection;
+        /** Connection for real robot: path to calib file (containing port, baud_rate, and calibration data). Used when driver_type is "serial_servo". */
+        std::string robot_calib_file;
         /** When true (default), send position commands to real hardware. When false (passive mode), only read positions and mirror to display — e.g. move by hand and observe in GUI. Ignored when driver_type is "mujoco". */
         bool active_control = true;
     };
@@ -191,23 +191,6 @@ namespace torq {
             double controlFrequencyHz() const { return control_frequency_hz_; }
             /** @brief Control period [s] = 1 / controlFrequencyHz(), for rate limiting. */
             double controlPeriodSec() const { return 1.0 / control_frequency_hz_; }
-
-            /**
-             * @brief Enable or disable active control (real robot only).
-             *
-             * When disabled (passive mode), update() still reads joint positions from
-             * hardware and mirrors them to the display model, but no commands are
-             * sent to the servos. Use this to move the robot by hand and see the
-             * pose in the GUI, then enable active control when ready.
-             *
-             * @param active  True to send IK/position commands; false for display-only.
-             */
-            void setActiveControl(bool active) { active_control_ = active; }
-            /** @brief True if active control is enabled (commands sent to hardware). */
-            bool isActiveControl() const { return active_control_; }
-
-            /** @brief True if the current hardware driver is real (e.g. ServoDriver). Use to show passive/active toggle only for real robots. */
-            bool isRealRobot() const;
 
             /** @brief Toggle gripper between open and closed. */
             void toggleGripper();

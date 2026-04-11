@@ -24,8 +24,8 @@ namespace torq {
         const bool use_real_driver = (config.driver_type == "serial_servo");
 
         if (use_real_driver) {
-            if (config.driver_connection.empty()) {
-                log_.error() << "[RobotSystem] driver_connection is required when driver_type is " << config.driver_type;
+            if (config.robot_calib_file.empty()) {
+                log_.error() << "[RobotSystem] robot_calib_file is required when driver_type is " << config.driver_type;
                 return false;
             }
             hardware_.reset();
@@ -38,8 +38,8 @@ namespace torq {
             return false;
         }
 
-        const std::string connection_path = use_real_driver ? config.driver_connection : config.scene_path;
-        if (!hardware_->connect(connection_path)) {
+        const std::string robot_calib_file = use_real_driver ? config.robot_calib_file : config.scene_path;
+        if (!hardware_->connect(robot_calib_file)) {
             log_.error() << "[RobotSystem] Failed to connect Hardware";
             return false;
         }
@@ -272,9 +272,6 @@ namespace torq {
       return true;
     }
 
-    bool RobotSystem::isRealRobot() const {
-        return dynamic_cast<ServoDriver*>(hardware_.get()) != nullptr;
-    }
 
     void RobotSystem::setFrameTaskPositionCost(double cost) {
       if (controller_) controller_->setFrameTaskPositionCost(cost);

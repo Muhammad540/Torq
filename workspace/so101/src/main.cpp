@@ -11,15 +11,10 @@ int main(int argc, char** argv) {
     torq::RobotConfig config;
     config.scene_path = (root / "workspace/models/SO101/scene.xml").string();
     config.robot_model_path = (root / "workspace/models/SO101/so101_new_calib.urdf").string();
+    config.robot_calib_file = (root / "workspace/so101/calibration/calibration.txt").string();
     config.end_effector_frame = "gripper_frame_link";
     config.locked_joints = {"gripper"};
-
-    std::string conf_path = (root / "workspace/so101/so101.conf").string();
-    if (argc >= 2)
-        conf_path = argv[1];
-    config.driver_connection = conf_path;
-    config.driver_type = "mujoco";
-    // config.driver_type = "serial_servo";
+    config.driver_type = "serial_servo";
     config.active_control = true;
 
     torq::RobotSystem robot;
