@@ -419,16 +419,6 @@ namespace torq {
     void Gui::drawJointControlPanel(){
         ImGui::Begin("Joint Control");
 
-        if (robot_->isRealRobot()) {
-            bool active = robot_->isActiveControl();
-            if (ImGui::Checkbox("Active control", &active)) {
-                robot_->setActiveControl(active);
-            }
-            if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Off: only read positions and show in 3D (move by hand). On: send commands to robot.");
-            }
-            ImGui::Separator();
-        }
 
         ImGui::Text("Forward Kinematics - Joint Jog");
         ImGui::Separator();
