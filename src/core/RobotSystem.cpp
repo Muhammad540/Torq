@@ -12,9 +12,8 @@ static constexpr bool IK_ACTUAL_MOTION_DIAGNOSTICS = false;
 
 namespace torq {
     RobotSystem::RobotSystem() {
-        hardware_ = std::make_unique<MujocoDriver>();
         kinematics_ = std::make_unique<KinematicsEngine>();
-        controller_ = std::make_unique<Controller>(kinematics_.get(), hardware_.get());
+        controller_ = std::make_unique<Controller>(kinematics_.get(), nullptr);
     }
     RobotSystem::~RobotSystem() {
         log_.info() << "[RobotSystem] cleaned up";
@@ -30,8 +29,11 @@ namespace torq {
             }
             hardware_.reset();
             hardware_ = std::make_unique<ServoDriver>();
-            controller_->setHardwareInterface(hardware_.get());
+        } else {
+            hardware_.reset();
+            hardware_ = std::make_unique<MujocoDriver>();
         }
+        controller_->setHardwareInterface(hardware_.get());
 
         if (!hardware_) {
             log_.error() << "[RobotSystem] Hardware abstraction not initialized";

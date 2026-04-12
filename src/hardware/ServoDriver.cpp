@@ -33,7 +33,7 @@ static const JointSpec* findSpec(const std::string& name) {
 }
 
 ServoDriver::ServoDriver() {
-    log_.info() << "[ServoDriver] Created (use connect() to open)";
+    log_.info() << "[ServoDriver] Initialized";
 }
 
 ServoDriver::~ServoDriver() {

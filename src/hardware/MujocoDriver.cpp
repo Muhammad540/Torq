@@ -9,7 +9,7 @@
 
 namespace torq {
     MujocoDriver::MujocoDriver() {
-        logger.info() << "[MujocoDriver] Initializing  ...";
+        logger.info() << "[MujocoDriver] Initialized";
     }
 
     MujocoDriver::~MujocoDriver() {

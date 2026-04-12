@@ -89,8 +89,9 @@ namespace torq {
             /**
              * @brief Initialise the robot from a configuration.
              *
-             * Loads the MuJoCo scene, builds the Pinocchio model (with locked joints),
-             * creates the Controller, and detects the gripper actuator.
+             * Allocates the hardware driver from config.driver_type, connects it,
+             * builds the Pinocchio model (with locked joints), and detects the gripper actuator.
+             * For serial_servo, optionally loads a MuJoCo display mirror when scene_path is set.
              *
              * @param config  Robot configuration describing model paths and options.
              * @return True on success.
