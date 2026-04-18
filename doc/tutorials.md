@@ -50,7 +50,7 @@ int main() {
     torq::Gui gui;
     gui.initialize(&robot);
 
-    // Smooth convergence: reach target in ~2 seconds at 200 Hz
+    // Smooth convergence: reach target in ~2 seconds (depends on gain and how often update() runs)
     double alpha = 1.0 - std::pow(0.01, 1.0 / 400.0);
     robot.setFrameTaskGain(alpha);
 
@@ -136,22 +136,11 @@ limits together.
 The `VelocityLimit` and `ConfigurationLimit` are included automatically.
 They read bounds from the Pinocchio model (URDF).
 
-### Adding an acceleration limit
+### Optional custom limits
 
-```cpp
-#include "torq/Limits.hpp"
-
-// Create acceleration limit: 10 rad/s² per joint
-Eigen::VectorXd a_max = Eigen::VectorXd::Constant(robot.nv(), 10.0);
-auto accel_limit = std::make_unique<torq::AccelerationLimit>(
-    robot.model(), a_max);
-
-robot.addLimit(std::move(accel_limit));
-```
-
-> @b Important: @b `AccelerationLimit` requires calling `setLastIntegration()`
-> each tick with the previous velocity. When added via `RobotSystem::addLimit()`,
-> the controller handles this automatically.
+You can implement your own `torq::Limit` subclass (return \f$G\,\Delta q \le h\f$
+rows from `computeQPInequalities`) and attach it with `robot.addLimit(std::move(...))`.
+Built-in limits remain active alongside user limits.
 
 ### Effect of configuration limit gain
 

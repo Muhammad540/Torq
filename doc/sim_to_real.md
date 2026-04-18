@@ -64,7 +64,6 @@ if (!robot.initialize(config)) {
 
 while (running) {
     robot.update();
-    rate_limiter.sleep();  // e.g. 500 Hz
 }
 ```
 
@@ -87,7 +86,7 @@ torq::RobotSystem robot;
 robot.initialize(config);
 
 torq::Gui gui;
-gui.initialize(&robot, "SO101 Real");   // getPhysics() returns the display model
+gui.initialize(&robot, "SO101 Real");   // mujocoVisualizationDriver() is the display model
 
 while (gui.windowIsOpen()) {
     robot.update();   // reads real servos, optionally runs IK, mirrors state to display model
@@ -95,7 +94,7 @@ while (gui.windowIsOpen()) {
 }
 ```
 
-If `scene_path` is omitted, `getPhysics()` returns null and the GUI 3D view is unavailable; you can still run headless or with a minimal UI.
+If `scene_path` is omitted, `mujocoVisualizationDriver()` returns null and the GUI 3D view is unavailable; you can still run headless or with a minimal UI.
 
 ### Passive mode (display only, move by hand)
 
@@ -125,17 +124,15 @@ To avoid dangerous velocities and torques on the real robot:
 
 1. **VelocityLimit** — Ensure the model or the limit configuration uses safe max velocities (rad/s) for each joint. The ST3215 has limited speed; keep commanded velocity within spec.
 2. **ConfigurationLimit** — Use the same joint limits as in the URDF; the IK will not command outside `[q_min, q_max]`. Tune `config_limit_gain` (e.g. 0.3–0.5) so the robot slows down before hitting limits.
-3. **AccelerationLimit** (optional) — Add via `RobotSystem::addLimit()` with a vector of max accelerations per joint. Call `setLastIntegration(v_prev, dt)` each tick (the Controller does this when an AccelerationLimit is present). This smooths motion and avoids torque spikes.
-4. **Barriers** — Use **PositionBarrier** (e.g. workspace bounds, CoM height) or **BodySphericalBarrier** (minimum distance between links) to keep the robot away from unsafe regions. Add via `RobotSystem::addBarrier()`.
+3. **Barriers** — Use **PositionBarrier** (e.g. workspace bounds, CoM height) or **BodySphericalBarrier** (minimum distance between links) to keep the robot away from unsafe regions. Add via `RobotSystem::addBarrier()`.
 
-The servos (e.g. ST3215) usually have internal position (and sometimes velocity) control. Torq sends **position setpoints** at the control rate; the servo's internal controller tracks them. So the "output" from Torq is desired joint positions; the HAL turns that into serial commands. Limiting the IK output (velocity, acceleration, configuration) keeps those setpoints safe.
+The servos (e.g. ST3215) usually have internal position (and sometimes velocity) control. Torq sends **position setpoints** whenever `update()` runs with active control; the servo's internal controller tracks them. So the "output" from Torq is desired joint positions; the HAL turns that into serial commands. Limiting the IK output (velocity, configuration, optional custom limits and barriers) keeps those setpoints safe.
 
 ## Checklist for real robot
 
 - [ ] Same URDF (and calibration) as in sim.
 - [ ] Correct serial port and baud rate; servo IDs in joint order (e.g. via `driver_connection` or .conf).
 - [ ] Velocity limits set (model or limit config) to safe values.
-- [ ] Configuration limits and optional acceleration limits enabled.
+- [ ] Configuration limits (and any optional custom limits) enabled as needed.
 - [ ] Optional barriers for workspace or self-collision.
-- [ ] Control loop running at a fixed rate (e.g. 500 Hz); use the same `control_frequency_hz` as in sim if possible.
 - [ ] Emergency stop or disable path independent of Torq (hardware or watchdog).

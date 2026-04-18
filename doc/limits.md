@@ -10,9 +10,9 @@ Limits are @b hard constraints — the QP solver will never return a
 \f$\Delta q\f$ that violates them. If no feasible solution exists, the
 solver reports infeasibility.
 
-Torq provides **4 limit types**. Two are built into every `RobotSystem`
-(VelocityLimit, ConfigurationLimit); the others are added via
-`RobotSystem::addLimit()`.
+Torq provides **two built-in limit types** in every `RobotSystem`
+(`VelocityLimit`, `ConfigurationLimit`). You can add **custom** limits by
+subclassing `torq::Limit` and passing them to `RobotSystem::addLimit()`.
 
 ---
 
@@ -22,8 +22,7 @@ Torq provides **4 limit types**. Two are built into every `RobotSystem`
 |-------|------|---------|-----------|
 | @ref velocitylimit "VelocityLimit" | \f$2k\f$ | Joint velocity bounds | Yes |
 | @ref configurationlimit "ConfigurationLimit" | \f$2k\f$ | Joint position bounds with smooth deceleration | Yes |
-| @ref floatingbasevelocitylimit "FloatingBaseVelocityLimit" | \f$2 \times 6\f$ | Base twist limits for mobile/legged robots | No |
-| @ref accelerationlimit "AccelerationLimit" | \f$2k\f$ | Joint acceleration bounds with braking distance | No |
+| Custom `Limit` subclasses | varies | User-defined inequality constraints | No (`addLimit`) |
 
 ---
 
@@ -151,140 +150,15 @@ limit. This prevents hard stops and reduces stress on hardware.
 
 ---
 
-## FloatingBaseVelocityLimit {#floatingbasevelocitylimit}
-
-@b Purpose: Cap the linear and angular velocity of the floating base for
-mobile or legged robots.
-
-### Formulation
-
-Given maximum twist \f$v_{\max} \in \mathbb{R}^6\f$ (linear + angular):
-
-\f[
--\Delta t\,v_{\max} \;\le\; J_{\text{root}}\,\Delta q \;\le\; \Delta t\,v_{\max}
-\f]
-
-In standard form:
-
-\f[
-\begin{bmatrix} +J_{\text{root}} \\ -J_{\text{root}} \end{bmatrix} \Delta q
-\;\le\;
-\begin{bmatrix} \Delta t\,v_{\max} \\ \Delta t\,v_{\max} \end{bmatrix}
-\f]
-
-The Jacobian \f$J_{\text{root}}\f$ is the frame Jacobian of the base with
-all columns outside the root joint zeroed. This ensures only the
-floating-base DOFs are constrained.
-
-### Requirements
-
-- The model must have a `root_joint` (floating base).
-- A base frame name can be provided, or it is auto-detected.
-
-### How it works in code
-
-1. On construction, identifies the root joint and its velocity indices.
-2. Each tick, computes the frame Jacobian, zeros non-root columns, and
-   builds the box constraint.
-3. Only rows with finite bounds are included.
-
-### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `base_frame` | string | Base frame name (empty = auto-detect). |
-| `max_linear_velocity` | Vector3d or double | Linear velocity bound [m/s]. |
-| `max_angular_velocity` | Vector3d or double | Angular velocity bound [rad/s]. |
-
-### Example
-
-```cpp
-auto fb_limit = std::make_unique<torq::FloatingBaseVelocityLimit>(
-    robot.model(),
-    "",     // auto-detect base frame
-    0.5,    // max linear velocity [m/s]
-    1.0     // max angular velocity [rad/s]
-);
-robot.addLimit(std::move(fb_limit));
-```
-
----
-
-## AccelerationLimit {#accelerationlimit}
-
-@b Purpose: Limit joint accelerations to smooth motion and prevent torque
-spikes. Combines a finite-difference acceleration bound with a
-braking-distance constraint.
-
-### Formulation
-
-Two constraint types are enforced per joint, and the tighter one wins:
-
-**1. Finite-difference acceleration bound:**
-
-\f[
-\Delta q_{\text{prev}} - a_{\max}\,\Delta t^2 \;\le\; \Delta q
-\;\le\; \Delta q_{\text{prev}} + a_{\max}\,\Delta t^2
-\f]
-
-This limits how much the displacement can change from the previous tick,
-bounding the finite-difference acceleration.
-
-**2. Braking-distance bound** (Flacco 2015, Del Prete 2018):
-
-\f[
-|\dot{q}| \;\le\; \sqrt{2\,a_{\max}\,d_{\text{limit}}}
-\f]
-
-where \f$d_{\text{limit}}\f$ is the distance to the nearest joint position
-limit. This ensures the robot can always decelerate to a stop before
-hitting the limit, given the maximum deceleration \f$a_{\max}\f$.
-
-In displacement terms:
-
-\f[
-\Delta q_{\max}^{\text{brake}} = \Delta t \cdot \sqrt{2\,a_{\max}\,\max(d_{\text{limit}}, 0)}
-\f]
-
-The effective bound is:
-
-\f[
-h = \min\left(a_{\max}\,\Delta t^2 + \Delta q_{\text{prev}},\;
-    \Delta t\,\sqrt{2\,a_{\max}\,d_{\text{limit}}}\right)
-\f]
-
-### Requirements
-
-`setLastIntegration(v_prev, dt)` must be called each tick with the
-velocity from the previous IK solve. When added via
-`RobotSystem::addLimit()`, the controller handles this automatically.
-
-### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `acceleration_limit` | VectorXd | Per-joint max acceleration (dimension \f$n_v\f$). |
-
-### Example
-
-```cpp
-Eigen::VectorXd a_max = Eigen::VectorXd::Constant(robot.nv(), 10.0);
-auto accel_limit = std::make_unique<torq::AccelerationLimit>(
-    robot.model(), a_max);
-robot.addLimit(std::move(accel_limit));
-```
-
----
-
 ## How limits stack
 
 All limit types produce rows in the same inequality system:
 
 \f[
-G = \begin{bmatrix} G_{\text{vel}} \\ G_{\text{cfg}} \\ G_{\text{fb}} \\
-    G_{\text{accel}} \end{bmatrix}, \quad
-h = \begin{bmatrix} h_{\text{vel}} \\ h_{\text{cfg}} \\ h_{\text{fb}} \\
-    h_{\text{accel}} \end{bmatrix}
+G = \begin{bmatrix} G_{\text{vel}} \\ G_{\text{cfg}} \\ G_{\text{user}}
+    \end{bmatrix}, \quad
+h = \begin{bmatrix} h_{\text{vel}} \\ h_{\text{cfg}} \\ h_{\text{user}}
+    \end{bmatrix}
 \f]
 
 A limit may return `std::nullopt` if it has no active constraints, in

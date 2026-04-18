@@ -52,7 +52,6 @@ namespace torq {
 
         end_effector_frame_ = config.end_effector_frame;
         max_tracking_error_ = config.max_tracking_error;
-        control_frequency_hz_ = config.control_frequency_hz;
         active_control_ = use_real_driver ? config.active_control : true;
 
         // When using real hardware, optionally load MuJoCo scene as a display
@@ -60,31 +59,31 @@ namespace torq {
         // model is never stepped — only its qpos is overwritten from the real
         // robot each update().
         if (use_real_driver && !config.scene_path.empty()) {
-            display_physics_ = std::make_unique<MujocoDriver>();
-            if (!display_physics_->connect(config.scene_path)) {
+            mujoco_display_mirror_ = std::make_unique<MujocoDriver>();
+            if (!mujoco_display_mirror_->connect(config.scene_path)) {
                 log_.warning() << "[RobotSystem] Could not load display scene '" << config.scene_path
                                << "'; GUI 3D view will be unavailable.";
-                display_physics_.reset();
+                mujoco_display_mirror_.reset();
             } else {
                 Eigen::VectorXd q_real = hardware_->getJointPositions();
-                int nq_display = display_physics_->getModel()->nq;
+                int nq_display = mujoco_display_mirror_->getModel()->nq;
                 if (q_real.size() == nq_display) {
-                    display_physics_->overrideJointPositions(q_real);
+                    mujoco_display_mirror_->overrideJointPositions(q_real);
                 } else if (q_real.size() < nq_display) {
                     Eigen::VectorXd q_padded = Eigen::VectorXd::Zero(nq_display);
                     q_padded.head(q_real.size()) = q_real;
-                    display_physics_->overrideJointPositions(q_padded);
+                    mujoco_display_mirror_->overrideJointPositions(q_padded);
                 } else {
-                    display_physics_->overrideJointPositions(q_real.head(nq_display));
+                    mujoco_display_mirror_->overrideJointPositions(q_real.head(nq_display));
                 }
                 log_.info() << "[RobotSystem] Display mirror loaded from '" << config.scene_path << "'";
             }
         }
 
-        MujocoDriver* physics = getPhysics();
-        if (physics && physics->getModel() && physics->getData()) {
-            mjModel* m = physics->getModel();
-            mjData*  d = physics->getData();
+        MujocoDriver* mj_vis = mujocoVisualizationDriver();
+        if (mj_vis && mj_vis->getModel() && mj_vis->getData()) {
+            mjModel* m = mj_vis->getModel();
+            mjData*  d = mj_vis->getData();
             int gripper_idx = config.gripper_actuator_idx;
             if (gripper_idx < 0) gripper_idx = m->nu - 1;
             double low  = m->actuator_ctrlrange[2 * gripper_idx];
@@ -92,6 +91,10 @@ namespace torq {
             double current = d->ctrl[gripper_idx];
             controller_->setGripperConfig(gripper_idx, high, low, current);
         }
+
+        controller_->setJointSpaceTarget(
+            kinematics_->fullToReducedQ(hardware_->getJointPositions()));
+
         return true;
     }
 
@@ -116,7 +119,7 @@ namespace torq {
 
     void RobotSystem::setJointSpaceTarget(const Eigen::VectorXd& target_pose) {
       if (controller_) {
-        controller_->resetIKState();
+        controller_->invalidateTaskSpaceIkState();
         target_initialized_ = false;
         controller_->setJointSpaceTarget(target_pose);
       } else {
@@ -160,25 +163,25 @@ namespace torq {
 
           // Mirror real robot state into the display-only MuJoCo model so
           // the GUI viewport reflects actual hardware joint positions.
-          if (display_physics_) {
+          if (mujoco_display_mirror_) {
              Eigen::VectorXd q_real = hardware_->getJointPositions();
-             int nq_display = display_physics_->getModel()->nq;
+             int nq_display = mujoco_display_mirror_->getModel()->nq;
              if (q_real.size() == nq_display) {
-                display_physics_->overrideJointPositions(q_real);
+                mujoco_display_mirror_->overrideJointPositions(q_real);
              } else if (q_real.size() < nq_display) {
                 Eigen::VectorXd q_padded = Eigen::VectorXd::Zero(nq_display);
                 q_padded.head(q_real.size()) = q_real;
-                display_physics_->overrideJointPositions(q_padded);
+                mujoco_display_mirror_->overrideJointPositions(q_padded);
              } else {
-                display_physics_->overrideJointPositions(q_real.head(nq_display));
+                mujoco_display_mirror_->overrideJointPositions(q_real.head(nq_display));
              }
           }
        }
     }
 
-    MujocoDriver* RobotSystem::getPhysics() {
-        if (display_physics_)
-            return display_physics_.get();
+    MujocoDriver* RobotSystem::mujocoVisualizationDriver() {
+        if (mujoco_display_mirror_)
+            return mujoco_display_mirror_.get();
         return dynamic_cast<MujocoDriver*>(hardware_.get());
     }
 
@@ -219,10 +222,6 @@ namespace torq {
 
     void RobotSystem::setMaxTrackingError(double max_error) {
       max_tracking_error_ = max_error;
-    }
-
-    void RobotSystem::setControlFrequencyHz(double hz) {
-      if (hz > 0.0) control_frequency_hz_ = hz;
     }
 
     void RobotSystem::jogCartesian(int axis, double sign, const std::string& frame_name) {

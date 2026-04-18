@@ -2,17 +2,17 @@
 #include "torq/PinocchioModel.hpp"
 #include <cmath>
 #include <iostream>
-#include <algorithm>
 
 static constexpr bool IK_DIAGNOSTICS = false;
 
 namespace torq{
-  Controller::Controller(KinematicsEngine* kinematics, HardwareInterface* hardware): kinematics_(kinematics), hardware_(hardware){
+  Controller::Controller(KinematicsEngine* kinematics, HardwareInterface* hardware)
+      : kinematics_(kinematics), hardware_(hardware) {
     log_.info() << "[Controller] Initialized";
   }
 
   Controller::~Controller(){
-    log_.info() << "[Controller] cleaned up";  
+    log_.info() << "[Controller] cleaned up";
   }
 
   void Controller::initIK() {
@@ -25,30 +25,15 @@ namespace torq{
       posture_task_ = std::make_unique<PostureTask>(ik_config_.posture_cost, ik_config_.posture_lm_damping, ik_config_.posture_gain);
       damping_task_ = std::make_unique<DampingTask>(ik_config_.damping_cost);
 
-      // Auto-detect floating base and create limit if configured
-      if (ik_config_.has_floating_base && model.existJointName("root_joint")) {
-          try {
-              floating_base_limit_ = std::make_unique<FloatingBaseVelocityLimit>(
-                  model, "",
-                  ik_config_.max_base_linear_vel,
-                  ik_config_.max_base_angular_vel);
-              log_.info() << "[Controller] FloatingBaseVelocityLimit created";
-          } catch (const std::exception& e) {
-              log_.warning() << "[Controller] Could not create FloatingBaseVelocityLimit: " << e.what();
-          }
-      }
-
       Eigen::VectorXd q0_full = hardware_->getJointPositions();
       Eigen::VectorXd q0 = kinematics_->fullToReducedQ(q0_full);
       auto config = kinematics_->makeConfiguration(q0);
       posture_task_->setTargetFromConfiguration(config);
 
-      prev_velocity_ = Eigen::VectorXd::Zero(model.nv);
-
       ik_ready_ = true;
       log_.info() << "[Controller] IK tasks and limits initialized";
   }
-  
+
   void Controller::setTaskSpaceTarget(const Eigen::Matrix4d& target_pose, const std::string& frame_name){
     initIK();
 
@@ -74,7 +59,7 @@ namespace torq{
     mode_ = ControlMode::JOINT_SPACE;
   }
 
-  void Controller::resetIKState() {
+  void Controller::invalidateTaskSpaceIkState() {
     ik_config_initialized_ = false;
   }
 
@@ -91,7 +76,7 @@ namespace torq{
       if (gripper_actuator_idx_ < 0) {
         log_.warning() << "[Controller] gripper index is not correctly setup";
       }
-      
+
       gripper_open_ = !gripper_open_;
       double val = gripper_open_ ? gripper_open_val_ : gripper_close_val_;
 
@@ -121,7 +106,6 @@ namespace torq{
 
         auto config = kinematics_->makeConfiguration(ik_configuration_);
 
-        // Assemble built-in + user tasks
         std::vector<Task*> tasks = {
             frame_task_.get(),
             posture_task_.get(),
@@ -129,26 +113,15 @@ namespace torq{
         };
         tasks.insert(tasks.end(), user_tasks.begin(), user_tasks.end());
 
-        // Assemble built-in + user limits
         std::vector<Limit*> limits = {
             vel_limit_.get(),
             cfg_limit_.get()
         };
-        if (floating_base_limit_)
-            limits.push_back(floating_base_limit_.get());
-        if (accel_limit_)
-            limits.push_back(accel_limit_.get());
         limits.insert(limits.end(), user_limits.begin(), user_limits.end());
 
-        // Barriers (user-provided only; no built-in barriers)
         const std::vector<Barrier*>& barriers = user_barriers;
 
-        // Feed previous velocity to acceleration limit
-        if (accel_limit_)
-            accel_limit_->setLastIntegration(prev_velocity_, dt);
-
         Eigen::VectorXd velocity = ik_solver_.solve(config, tasks, dt, ik_config_.solver_damping, limits, barriers);
-        prev_velocity_ = velocity;
 
         if (IK_DIAGNOSTICS) {
             const std::string& frame_name = frame_task_->frame();
@@ -166,16 +139,6 @@ namespace torq{
         config.integrateInplace(velocity, dt);
         ik_configuration_ = config.q();
 
-        // Optional: slow re-sync to prevent kinematic/physics drift over long runs
-        constexpr bool IK_ENABLE_SLOW_RESYNC = false;
-        constexpr double IK_RESYNC_ALPHA = 0.01;
-        if (IK_ENABLE_SLOW_RESYNC) {
-          Eigen::VectorXd q_mujoco =
-              kinematics_->fullToReducedQ(hardware_->getJointPositions());
-          ik_configuration_ =
-              (1.0 - IK_RESYNC_ALPHA) * ik_configuration_ +
-              IK_RESYNC_ALPHA * q_mujoco;
-        }
 
         Eigen::VectorXd q_cmd = ik_configuration_;
         if (gripper_actuator_idx_ >= static_cast<int>(q_cmd.size())) {

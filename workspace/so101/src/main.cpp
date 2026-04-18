@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     config.robot_calib_file = (root / "workspace/so101/calibration/calibration.txt").string();
     config.end_effector_frame = "gripper_frame_link";
     config.locked_joints = {"gripper"};
-    config.driver_type = "serial_servo";
+    config.driver_type = "mujoco";
     config.active_control = true;
 
     torq::RobotSystem robot;

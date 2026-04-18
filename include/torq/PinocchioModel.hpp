@@ -78,14 +78,6 @@ namespace torq {
            Eigen::MatrixXd getFrameJacobian(const std::string& frame) const;
 
            /**
-            * @brief Frame Jacobian in the LOCAL_WORLD_ALIGNED reference frame.
-            * @param frame  Frame name in the Pinocchio model.
-            * @return Jacobian \f$J \in \mathbb{R}^{6 \times n_v}\f$ with columns
-            *         expressed at the frame origin but aligned with world axes.
-            */
-           Eigen::MatrixXd getFrameJacobianWorldAligned(const std::string& frame) const;
-
-           /**
             * @brief SE(3) transform of a frame in world coordinates.
             * @param frame  Frame name.
             * @return \f$T_{\text{frame}}^{\text{world}} \in SE(3)\f$.
@@ -232,8 +224,6 @@ namespace torq {
             /** @brief Full model configuration dimension. */
             int fullNq() const { return full_model_ ? full_model_->nq : 0; }
 
-            /** @brief Print all frame names in the model to stdout. */
-            void printFrames() const;
         private:
             void buildQMapping();
 

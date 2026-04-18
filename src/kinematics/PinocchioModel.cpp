@@ -87,20 +87,6 @@ namespace torq {
         return J;
     }
 
-    Eigen::MatrixXd Configuration::getFrameJacobianWorldAligned(const std::string& frame) const {
-        if (!model_.existFrame(frame)){
-            last_error_ = ErrorCode::FrameNotFound;
-            log_.warning() << "[Configuration] Frame not found";
-            return Eigen::MatrixXd::Zero(6, model_.nv);
-        }
-
-        auto frame_id = model_.getFrameId(frame);
-        Eigen::MatrixXd J(6, model_.nv);
-        J.setZero();
-        pinocchio::getFrameJacobian(model_, const_cast<pinocchio::Data&>(data_), frame_id, pinocchio::LOCAL_WORLD_ALIGNED, J);
-        return J;
-    }
-
     pinocchio::SE3 Configuration::getTransformFrameToWorld(const std::string& frame) const {
       if (!model_.existFrame(frame)){
         last_error_ = ErrorCode::FrameNotFound;
@@ -251,14 +237,4 @@ namespace torq {
       return q_reduced;
     }
 
-    void KinematicsEngine::printFrames() const {
-        if (!model_) {
-            log_.warning() << "[KinematicsEngine] Model not loaded";
-            return;
-        }
-        log_.info() << "======= ROBOT FRAMES =======";
-        for (const auto& frame : model_->frames) {
-            log_.info() << "  " << frame.name;
-        }
-    }
-    } // namespace torq
+} // namespace torq

@@ -200,7 +200,7 @@ The posture task is too weak or has no useful reference.
 1. Increase `damping_cost`.
 2. Lower `frame_gain`.
 3. Add a `LowAccelerationTask` via `addTask()` for smooth velocity profiles.
-4. Add an `AccelerationLimit` via `addLimit()` for hard acceleration bounds.
+4. Optionally add a custom `Limit` subclass via `addLimit()` for extra hard constraints.
 
 ### Solver reports infeasible
 

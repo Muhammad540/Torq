@@ -55,31 +55,10 @@ namespace torq{
     ~InverseKinematics() = default;
 
     /**
-     * @brief Build the QP from the current configuration and active tasks/limits/barriers.
-     *
-     * Sums task Hessians and gradients, adds Tikhonov damping, barrier
-     * objective contributions, and stacks limit + barrier inequality rows.
-     *
-     * @param config   Current robot configuration (FK computed).
-     * @param tasks    Active tasks contributing to the objective.
-     * @param dt       Integration timestep [s].
-     * @param damping  Tikhonov (solver) damping \f$\lambda\f$ added to the Hessian diagonal.
-     * @param limits   Active limits contributing inequality constraints.
-     * @param barriers Active barriers contributing both objective and inequality constraints.
-     * @return The assembled QPProblem.
-     */
-    QPProblem buildIK(const Configuration& config,
-		      const std::vector<Task*>& tasks,
-		      double dt,
-		      double damping = 1e-12,
-		      const std::vector<Limit*>& limits = {},
-		      const std::vector<Barrier*>& barriers = {});
-
-    /**
      * @brief Build and solve the IK, returning the joint velocity.
      *
-     * Calls buildIK() then solves via OSQP.  Integrates the result on the
-     * configuration manifold via `pinocchio::integrate`.
+     * Assembles the QP internally, solves via OSQP, and returns the tangent-space
+     * velocity for this tick.
      *
      * @param config   Current robot configuration (will be updated in-place on success).
      * @param tasks    Active tasks.
@@ -96,9 +75,15 @@ namespace torq{
 			  double damping = 1e-12,
 			  const std::vector<Limit*>& limits = {},
 			  const std::vector<Barrier*>& barriers = {});
-    
-    
+
   private:
+    QPProblem buildIK(const Configuration& config,
+                      const std::vector<Task*>& tasks,
+                      double dt,
+                      double damping = 1e-12,
+                      const std::vector<Limit*>& limits = {},
+                      const std::vector<Barrier*>& barriers = {});
+
     bool initSolver(int nv, int m,
                     const Eigen::SparseMatrix<double>& H_sparse,
                     const Eigen::VectorXd& c,

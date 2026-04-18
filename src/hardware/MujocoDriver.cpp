@@ -1,7 +1,7 @@
 #include "torq/MujocoDriver.hpp"
 #include "torq/logger.hpp"
 
-#include "Eigen/src/Core/Matrix.h"
+#include <Eigen/Core>
 #include "mujoco/mjdata.h"
 #include "mujoco/mjmodel.h"
 
@@ -75,17 +75,6 @@ namespace torq {
         Eigen::Map<Eigen::VectorXd>(data_->qvel, model_->nv).setZero();
         mj_forward(model_.get(), data_.get());
     }
-
-    void MujocoDriver::overrideJointVelocities(const Eigen::Ref<const Eigen::VectorXd>& qd){
-        if (!model_ || !data_) return;
-        if (qd.size() != model_->nv) {
-            logger.error()  << "[MujocoDriver] Size mismatch. "
-                            << "Expected " << model_->nv << ", got " << qd.size();
-            return;
-        }
-        Eigen::Map<Eigen::VectorXd>(data_->qvel, model_->nv) = qd;
-    }
-
 
     void MujocoDriver::setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
         if (!model_ || !data_) return;

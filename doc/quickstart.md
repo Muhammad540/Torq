@@ -67,8 +67,8 @@ jog controls, and an IK tuning panel:
 
 ## Step 3: Run the control loop
 
-The main loop calls `robot.update()` at the control frequency and
-`gui.render()` for visualisation:
+The main loop calls `robot.update()` and `gui.render()` for visualisation
+(as often as you like; the examples use one update per GUI frame):
 
 ```cpp
     while (gui.windowIsOpen()) {

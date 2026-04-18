@@ -23,7 +23,7 @@ addLimit, addBarrier, IK tuning, update) goes through RobotSystem.
 | **RobotSystem** | User-added tasks, limits, barriers | Objects passed to `addTask()` / `addLimit()` / `addBarrier()` are owned by RobotSystem and destroyed on `remove*()` or when RobotSystem is destroyed (passed as `unique_ptr`). |
 | **Controller** | `InverseKinematics` solver | Created and used internally. |
 | **Controller** | Built-in tasks: `FrameTask`, `PostureTask`, `DampingTask` | Created lazily on first `setTaskSpaceTarget()`. |
-| **Controller** | Built-in limits: `VelocityLimit`, `ConfigurationLimit`, optional `FloatingBaseVelocityLimit`, `AccelerationLimit` | Same lifecycle as built-in tasks. |
+| **Controller** | Built-in limits: `VelocityLimit`, `ConfigurationLimit` | Same lifecycle as built-in tasks. |
 | **Controller** | Does @e not own user tasks/limits/barriers | These are passed in each tick by RobotSystem and owned by RobotSystem. |
 
 This separation avoids memory leaks and use-after-free: user-added objects
@@ -37,7 +37,7 @@ pointers to them across ticks.
 - @b torq::RobotSystem : Single entry point for all robot operations. Owns
   `HardwareInterface`, `KinematicsEngine`, `Controller`, and any user-added
   tasks/limits/barriers. Exposes manipulation, IK tuning, and `update()`.
-- @b torq::Controller : Internal. Manages control modes (`IDLE`, `JOINT_SPACE`, `TASK_SPACE`),
+- @b torq::Controller : Internal. Manages control modes (`JOINT_SPACE`, `TASK_SPACE`),
   owns the IK solver and built-in task/limit instances, holds `IKConfig`.
   Invoked only by RobotSystem; receives user task/limit/barrier pointers each tick.
 - @b torq::InverseKinematics : Internal. Assembles the QP from tasks, limits, and barriers; delegates to OSQP.
@@ -68,8 +68,7 @@ pointers to them across ticks.
 
 - @b torq::Limit (abstract) : defines `computeQPInequalities()`.
   - @b torq::VelocityLimit, @b torq::ConfigurationLimit : Built-in.
-  - @b torq::FloatingBaseVelocityLimit : For floating-base robots. Add via `RobotSystem::addLimit()`.
-  - @b torq::AccelerationLimit : Acceleration + braking-distance bounds. Add via `RobotSystem::addLimit()`.
+  - Custom subclasses of @b torq::Limit : Optional extra inequality rows; add via `RobotSystem::addLimit()`.
 
 ### Barriers (CBF inequality + optional objective) — see @ref barriers_page
 
@@ -99,18 +98,21 @@ IK solver and built-in task/limit instances (no direct exposure to library users
 
 \dotfile ownership_diagram.dot
 
-## Control loop frequencies
+## How often to call `update()`
 
-Typical frequencies:
+Torq does not enforce a call rate: your `while` loop, timer, or GUI frame
+decides how often `RobotSystem::update()` runs. Faster calls give smoother
+closed-loop behaviour; each call still advances the simulation (or hardware
+I/O) by **one** integration step whose length is `getTimestep()` from the
+model or driver, not the wall time between your calls.
 
-- **Task planner / user input** (e.g. GUI jog, programmatic `setTaskSpaceTarget`): ~60 Hz or event-driven.
-- **RobotSystem::update()** and **Controller::update()** (IK layer): 200–1000 Hz. The user application must call `update()` at this rate.
-- **Hardware step**: Same as the control loop (one step per `update()`). Physics timestep is set in the MJCF/XML.
-- **Joint controller (real hardware)**: Internal to the servo (e.g. ST3215 runs a PID loop internally at ~1 kHz). Torq sends position setpoints at the control rate; the servo tracks them.
+- **User input** (e.g. GUI jog): often display-rate or event-driven.
+- **Hardware / simulation step**: one step per `update()`; timestep is set in the MJCF/XML or the real driver.
+- **Joint controller (real hardware)**: internal to the servo. Torq sends position setpoints each time you call `update()` while active control is on.
 
 ## Data flow per tick
 
-1. The application calls `RobotSystem::update()` at the configured control frequency.
+1. The application calls `RobotSystem::update()`.
 2. `HardwareDriver::step()` advances the physics by one timestep (applying the previous tick's commands).
 3. In TASK_SPACE, the Controller uses its **internal kinematic state** (not the physics state) to build a `Configuration`.
 4. Each @b Task computes its error \f$e_i(q)\f$ and Jacobian \f$J_i(q)\f$ from that `Configuration`.

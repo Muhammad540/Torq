@@ -3,7 +3,6 @@
 #include "mujoco/mjrender.h"
 #include "mujoco/mjvisualize.h"
 #include "torq/RobotSystem.hpp"
-#include "torq/Controller.hpp"
 #include "torq/MujocoDriver.hpp"
 #include "torq/logger.hpp"
 #include <cstring>
@@ -62,13 +61,14 @@ namespace torq {
     bool Gui::initialize(RobotSystem* robot, const std::string& title) {
         if (!robot) return false;
         robot_ = robot;
-        if (!robot->getPhysics()) {
+        if (!robot->mujocoVisualizationDriver()) {
             logger.error() << "[Gui] No MuJoCo model available for rendering. "
                               "Use driver_type=\"mujoco\", or provide scene_path with driver_type=\"serial_servo\" for display mirror.";
             return false;
         }
-        model_ = static_cast<mjModel*>(robot->getPhysics()->getModel());
-        data_ = static_cast<mjData*>(robot->getPhysics()->getData());
+        MujocoDriver* mj = robot->mujocoVisualizationDriver();
+        model_ = static_cast<mjModel*>(mj->getModel());
+        data_ = static_cast<mjData*>(mj->getData());
 
         if (!glfwInit()) return false;
         // Valid on GLFW 3.3+ only
@@ -149,26 +149,6 @@ namespace torq {
         mjrRect mjr_viewport = {0, 0, viewport_width_, viewport_height_};
         mjv_updateScene(model_, data_, opt_.get(), NULL, cam_.get(), mjCAT_ALL, scn_.get());
 
-        // #ifdef ENABLE_TRACKING_POINTS
-        //     for (const auto& point: tps){
-        //         if (scn_->ngeom < scn_->maxgeom){
-        //             mjvGeom* next_geom = scn_->geoms + scn_->ngeom;
-        //             float color[4] = {(float)point.color[0], (float)point.color[1], (float)point.color[2], 1.0f};
-        //             double pos[3] = {(double)point.position[0],(double)point.position[1],(double)point.position[2]};
-        //             double size[3] = {(double)point.radius, 0.0f, 0.0f};
-                    
-        //             mjv_initGeom(next_geom, mjGEOM_SPHERE,size,pos,NULL,color);
-        //             next_geom->category = mjCAT_DECOR;
-        //             next_geom->emission = 0.5f;
-        //             scn_->ngeom += 1;
-        //         } else {
-        //             logger.warning() << "[Gui] Max geom exceeded!"; 
-        //             break;
-        //         }
-        //     }
-
-        //     tps.clear();
-        // #endif
         mjr_render(mjr_viewport, scn_.get(), ctx_.get());
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

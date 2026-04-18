@@ -57,12 +57,12 @@ namespace torq{
     }
 
     FrameTask::FrameTask(const std::string& frame,
-                         double position__cost,
+                         double position_cost,
                          double orientation_cost,
                          double lm_damping,
                          double gain)
         : Task(Eigen::VectorXd::Ones(6), gain, lm_damping), frame_(frame){
-            setPositionCost(position__cost);
+            setPositionCost(position_cost);
             setOrientationCost(orientation_cost);
         }
     
@@ -90,14 +90,6 @@ namespace torq{
         cost_.tail<3>() = cost;
     }
 
-    /*
-        Error is log(T_frame^{-1} * T_target ) -> body frame twist in R^6
-        logarithmic map converts a transformation matrix into a twist
-        And exponential of Twist is T
-
-        When integrated: T_new = T_frame * exp(error) = T_target
-        In pinocchio: linear coord [0:3] and then angular coord [3:6]
-    */
     Eigen::VectorXd FrameTask::computeError(const Configuration& config) const {
         if (!target_.has_value()) {
             return Eigen::VectorXd::Zero(6);
@@ -108,12 +100,6 @@ namespace torq{
         return pinocchio::log6(T_target_to_frame).toVector();
     }
     
-    /*
-        Jacobian: J = -Jlog6(T_frame_to_target) * J_frame
-
-        Jlog6 accounts for the non linearity of the SE3 logarithm,
-        giving the analytically correct Jacobian even far from the target.
-    */
     Eigen::MatrixXd FrameTask::computeJacobian(const Configuration &config) const {
         if (!target_.has_value()) {
             return Eigen::MatrixXd::Zero(6, config.nv());

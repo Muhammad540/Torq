@@ -31,8 +31,6 @@ namespace torq {
         int gripper_actuator_idx = -1;       ///< MuJoCo actuator index for the gripper (-1 = last actuator).
         /** Max Cartesian tracking error [m] for jog safety; target is clamped within this distance of actual EE. Default 0.05. */
         double max_tracking_error = 0.05;
-        /** Target control loop frequency [Hz] for update(); caller should invoke update() at this rate. Typical 200–1000 for IK. Default 500. */
-        double control_frequency_hz = 500.0;
 
         /** Driver for hardware: "mujoco" (simulation) or "serial_servo" (real robot, e.g. ST3215 servo). Default "mujoco". */
         std::string driver_type = "mujoco";
@@ -57,12 +55,12 @@ namespace torq {
      *
      * The Controller is an internal implementation detail: it owns the
      * InverseKinematics solver and built-in tasks/limits (FrameTask, PostureTask,
-     * DampingTask, VelocityLimit, ConfigurationLimit, etc.). Users do not
-     * access the Controller or IK solver directly; all interaction is through
-     * RobotSystem.
+     * DampingTask, VelocityLimit, ConfigurationLimit). Users do not access the
+     * Controller or IK solver directly; all interaction is through RobotSystem.
      *
-     * Control loop: call update() at the configured control_frequency_hz
-     * (200–1000 Hz typical). The caller is responsible for rate limiting.
+     * Call `update()` whenever your application needs a new control / physics tick
+     * Differential IK integrates with the hardware driver's `getTimestep()` (e.g. MuJoCo
+     * `opt.timestep`); that timestep is independent of how often you call `update()`.
      *
      * @code
      * torq::RobotConfig cfg;
@@ -75,7 +73,6 @@ namespace torq {
      *
      * while (running) {
      *     robot.update();
-     *     rate_limiter.sleep();
      * }
      * @endcode
      *
@@ -101,23 +98,33 @@ namespace torq {
             /**
              * @brief Execute one control + physics tick.
              *
-             * Runs at the rate of the caller; typically invoked at control_frequency_hz
-             * (200–1000 Hz). Performs: physics step, then Controller::update() (IK solve
-             * and joint command). Call at a fixed rate for deterministic behaviour.
+             * Performs one tick: `hardware_->step()`, then (if active control is on)
+             * `Controller::update()`. Task-space IK uses `hardware_->getTimestep()` for
+             * integration (MuJoCo model timestep or the real driver's period), not the
+             * interval between your calls to `update()`.
              */
             void update();
             
             /**
-             * @brief Raw pointer to a MuJoCo driver suitable for GUI rendering.
+             * @brief MuJoCo backend that owns `mjModel` / `mjData` for this robot, if any.
              *
-             * When using MujocoDriver as the primary hardware, returns that driver.
-             * When using a real hardware driver (e.g. ServoDriver) with a
-             * display model loaded (scene_path provided), returns the display-only
-             * MujocoDriver whose state is synced from the real robot each update().
+             * This is **not** the abstract hardware used for control (that is internal).
+             * It is the `MujocoDriver` instance whose scene you can render or introspect:
              *
-             * @return nullptr if no MuJoCo model is available for rendering.
+             * - **Simulation** (`driver_type == "mujoco"`): returns the same driver that
+             *   steps physics and receives commands.
+             * - **Real hardware** with `scene_path` set: returns a **display-only** driver
+             *   loaded from that XML; joint poses are copied from the real robot each
+             *   `update()` for visualization. It is never stepped for dynamics.
+             * - **Real hardware** without `scene_path`: returns nullptr (no MuJoCo scene).
+             *
+             * Typical uses: attach `Gui` (viewport), or read MuJoCo-only metadata such as
+             * actuator `ctrlrange` during initialize(). Do not assume this pointer is the
+             * control plant when using serial servos.
+             *
+             * @return nullptr if no MuJoCo scene is loaded.
              */
-            MujocoDriver* getPhysics();
+            MujocoDriver* mujocoVisualizationDriver();
 
             /** @name Manipulation
              *  @{
@@ -186,13 +193,6 @@ namespace torq {
             /** @brief Current max tracking error [m]. */
             double maxTrackingError() const { return max_tracking_error_; }
 
-            /** @brief Set target control loop frequency [Hz] (caller should call update() at this rate). */
-            void setControlFrequencyHz(double hz);
-            /** @brief Current target control frequency [Hz]. */
-            double controlFrequencyHz() const { return control_frequency_hz_; }
-            /** @brief Control period [s] = 1 / controlFrequencyHz(), for rate limiting. */
-            double controlPeriodSec() const { return 1.0 / control_frequency_hz_; }
-
             /** @brief Toggle gripper between open and closed. */
             void toggleGripper();
             /** @brief True if the gripper is currently open. */
@@ -254,7 +254,7 @@ namespace torq {
 
             /**
              * @brief Add a limit; RobotSystem takes ownership.
-             * @param limit  Limit to add (e.g. FloatingBaseVelocityLimit, AccelerationLimit).
+             * @param limit  Limit to add (e.g. a custom Limit subclass).
              */
             void addLimit(std::unique_ptr<Limit> limit);
 
@@ -302,10 +302,10 @@ namespace torq {
             std::unique_ptr<KinematicsEngine> kinematics_;
             std::unique_ptr<Controller> controller_;
 
-            /// Display-only MuJoCo model used to mirror real robot state in the GUI.
-            /// Created when driver_type is real hardware and scene_path is provided.
-            /// Never used for control — only for rendering via getPhysics().
-            std::unique_ptr<MujocoDriver> display_physics_;
+            /// Optional MuJoCo scene that mirrors real joint positions for the GUI only
+            /// (`driver_type == "serial_servo"` and non-empty `scene_path`). Not stepped for
+            /// dynamics; exposed alongside the sim driver through mujocoVisualizationDriver().
+            std::unique_ptr<MujocoDriver> mujoco_display_mirror_;
 
             /// User-added tasks/limits/barriers (RobotSystem owns these)
             std::vector<std::unique_ptr<Task>> user_tasks_;
@@ -322,7 +322,6 @@ namespace torq {
             bool target_initialized_ = false;
             std::string last_jog_frame_;
             double max_tracking_error_ = 0.05;
-            double control_frequency_hz_ = 500.0;
             bool active_control_ = false;  ///< When false (passive mode), no commands sent to real hardware.
     };
 }

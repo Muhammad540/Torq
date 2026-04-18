@@ -17,14 +17,13 @@
 namespace torq{
 
   /**
-   * @brief Control mode for the Controller state machine.
+   * @brief Control mode for the Controller.
    */
   enum class ControlMode{
-    IDLE,        ///< No active control — robot holds current position.
-    JOINT_SPACE, ///< Direct joint-angle commands.
-    TASK_SPACE   ///< Cartesian IK — tasks and limits are active.
+    JOINT_SPACE, ///< Direct joint-angle commands via the hardware interface.
+    TASK_SPACE   ///< Cartesian differential IK (built-in tasks + QP).
   };
-  
+
   /**
    * @brief Centralised store for all tunable IK parameters with sensible defaults.
    *
@@ -45,9 +44,6 @@ namespace torq{
     double damping_cost          = 1e-4;  ///< DampingTask weight [cost·s/rad].
     double solver_damping        = 1e-12; ///< Tikhonov damping \f$\lambda\f$ on the QP Hessian.
     double config_limit_gain     = 0.5;   ///< ConfigurationLimit gain \f$\gamma \in (0,1]\f$.
-    bool   has_floating_base     = false; ///< Auto-attach FloatingBaseVelocityLimit when true.
-    double max_base_linear_vel   = 1.0;   ///< FloatingBaseVelocityLimit linear bound [m/s].
-    double max_base_angular_vel  = 1.0;   ///< FloatingBaseVelocityLimit angular bound [rad/s].
   };
 
   /**
@@ -55,17 +51,16 @@ namespace torq{
    *
    * **Ownership:** Controller owns the InverseKinematics solver and all
    * *built-in* tasks and limits (FrameTask, PostureTask, DampingTask,
-   * VelocityLimit, ConfigurationLimit, optional FloatingBaseVelocityLimit and
-   * AccelerationLimit). It does **not** own user-added tasks/limits/barriers;
-   * those are owned by RobotSystem and passed into update() each tick.
+   * VelocityLimit, ConfigurationLimit). It does **not** own user-added
+   * tasks/limits/barriers; those are owned by RobotSystem and passed into
+   * update() each tick.
    *
    * **Separation of concern:** Library users interact only with RobotSystem.
    * Controller is not part of the public API; RobotSystem forwards
    * setTaskSpaceTarget, setJointSpaceTarget, IK tuning, and update().
    *
-   * Control loop: update() is invoked by RobotSystem at the control rate
-   * (200–1000 Hz). In TASK_SPACE mode it builds the QP from built-in plus
-   * user-provided task/limit/barrier lists and solves via OSQP.
+   * In TASK_SPACE, the IK integration timestep is hardware_->getTimestep()
+   * (MuJoCo model opt.timestep, or the real driver's control period).
    *
    * @see RobotSystem, InverseKinematics, Task, Limit, Barrier
    */
@@ -75,12 +70,12 @@ namespace torq{
     /**
      * @brief Construct a Controller.
      * @param kinematics  Non-owning pointer to the KinematicsEngine (must outlive the Controller).
-     * @param hardware    Non-owning pointer to the HardwareInterface (must outlive the Controller).
+     * @param hardware    Non-owning pointer to the HardwareInterface (nullptr until initialize).
      */
     Controller(KinematicsEngine* kinematics, HardwareInterface* hardware);
     ~Controller();
 
-    /** @brief Set the hardware interface (e.g. when switching from sim to real driver). Must outlive the Controller. */
+    /** @brief Set the hardware interface after construction. Must outlive the Controller. */
     void setHardwareInterface(HardwareInterface* hardware) { hardware_ = hardware; }
 
     /**
@@ -100,12 +95,18 @@ namespace torq{
      */
     void setJointSpaceTarget(const Eigen::VectorXd& target_joints);
 
-    /** @brief Reset IK kinematic state (call when leaving TASK_SPACE). */
-    void resetIKState();
+    /**
+     * @brief After leaving task-space IK, clear the cached internal configuration
+     *        so the next TASK_SPACE tick seeds \f$q\f$ from the hardware state.
+     *
+     * Call when switching to JOINT_SPACE (or any mode that moves the plant without
+     * updating the IK integrator) so task-space IK does not continue from a stale \f$q\f$.
+     */
+    void invalidateTaskSpaceIkState();
 
     /**
-     * @brief Configure the gripper actuator.
-     * @param actuator_idx  Index into the MuJoCo actuator array.
+     * @brief Configure the gripper actuator (command-space index for toggleGripper).
+     * @param actuator_idx  Index into the reduced command / joint vector used by setJointPositions.
      * @param open_val      Actuator value for the open position.
      * @param close_val     Actuator value for the closed position.
      * @param current_val   Current actuator value (to detect initial state).
@@ -121,7 +122,7 @@ namespace torq{
     /**
      * @brief Execute one control tick.
      *
-     * Built-in tasks/limits are always used; user_tasks, user_limits, and
+     * Built-in tasks/limits are always used in TASK_SPACE; user_tasks, user_limits, and
      * user_barriers are appended for this solve only (owned by RobotSystem).
      *
      * @param user_tasks   User-added tasks (non-owning; may be empty).
@@ -172,15 +173,12 @@ namespace torq{
     // Built-in limits
     std::unique_ptr<VelocityLimit> vel_limit_;
     std::unique_ptr<ConfigurationLimit> cfg_limit_;
-    std::unique_ptr<FloatingBaseVelocityLimit> floating_base_limit_;
-    std::unique_ptr<AccelerationLimit> accel_limit_;
 
-    ControlMode mode_ = ControlMode::IDLE;
+    ControlMode mode_ = ControlMode::JOINT_SPACE;
     Eigen::VectorXd target_joints_;
     bool ik_ready_ = false;
 
     Eigen::VectorXd ik_configuration_;
-    Eigen::VectorXd prev_velocity_;
     bool ik_config_initialized_ = false;
     double gripper_open_val_ = 0.0;
     double gripper_close_val_ = 0.0;
