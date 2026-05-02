@@ -19,6 +19,10 @@ int main(int argc, char** argv){
         logger.error() << "Failed to load model";
         return 1;
     }
+    Eigen::VectorXd home_position(7);
+    home_position << 0, 0, 0, -1.62, 0.03, 1.72, 0.88;
+    robot.setHomePosition(home_position);
+    robot.moveToHome();
 
     torq::Gui gui;
     gui.initialize(&robot, "Franka Panda");

@@ -134,6 +134,8 @@ namespace torq {
            /** @brief Collision geometry data (nullptr if not loaded). */
            const std::shared_ptr<pinocchio::GeometryData>& collisionData() const { return collision_data_; }
 
+           void jointJacobian(pinocchio::JointIndex j_id, Eigen::MatrixXd& j_buf) const;
+
            /** @brief True if a collision model is loaded and ready. */
            bool hasCollisionModel() const { return collision_model_ != nullptr; }
 
@@ -225,6 +227,9 @@ namespace torq {
             int fullNq() const { return full_model_ ? full_model_->nq : 0; }
 
         private:
+            /**
+             * @brief Build a mapping from the full model configuration to the reduced model configuration.
+             */
             void buildQMapping();
 
             mutable Logger log_;

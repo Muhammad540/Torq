@@ -150,6 +150,9 @@ namespace torq {
             /** @brief Record the current joint configuration as the home position. */
             void setHomePosition();
 
+            /** @brief Set the home position. */
+            void setHomePosition(const Eigen::VectorXd& home_position);
+
             /** @brief Command the robot to move to the stored home position. */
             void moveToHome();
 
@@ -314,8 +317,8 @@ namespace torq {
 
             Eigen::VectorXd home_position_;
             bool home_set_ = false;
-            double jog_linear_step_ = 0.01;
-            double jog_angular_step_ = 0.05;
+            double jog_linear_step_ = 0.001;
+            double jog_angular_step_ = 0.01;
             std::string end_effector_frame_;
 
             Eigen::Matrix4d persistent_target_pose_;

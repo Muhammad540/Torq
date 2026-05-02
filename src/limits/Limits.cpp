@@ -1,8 +1,10 @@
 #include "torq/Limits.hpp"
 #include "torq/PinocchioModel.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
-#include "pinocchio/multibody/fwd.hpp"
 #include <optional>
+#include <ostream>
+#include <stdexcept>
+#include <utility>
 #include <vector>
 #include <cmath>
 
@@ -16,11 +18,13 @@ namespace torq {
         for (size_t j = 1; j < model_.joints.size(); ++j) {
             const auto& joint = model_.joints[j];
             int idx_v = joint.idx_v();
+            // each joint has its dof
             int nv    = joint.nv();
 
             bool all_bounded = true;
             for (int k = 0; k < nv; ++k) {
                 double vl = v_limit(idx_v + k);
+                // checking for each joint's dof if it is between the sane limits
                 if (vl >= 1e20 || vl <= 1e-10) {
                     all_bounded = false;
                     break;
@@ -38,10 +42,19 @@ namespace torq {
 
         if (!indices_.empty()) {
             int dim = static_cast<int>(indices_.size());
-            projection_matrix_.resize(dim, model_.nv);
-            projection_matrix_.setZero();
+            if (dim > 0){
+                v_max_.resize(dim);
+                G_.resize(2 * dim, model_.nv);
+                G_.setZero();
+                h_.resize(2 * dim);
+            }
             for (int i = 0; i < dim; ++i) {
-                projection_matrix_(i, indices_[i]) = 1.0;
+                int tangent_idx = indices_[i];
+                v_max_(i) = model_.velocityLimit(tangent_idx);
+                // Projection matrix helps extract only the joints where limits are actually defined
+                // P*Deltaq  <= h
+                G_(i, tangent_idx) = 1.0;            // top half (P)
+                G_(dim + i, tangent_idx) = -1.0;     // Bottom half (-P)
             }
         }
     }
@@ -55,20 +68,10 @@ namespace torq {
 
         int dim = static_cast<int>(indices_.size());
 
-        Eigen::VectorXd v_max(dim);
-        for (int i = 0; i < dim; ++i) {
-            v_max(i) = model_.velocityLimit(indices_[i]);
-        }
+        h_.head(dim) = dt * v_max_;
+        h_.tail(dim) = dt * v_max_;
 
-        Eigen::MatrixXd G(2 * dim, model_.nv);
-        G.topRows(dim) = projection_matrix_;
-        G.bottomRows(dim) = -projection_matrix_;
-
-        Eigen::VectorXd h(2 * dim);
-        h.head(dim) = dt * v_max;
-        h.tail(dim) = dt * v_max;
-
-        return std::make_pair(G, h);
+        return std::make_pair(G_, h_);
     }
 
     ConfigurationLimit::ConfigurationLimit(const pinocchio::Model& model, double config_limit_gain)
@@ -104,12 +107,19 @@ namespace torq {
 
         indices_ = index_list;
 
-        if (!indices_.empty()) {
-            int dim = static_cast<int>(indices_.size());
-            projection_matrix_.resize(dim, model_.nv);
-            projection_matrix_.setZero();
+        int dim = static_cast<int>(indices_.size());
+        if (dim > 0) {
+            G_.resize(2 * dim, model_.nv);
+            G_.setZero();
+            h_.resize(2 * dim);
+            
+            delta_q_max_.resize(model_.nv);
+            delta_q_min_.resize(model_.nv);
+
             for (int i = 0; i < dim; ++i) {
-                projection_matrix_(i, indices_[i]) = 1.0;
+                int tangent_idx = indices_[i];
+                G_(i, tangent_idx) = 1.0;            // Top half (P)
+                G_(dim + i, tangent_idx) = -1.0;     // Bottom half (-P)
             }
         }
     }
@@ -120,25 +130,19 @@ namespace torq {
         if (indices_.empty()) {
             return std::nullopt;
         }
-
+    
+        // 1. Zero allocation manifold subtraction
+        pinocchio::difference(model_, config.q(), model_.upperPositionLimit, delta_q_max_);
+        pinocchio::difference(model_, config.q(), model_.lowerPositionLimit, delta_q_min_);
+    
         int dim = static_cast<int>(indices_.size());
-        Eigen::VectorXd delta_q_max = pinocchio::difference(model_, config.q(), model_.upperPositionLimit);
-        Eigen::VectorXd delta_q_min = pinocchio::difference(model_, config.q(), model_.lowerPositionLimit);
-
-        Eigen::VectorXd p_max(dim), p_min(dim);
+        
         for (int i = 0; i < dim; ++i) {
-            p_max(i) = config_limit_gain_ * delta_q_max(indices_[i]);
-            p_min(i) = config_limit_gain_ * delta_q_min(indices_[i]);
+            int idx = indices_[i];
+            h_(i) = config_limit_gain_ * delta_q_max_(idx);
+            h_(dim + i) = -config_limit_gain_ * delta_q_min_(idx);
         }
-
-        Eigen::MatrixXd G(2 * dim, model_.nv);
-        G.topRows(dim) = projection_matrix_;
-        G.bottomRows(dim) = -projection_matrix_;
-
-        Eigen::VectorXd h(2 * dim);
-        h.head(dim) = p_max;
-        h.tail(dim) = -p_min;
-
-        return std::make_pair(G, h);
+    
+        return std::make_pair(G_, h_);
     }
 }

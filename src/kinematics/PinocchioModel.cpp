@@ -87,6 +87,10 @@ namespace torq {
         return J;
     }
 
+    void Configuration::jointJacobian(pinocchio::JointIndex j_id, Eigen::MatrixXd& j_buf) const {
+        pinocchio::getJointJacobian(model_, data_, j_id, pinocchio::LOCAL_WORLD_ALIGNED, j_buf);
+    }
+
     pinocchio::SE3 Configuration::getTransformFrameToWorld(const std::string& frame) const {
       if (!model_.existFrame(frame)){
         last_error_ = ErrorCode::FrameNotFound;
@@ -170,8 +174,7 @@ namespace torq {
         }
     }
 
-    bool KinematicsEngine::loadCollisionModel(const std::string& model_path,
-                                               const std::string& srdf_path) {
+    bool KinematicsEngine::loadCollisionModel(const std::string& model_path,const std::string& srdf_path) {
         if (!model_) {
             log_.error() << "[KinematicsEngine] Model must be loaded before collision model.";
             return false;
@@ -215,7 +218,6 @@ namespace torq {
         // form a red-black tree (ologn insert/find/erase)
         std::set<pinocchio::JointIndex> locked_set(locked_joint_ids_.begin(), locked_joint_ids_.end());
         
-        // njoints -> gives total number of joints    
         for (pinocchio::JointIndex j = 1; j < static_cast<pinocchio::JointIndex>(full_model_->njoints); ++j) {
             if (locked_set.count(j)) continue;
             // idx_q -> gives the starting index in the config vector q of joint j

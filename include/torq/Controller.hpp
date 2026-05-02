@@ -4,17 +4,23 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <Eigen/Dense>
+#include <Eigen/Core>
 
-#include "torq/InverseKinematics.hpp"
-#include "torq/Tasks.hpp"
-#include "torq/Limits.hpp"
-#include "torq/Barriers.hpp"
-#include "torq/HardwareInterface.hpp"
-#include "torq/PinocchioModel.hpp"
 #include "torq/logger.hpp"
 
 namespace torq{
+
+  class HardwareInterface;
+  class KinematicsEngine;
+  class Task;
+  class Limit;
+  class Barrier;
+  class FrameTask;
+  class PostureTask;
+  class DampingTask;
+  class VelocityLimit;
+  class ConfigurationLimit;
+  class InverseKinematics;
 
   /**
    * @brief Control mode for the Controller.
@@ -25,11 +31,7 @@ namespace torq{
   };
 
   /**
-   * @brief Centralised store for all tunable IK parameters with sensible defaults.
-   *
-   * Owned by the Controller. Library users get read-only access via
-   * RobotSystem::ikConfig(); runtime setters are called through RobotSystem
-   * (e.g. setFrameTaskPositionCost, setConfigLimitGain).
+   * @brief Centralised store for all tunable IK parameters
    *
    * @see @ref tuning_guide for detailed descriptions and tuning recipes.
    */
@@ -37,11 +39,11 @@ namespace torq{
     double frame_position_cost   = 1.0;   ///< FrameTask translational weight [cost/m].
     double frame_orientation_cost = 1.0;  ///< FrameTask rotational weight [cost/rad].
     double frame_gain            = 1.0;   ///< FrameTask gain \f$\alpha \in (0,1]\f$.
-    double frame_lm_damping      = 0.0;   ///< FrameTask Levenberg–Marquardt damping \f$\mu\f$.
+    double frame_lm_damping      = 0.5;   ///< FrameTask Levenberg–Marquardt damping \f$\mu\f$.
     double posture_cost          = 1e-3;  ///< PostureTask weight [cost/rad].
     double posture_gain          = 1.0;   ///< PostureTask gain \f$\alpha\f$.
-    double posture_lm_damping    = 0.0;   ///< PostureTask LM damping.
-    double damping_cost          = 1e-4;  ///< DampingTask weight [cost·s/rad].
+    double posture_lm_damping    = 0.5;   ///< PostureTask LM damping.
+    double damping_cost          = 1e-2;  ///< DampingTask weight [cost·s/rad].
     double solver_damping        = 1e-12; ///< Tikhonov damping \f$\lambda\f$ on the QP Hessian.
     double config_limit_gain     = 0.5;   ///< ConfigurationLimit gain \f$\gamma \in (0,1]\f$.
   };
@@ -74,6 +76,11 @@ namespace torq{
      */
     Controller(KinematicsEngine* kinematics, HardwareInterface* hardware);
     ~Controller();
+
+    Controller(const Controller&)            = delete;
+    Controller& operator=(const Controller&) = delete;
+    Controller(Controller&&)                 = delete;
+    Controller& operator=(Controller&&)      = delete;
 
     /** @brief Set the hardware interface after construction. Must outlive the Controller. */
     void setHardwareInterface(HardwareInterface* hardware) { hardware_ = hardware; }
@@ -116,7 +123,7 @@ namespace torq{
     /** @brief True if the gripper is currently open. */
     bool isGripperOpen() const { return gripper_open_; }
 
-    /** @brief Toggle gripper between open and closed. */
+    /** @brief Toggle gripper between open and closed */
     void toggleGripper();
 
     /**
@@ -159,10 +166,12 @@ namespace torq{
   private:
     void initIK();
 
+    void sendHardwareCommand(const Eigen::Ref<const Eigen::VectorXd>& q_cmd);
+
     KinematicsEngine* kinematics_;
     HardwareInterface* hardware_;
 
-    InverseKinematics ik_solver_;
+    std::unique_ptr<InverseKinematics> ik_solver_;
     IKConfig ik_config_;
 
     // Built-in tasks
@@ -178,12 +187,17 @@ namespace torq{
     Eigen::VectorXd target_joints_;
     bool ik_ready_ = false;
 
-    Eigen::VectorXd ik_configuration_;
+    Eigen::VectorXd reduced_configuration_;
     bool ik_config_initialized_ = false;
+
+    int gripper_actuator_idx_ = -1;
     double gripper_open_val_ = 0.0;
     double gripper_close_val_ = 0.0;
     bool gripper_open_ = true;
-    int gripper_actuator_idx_ = 0;
+
+    std::vector<Task*>  active_tasks_;
+    std::vector<Limit*> active_limits_;
+    Eigen::VectorXd     q_cmd_buffer_;
 
     Logger log_;
   };

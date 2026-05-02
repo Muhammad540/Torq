@@ -8,7 +8,7 @@
 #include <OsqpEigen/OsqpEigen.h>
 #include "torq/logger.hpp"
 
-namespace torq{
+namespace torq {
 
   class Configuration;
   class Task;
@@ -17,64 +17,41 @@ namespace torq{
 
   /**
    * @brief Assembled QP data ready to be passed to the solver.
-   *
-   * Holds the Hessian, gradient, and (optionally) inequality constraints
-   * that define the IK optimisation problem for a single tick.
-   *
-   * @see @ref qp_formulation for how these matrices are built.
    */
-  struct QPProblem{
-    Eigen::MatrixXd H; ///< Hessian matrix \f$P \in \mathbb{R}^{n_v \times n_v}\f$ (positive semi-definite).
-    Eigen::VectorXd c; ///< Linear gradient \f$c \in \mathbb{R}^{n_v}\f$.
-    Eigen::MatrixXd G; ///< Inequality constraint matrix \f$G \in \mathbb{R}^{m \times n_v}\f$.
-    Eigen::VectorXd h; ///< Inequality upper bound \f$h \in \mathbb{R}^{m}\f$ such that \f$G\,\Delta q \le h\f$.
-    bool has_constraints = false; ///< True if at least one limit contributed constraint rows.
+  struct QPProblem {
+    Eigen::MatrixXd H;            ///< Symmetric Hessian \f$P \in \mathbb{R}^{n_v \times n_v}\f$.
+    Eigen::VectorXd c;            ///< Linear gradient \f$c \in \mathbb{R}^{n_v}\f$.
+    Eigen::MatrixXd G;            ///< Inequality matrix \f$G \in \mathbb{R}^{m \times n_v}\f$.
+    Eigen::VectorXd h;            ///< Inequality upper bound \f$G \Delta q \le h\f$.
+    bool has_constraints = false;
   };
-  
+
   /**
-   * @brief QP-based differential inverse kinematics solver.
-   *
-   * Assembles a Quadratic Program from tasks (objective) and limits (constraints),
-   * then solves via OSQP.  The solver is warm-started across ticks: the sparsity
-   * pattern is set once and only numerical values are updated on subsequent calls.
+   * @brief QP-based differential inverse kinematics solver (OSQP).
    *
    * QP form:
    * \f[
    *   \min_{\Delta q}\;\tfrac{1}{2}\,\Delta q^\top P\,\Delta q + c^\top \Delta q
    *   \quad\text{s.t.}\quad G\,\Delta q \le h
    * \f]
+   * Returns \f$v = \Delta q / \Delta t\f$.
    *
-   * Returns a velocity \f$v = \Delta q / \Delta t\f$.
-   *
-   * @see @ref qp_formulation for the full mathematical derivation.
-   * @see Task, Limit, Configuration
+   * On any non-optimal OSQP exit on the constrained path, the solver returns
+   * zero velocity for safety. The unconstrained path still uses an LDLT solve
+   * because there are no inequality constraints to violate.
    */
-  class InverseKinematics{
+  class InverseKinematics {
   public:
     InverseKinematics() = default;
     ~InverseKinematics() = default;
 
-    /**
-     * @brief Build and solve the IK, returning the joint velocity.
-     *
-     * Assembles the QP internally, solves via OSQP, and returns the tangent-space
-     * velocity for this tick.
-     *
-     * @param config   Current robot configuration (will be updated in-place on success).
-     * @param tasks    Active tasks.
-     * @param dt       Integration timestep [s].
-     * @param damping  Tikhonov damping \f$\lambda\f$.
-     * @param limits   Active limits.
-     * @param barriers Active barriers.
-     * @return Joint velocity \f$v \in \mathbb{R}^{n_v}\f$, or zero on failure.
-     */
     Eigen::VectorXd solve(
-			  Configuration& config,
-			  const std::vector<Task*>& tasks,
-			  double dt,
-			  double damping = 1e-12,
-			  const std::vector<Limit*>& limits = {},
-			  const std::vector<Barrier*>& barriers = {});
+        Configuration& config,
+        const std::vector<Task*>& tasks,
+        double dt,
+        double damping = 1e-12,
+        const std::vector<Limit*>& limits = {},
+        const std::vector<Barrier*>& barriers = {});
 
   private:
     QPProblem buildIK(const Configuration& config,
@@ -91,20 +68,20 @@ namespace torq{
                     const Eigen::VectorXd& lower,
                     const Eigen::VectorXd& upper);
 
-    bool updateAndSolve(const Eigen::SparseMatrix<double>& H_sparse,
-                        const Eigen::VectorXd& c,
-                        const Eigen::SparseMatrix<double>& G_sparse,
-                        const Eigen::VectorXd& lower,
-                        const Eigen::VectorXd& upper);
+    OsqpEigen::ErrorExitFlag updateAndSolve(const Eigen::SparseMatrix<double>& H_sparse,
+                                            const Eigen::VectorXd& c,
+                                            const Eigen::SparseMatrix<double>& G_sparse,
+                                            const Eigen::VectorXd& lower,
+                                            const Eigen::VectorXd& upper);
 
-    static Eigen::SparseMatrix<double> toDenseSparse(const Eigen::MatrixXd& dense);
+    static Eigen::SparseMatrix<double> toDenseSparse(const Eigen::MatrixXd& dense, bool is_upper_triangular);
 
     OsqpEigen::Solver solver_;
     bool initialized_ = false;
-    int last_nv_ = 0;
-    int last_m_  = 0;
-    
-    mutable Logger log_;
+    int  last_nv_     = 0;
+    int  last_m_      = 0;
+
+    Logger log_;
   };
 
 } // namespace torq

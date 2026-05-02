@@ -3,17 +3,8 @@
 
 #include <cmath>
 #include <stdexcept>
-#include <algorithm>
-#include <numeric>
-#include <pinocchio/algorithm/geometry.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/collision/distance.hpp>
-#include <pinocchio/spatial/skew.hpp>
 
 namespace torq {
-
-    // ── Barrier base class ──
-
     Barrier::Barrier(int dim, double gain, double safe_displacement_gain)
         : dim_(dim)
         , gain_(Eigen::VectorXd::Constant(dim, gain))
@@ -28,47 +19,44 @@ namespace torq {
         , safe_displacement_gain_(safe_displacement_gain)
     {}
 
-    Eigen::VectorXd Barrier::computeSafeDisplacement(const Configuration& config) const {
-        return Eigen::VectorXd::Zero(config.nv());
+    void Barrier::computeSafeDisplacement(const Configuration& /*config*/, Eigen::Ref<Eigen::VectorXd> out_dq) const {
+        out_dq.setZero();
     }
 
-    std::pair<Eigen::MatrixXd, Eigen::VectorXd>
-    Barrier::computeQPInequalities(const Configuration& config, double dt) const {
-        Eigen::MatrixXd jac = computeJacobian(config);
-        Eigen::VectorXd barrier = computeBarrier(config);
-
-        Eigen::MatrixXd G = -jac / dt;
-
-        Eigen::VectorXd h(dim_);
-        for (int i = 0; i < dim_; ++i)
-            h(i) = gain_(i) * gain_function_(barrier(i));
-
-        return {G, h};
-    }
-
-    std::pair<Eigen::MatrixXd, Eigen::VectorXd>
-    Barrier::computeQPObjective(const Configuration& config) const {
+    void Barrier::updateQP(const Configuration& config, double dt) {
         int nv = config.nv();
-        Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nv, nv);
-        Eigen::VectorXd c = Eigen::VectorXd::Zero(nv);
-
-        if (safe_displacement_gain_ > 1e-6) {
-            Eigen::MatrixXd jac = computeJacobian(config);
-            Eigen::VectorXd safe_dq = computeSafeDisplacement(config);
-
-            double jac_sq_norm = jac.squaredNorm();
-            if (jac_sq_norm < 1e-12)
-                return {H, c};
-
-            double weight = safe_displacement_gain_ / jac_sq_norm;
-            H.diagonal().array() += weight;
-            c -= weight * safe_dq;
+    
+        if (!is_initialized_ || H_.rows() != nv) {
+            barrier_cache_.resize(dim_);
+            jac_cache_.resize(dim_, nv);
+            safe_dq_cache_.resize(nv);
+            G_.resize(dim_, nv);
+            h_qp_.resize(dim_);
+            H_.resize(nv, nv);
+            c_.resize(nv);
+            is_initialized_ = true;
         }
-
-        return {H, c};
+    
+        computeBarrier(config, barrier_cache_);
+        computeJacobian(config, jac_cache_);
+    
+        G_.noalias() = -jac_cache_ / dt;
+        for (int i = 0; i < dim_; ++i)
+            h_qp_(i) = gain_(i) * gain_function_(barrier_cache_(i));
+    
+        H_.setZero();
+        c_.setZero();
+    
+        if (safe_displacement_gain_ > 1e-6) {
+            double jac_sq_norm = jac_cache_.squaredNorm();
+            if (jac_sq_norm >= 1e-12) {
+                computeSafeDisplacement(config, safe_dq_cache_);
+                double weight = safe_displacement_gain_ / jac_sq_norm;
+                H_.diagonal().setConstant(weight);
+                c_.noalias() = -weight * safe_dq_cache_;
+            }
+        }
     }
-
-    // ── PositionBarrier ──
 
     PositionBarrier::PositionBarrier(const std::string& frame,
                                      const std::vector<int>& indices,
@@ -92,46 +80,47 @@ namespace torq {
         gain_ = Eigen::VectorXd::Constant(dim_, gain);
     }
 
-    Eigen::VectorXd PositionBarrier::computeBarrier(const Configuration& config) const {
+    void PositionBarrier::computeBarrier(const Configuration& config, Eigen::Ref<Eigen::VectorXd> out_h) const {
         Eigen::Vector3d pos = config.getTransformFrameToWorld(frame_).translation();
 
-        std::vector<double> vals;
-        vals.reserve(dim_);
-        if (p_min_.has_value()) {
-            for (size_t i = 0; i < indices_.size(); ++i)
-                vals.push_back(pos(indices_[i]) - (*p_min_)(i));
-        }
-        if (p_max_.has_value()) {
-            for (size_t i = 0; i < indices_.size(); ++i)
-                vals.push_back((*p_max_)(i) - pos(indices_[i]));
-        }
-        return Eigen::Map<Eigen::VectorXd>(vals.data(), dim_);
-    }
-
-    Eigen::MatrixXd PositionBarrier::computeJacobian(const Configuration& config) const {
-        Eigen::MatrixXd J_local = config.getFrameJacobian(frame_).topRows<3>();
-        Eigen::Matrix3d R = config.getTransformFrameToWorld(frame_).rotation();
-        Eigen::MatrixXd J_world = R * J_local;
-
-        int nv = config.nv();
-        int n_idx = static_cast<int>(indices_.size());
-        Eigen::MatrixXd J_sel(n_idx, nv);
-        for (int i = 0; i < n_idx; ++i)
-            J_sel.row(i) = J_world.row(indices_[i]);
-
-        Eigen::MatrixXd J(dim_, nv);
         int row = 0;
         if (p_min_.has_value()) {
-            J.middleRows(row, n_idx) = J_sel;
-            row += n_idx;
+            for (size_t i = 0; i < indices_.size(); ++i) {
+                out_h(row++) = pos(indices_[i]) - (*p_min_)(i);
+            }
         }
         if (p_max_.has_value()) {
-            J.middleRows(row, n_idx) = -J_sel;
+            for (size_t i = 0; i < indices_.size(); ++i) {
+                out_h(row++) = (*p_max_)(i) - pos(indices_[i]);
+            }
         }
-        return J;
     }
 
-    // ── BodySphericalBarrier ──
+    void PositionBarrier::computeJacobian(const Configuration& config, Eigen::Ref<Eigen::MatrixXd> out_J) const {
+        int nv = config.nv();
+        
+        if (J_world_.cols() != nv) J_world_.resize(3, nv);
+
+        auto J_local = config.getFrameJacobian(frame_).topRows<3>();
+        Eigen::Matrix3d R = config.getTransformFrameToWorld(frame_).rotation();
+        
+        // .noalias() avoids a temporary heap allocation for the matrix multiplication
+        J_world_.noalias() = R * J_local;
+
+        int row = 0;
+        int n_idx = static_cast<int>(indices_.size());
+        
+        if (p_min_.has_value()) {
+            for (int i = 0; i < n_idx; ++i) {
+                out_J.row(row++) = J_world_.row(indices_[i]);
+            }
+        }
+        if (p_max_.has_value()) {
+            for (int i = 0; i < n_idx; ++i) {
+                out_J.row(row++) = -J_world_.row(indices_[i]);
+            }
+        }
+    }
 
     BodySphericalBarrier::BodySphericalBarrier(const std::string& frame1,
                                                const std::string& frame2,
@@ -145,144 +134,37 @@ namespace torq {
     {
         if (d_min < 0.0)
             throw std::invalid_argument("Minimum distance must be non-negative.");
-        // Use h / (1 + |h|) gain function for smooth approach behaviour
+        
         gain_function_ = [](double h) { return h / (1.0 + std::abs(h)); };
     }
 
-    Eigen::VectorXd BodySphericalBarrier::computeBarrier(const Configuration& config) const {
+    void BodySphericalBarrier::computeBarrier(const Configuration& config, Eigen::Ref<Eigen::VectorXd> out_h) const {
         Eigen::Vector3d p1 = config.getTransformFrameToWorld(frame1_).translation();
         Eigen::Vector3d p2 = config.getTransformFrameToWorld(frame2_).translation();
-        Eigen::Vector3d diff = p1 - p2;
-        Eigen::VectorXd result(1);
-        result(0) = diff.squaredNorm() - d_min_ * d_min_;
-        return result;
+        
+        out_h(0) = (p1 - p2).squaredNorm() - (d_min_ * d_min_);
     }
 
-    Eigen::MatrixXd BodySphericalBarrier::computeJacobian(const Configuration& config) const {
-        Eigen::Vector3d p1 = config.getTransformFrameToWorld(frame1_).translation();
-        Eigen::Vector3d p2 = config.getTransformFrameToWorld(frame2_).translation();
+    void BodySphericalBarrier::computeJacobian(const Configuration& config, Eigen::Ref<Eigen::MatrixXd> out_J) const {
+        int nv = config.nv();
 
-        Eigen::MatrixXd J1_local = config.getFrameJacobian(frame1_).topRows<3>();
-        Eigen::Matrix3d R1 = config.getTransformFrameToWorld(frame1_).rotation();
-        Eigen::MatrixXd J1_world = R1 * J1_local;
-
-        Eigen::MatrixXd J2_local = config.getFrameJacobian(frame2_).topRows<3>();
-        Eigen::Matrix3d R2 = config.getTransformFrameToWorld(frame2_).rotation();
-        Eigen::MatrixXd J2_world = R2 * J2_local;
-
-        Eigen::Vector3d dh = 2.0 * (p1 - p2);
-        Eigen::MatrixXd J = dh.transpose() * (J1_world - J2_world);
-        return J;
-    }
-
-    // ── SelfCollisionBarrier ──
-
-    SelfCollisionBarrier::SelfCollisionBarrier(int n_collision_pairs,
-                                               double gain,
-                                               double safe_displacement_gain,
-                                               double d_min)
-        : Barrier(n_collision_pairs, gain, safe_displacement_gain)
-        , d_min_(d_min)
-    {
-        if (d_min < 0.0)
-            throw std::invalid_argument("Minimum distance must be non-negative.");
-        if (n_collision_pairs < 0)
-            throw std::invalid_argument("Number of collision pairs must be non-negative.");
-    }
-
-    Eigen::VectorXd SelfCollisionBarrier::computeBarrier(const Configuration& config) const {
-        if (!config.hasCollisionModel())
-            throw std::runtime_error("SelfCollisionBarrier requires a collision model in Configuration.");
-
-        const auto& collision_model = *config.collisionModel();
-        const auto& collision_data = *config.collisionData();
-        int n_pairs = static_cast<int>(collision_model.collisionPairs.size());
-
-        if (n_pairs < dim_)
-            throw std::runtime_error("Collision pairs (" + std::to_string(n_pairs) +
-                                     ") less than barrier dimension (" + std::to_string(dim_) + ").");
-
-        Eigen::VectorXd distances(n_pairs);
-        for (int k = 0; k < n_pairs; ++k)
-            distances(k) = collision_data.distanceResults[k].min_distance - d_min_;
-
-        // Find the dim_ closest (smallest distance) pairs
-        std::vector<int> idx(n_pairs);
-        std::iota(idx.begin(), idx.end(), 0);
-        std::partial_sort(idx.begin(), idx.begin() + dim_, idx.end(),
-            [&](int a, int b) { return distances(a) < distances(b); });
-
-        Eigen::VectorXd result(dim_);
-        for (int i = 0; i < dim_; ++i)
-            result(i) = distances(idx[i]);
-        return result;
-    }
-
-    Eigen::MatrixXd SelfCollisionBarrier::computeJacobian(const Configuration& config) const {
-        if (!config.hasCollisionModel())
-            throw std::runtime_error("SelfCollisionBarrier requires a collision model in Configuration.");
-
-        const auto& model = config.model();
-        const auto& data = config.data();
-        const auto& collision_model = *config.collisionModel();
-        const auto& collision_data = *config.collisionData();
-        int n_pairs = static_cast<int>(collision_model.collisionPairs.size());
-        int nv = model.nv;
-
-        Eigen::VectorXd distances(n_pairs);
-        for (int k = 0; k < n_pairs; ++k)
-            distances(k) = collision_data.distanceResults[k].min_distance;
-
-        std::vector<int> idx(n_pairs);
-        std::iota(idx.begin(), idx.end(), 0);
-        std::partial_sort(idx.begin(), idx.begin() + dim_, idx.end(),
-            [&](int a, int b) { return distances(a) < distances(b); });
-
-        Eigen::MatrixXd J = Eigen::MatrixXd::Zero(dim_, nv);
-
-        for (int i = 0; i < dim_; ++i) {
-            int k = idx[i];
-            const auto& cp = collision_model.collisionPairs[k];
-            const auto& dr = collision_data.distanceResults[k];
-
-            const auto& go1 = collision_model.geometryObjects[cp.first];
-            const auto& go2 = collision_model.geometryObjects[cp.second];
-
-            auto j1_id = go1.parentJoint;
-            auto j2_id = go2.parentJoint;
-
-            Eigen::Vector3d w1 = dr.nearest_points[0];
-            Eigen::Vector3d w2 = dr.nearest_points[1];
-
-            if ((w1 - w2).squaredNorm() < 1e-20)
-                continue;
-
-            Eigen::Vector3d n = (w1 - w2).normalized();
-            Eigen::Vector3d r1 = w1 - data.oMi[j1_id].translation();
-            Eigen::Vector3d r2 = w2 - data.oMi[j2_id].translation();
-
-            Eigen::MatrixXd J1(6, nv);
-            J1.setZero();
-            pinocchio::getJointJacobian(model, const_cast<pinocchio::Data&>(data),
-                                        j1_id, pinocchio::LOCAL_WORLD_ALIGNED, J1);
-
-            Eigen::RowVectorXd Jrow = n.transpose() * J1.topRows<3>()
-                                    + (pinocchio::skew(r1) * n).transpose() * J1.bottomRows<3>();
-
-            Eigen::MatrixXd J2(6, nv);
-            J2.setZero();
-            pinocchio::getJointJacobian(model, const_cast<pinocchio::Data&>(data),
-                                        j2_id, pinocchio::LOCAL_WORLD_ALIGNED, J2);
-
-            Jrow -= n.transpose() * J2.topRows<3>()
-                  + (pinocchio::skew(r2) * n).transpose() * J2.bottomRows<3>();
-
-            J.row(i) = Jrow;
+        if (J1_world_.cols() != nv) {
+            J1_world_.resize(3, nv);
+            J2_world_.resize(3, nv);
         }
 
-        // Replace NaN with zero (can occur at collision)
-        J = J.unaryExpr([](double v) { return std::isnan(v) ? 0.0 : v; });
-        return J;
-    }
+        auto J1_local = config.getFrameJacobian(frame1_).topRows<3>();
+        Eigen::Matrix3d R1 = config.getTransformFrameToWorld(frame1_).rotation();
+        J1_world_.noalias() = R1 * J1_local;
 
+        auto J2_local = config.getFrameJacobian(frame2_).topRows<3>();
+        Eigen::Matrix3d R2 = config.getTransformFrameToWorld(frame2_).rotation();
+        J2_world_.noalias() = R2 * J2_local;
+
+        Eigen::Vector3d p1 = config.getTransformFrameToWorld(frame1_).translation();
+        Eigen::Vector3d p2 = config.getTransformFrameToWorld(frame2_).translation();
+        Eigen::Vector3d dh = 2.0 * (p1 - p2);
+
+        out_J.noalias() = dh.transpose() * (J1_world_ - J2_world_);
+    }
 } // namespace torq

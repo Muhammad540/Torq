@@ -1,6 +1,8 @@
 #ifndef TORQ_LIMITS_HPP
 #define TORQ_LIMITS_HPP
 
+#include <iosfwd>
+#include <string>
 #include <vector>
 #include <optional>
 #include <utility>
@@ -59,12 +61,17 @@ namespace torq {
        */
       explicit VelocityLimit(const pinocchio::Model& model);
 
-      std::optional<std::pair<Eigen::MatrixXd, Eigen::VectorXd>> computeQPInequalities(const Configuration& config, double dt) const override;
+        std::optional<std::pair<Eigen::MatrixXd, Eigen::VectorXd>> computeQPInequalities(const Configuration& config, double dt) const override;
+
 
     private:
-      const pinocchio::Model& model_;
-      std::vector<int> indices_;
-      Eigen::MatrixXd projection_matrix_;
+        const pinocchio::Model& model_;
+        std::vector<int> indices_;
+
+        // pre-allocated 
+        Eigen::MatrixXd G_;          // Constant matrix [P; -P]
+        Eigen::VectorXd v_max_;      // Constant velocity limits
+        mutable Eigen::VectorXd h_;  // Buffer for dt * v_max
   };
 
   /**
@@ -100,7 +107,12 @@ namespace torq {
       const pinocchio::Model& model_;
       double config_limit_gain_;
       std::vector<int> indices_;
-      Eigen::MatrixXd projection_matrix_;
+
+      // pre-allocate
+      Eigen::MatrixXd G_;                   // Constant matrix [P; -P]
+      mutable Eigen::VectorXd delta_q_max_; // Buffer for max difference
+      mutable Eigen::VectorXd delta_q_min_; // Buffer for min difference
+      mutable Eigen::VectorXd h_;           // Buffer for scaled limits
   };
 
 } // namespace torq

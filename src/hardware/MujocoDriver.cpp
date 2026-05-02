@@ -78,8 +78,8 @@ namespace torq {
 
     void MujocoDriver::setJointPositions(const Eigen::Ref<const Eigen::VectorXd>& q){
         if (!model_ || !data_) return;
-	int n = static_cast<int>(q.size());
-	if (n > model_->nu){
+        int n = static_cast<int>(q.size());
+        if (n > model_->nu){
             logger.error() << "[MujocoDriver] Size mismatch. " << "Expected nu <= " << model_->nu << ", got " << n;
             return; 
         }

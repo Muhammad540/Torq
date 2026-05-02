@@ -7,9 +7,6 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
-
-static constexpr bool IK_ACTUAL_MOTION_DIAGNOSTICS = false;
-
 namespace torq {
     RobotSystem::RobotSystem() {
         kinematics_ = std::make_unique<KinematicsEngine>();
@@ -129,24 +126,7 @@ namespace torq {
 
     void RobotSystem::update() {
        if (hardware_ && kinematics_) {
-          Eigen::Vector3d pos_before;
-          Eigen::Vector3d pos_after;
-          std::string diag_frame;
-          bool capture_actual = false;
-          if (IK_ACTUAL_MOTION_DIAGNOSTICS && controller_ && controller_->ikReady()) {
-             diag_frame = end_effector_frame_;
-             pos_before = getFramePose(diag_frame).block<3, 1>(0, 3);
-             capture_actual = true;
-          }
-
           hardware_->step();
-
-          if (capture_actual) {
-             pos_after = getFramePose(diag_frame).block<3, 1>(0, 3);
-             Eigen::Vector3d actual_dp = pos_after - pos_before;
-             std::cout << "[IK diag] actual world dp (from prev cmd): ["
-                       << actual_dp.transpose() << "] dz=" << actual_dp(2) << std::endl;
-          }
 
           if (controller_ && active_control_) {
             std::vector<Task*> user_task_ptrs;
@@ -161,8 +141,6 @@ namespace torq {
             controller_->update(user_task_ptrs, user_limit_ptrs, user_barrier_ptrs);
           }
 
-          // Mirror real robot state into the display-only MuJoCo model so
-          // the GUI viewport reflects actual hardware joint positions.
           if (mujoco_display_mirror_) {
              Eigen::VectorXd q_real = hardware_->getJointPositions();
              int nq_display = mujoco_display_mirror_->getModel()->nq;
@@ -199,6 +177,12 @@ namespace torq {
         home_set_ = true;
         log_.info() << "[RobotSystem] Home position saved (" << home_position_.transpose() << ")";
       }
+    }
+
+    void RobotSystem::setHomePosition(const Eigen::VectorXd& home_position) {
+      home_position_ = home_position;
+      home_set_ = true;
+      log_.info() << "[RobotSystem] Home position saved (" << home_position_.transpose() << ")";
     }
 
     void RobotSystem::moveToHome() {
