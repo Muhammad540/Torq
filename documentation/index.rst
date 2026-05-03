@@ -1,17 +1,27 @@
-Torq
-====
+.. toctree::
+   :hidden:
+   :titlesonly:
+   :maxdepth: 2
+   :caption: Guide
 
-High-performance C++ robot control and training library.
-
-The API reference below is generated from the same Doxygen comments as the
-standalone HTML build (``doxygen Doxyfile``).
+   Quick start <pages/quickstart>
+   Architecture <pages/architecture>
+   QP formulation <pages/qp_formulation>
+   Tasks <pages/tasks>
+   Limits <pages/limits>
+   Barriers <pages/barriers>
+   Extending Torq <pages/extending>
+   Tuning guide <pages/tuning_guide>
+   Simulation to real <pages/sim_to_real>
+   Conventions <pages/conventions>
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Reference
+   :hidden:
+   :titlesonly:
+   :caption: API reference
 
-API
----
+   Full API index <pages/api>
 
-.. doxygenindex::
+.. doxygenpage:: index
    :project: Torq
+   :no-title:

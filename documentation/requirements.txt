@@ -1,3 +1,4 @@
 sphinx>=7.0,<9
-sphinx-rtd-theme>=2.0
+sphinx-wagtail-theme>=6.4
+sphinx-copybutton>=0.5
 breathe>=4.35.0

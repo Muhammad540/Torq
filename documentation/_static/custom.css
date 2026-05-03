@@ -1,0 +1,7 @@
+/* Breathe :no-title: still wraps the page in a desc <dl>; hide empty signature row. */
+.rst-content dl > dt.sig.sig-object.cpp:not(:has(.descname)) {
+  display: none;
+}
+.rst-content dl:has(> dt.sig.sig-object.cpp:not(:has(.descname))) > dd {
+  margin-left: 0;
+}
