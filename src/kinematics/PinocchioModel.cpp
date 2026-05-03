@@ -2,6 +2,7 @@
 #include "torq/utils.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <set>
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/mjcf.hpp>
@@ -125,7 +126,8 @@ namespace torq {
     }
     
     bool KinematicsEngine::initialize(const std::string& model_path,
-                                      const std::vector<std::string>& locked_joint_names) {
+                                      const std::vector<std::string>& locked_joint_names,
+                                      const std::optional<double>& joint_velocity_limit_rad_s) {
         try {
             log_.info() << "[KinematicsEngine] Loading model: " << model_path;
             full_model_ = std::make_unique<pinocchio::Model>();
@@ -163,6 +165,16 @@ namespace torq {
             } else {
                 model_ = std::make_unique<pinocchio::Model>(*full_model_);
                 log_.info() << "[KinematicsEngine] No joints locked, using full model";
+            }
+
+            if (joint_velocity_limit_rad_s.has_value()) {
+                const double lim = *joint_velocity_limit_rad_s;
+                if (lim > 0.0 && std::isfinite(lim)) {
+                    model_->velocityLimit.setConstant(lim);
+                    log_.info() << "[KinematicsEngine] Joint velocity limit override: " << lim << " rad/s (all DoF)";
+                } else {
+                    log_.warning() << "[KinematicsEngine] joint_velocity_limit_rad_s invalid; override skipped";
+                }
             }
 
             return true;

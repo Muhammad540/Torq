@@ -27,18 +27,15 @@ namespace torq {
   };
 
   /**
-   * @brief QP-based differential inverse kinematics solver (OSQP).
+   * @brief Differential IK via OSQP.
    *
-   * QP form:
-   * \f[
-   *   \min_{\Delta q}\;\tfrac{1}{2}\,\Delta q^\top P\,\Delta q + c^\top \Delta q
-   *   \quad\text{s.t.}\quad G\,\Delta q \le h
-   * \f]
-   * Returns \f$v = \Delta q / \Delta t\f$.
+   * Solves
+   * \f$\min_{\Delta q}\,\tfrac12 \Delta q^\top P\,\Delta q + c^\top \Delta q\f$
+   * s.t. \f$G\,\Delta q \le h\f$ and returns \f$v = \Delta q / \Delta t\f$.
+   * When there are no inequality constraints, falls back to a direct LDLT
+   * solve. On any non-optimal OSQP exit, returns zero velocity for safety.
    *
-   * On any non-optimal OSQP exit on the constrained path, the solver returns
-   * zero velocity for safety. The unconstrained path still uses an LDLT solve
-   * because there are no inequality constraints to violate.
+   * @see @ref qp_formulation
    */
   class InverseKinematics {
   public:

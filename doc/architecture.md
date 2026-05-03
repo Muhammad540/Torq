@@ -1,133 +1,93 @@
 # Architecture {#architecture}
 
-## System diagram
+Torq is structured around a single class, `torq::RobotSystem`, that
+owns every other component. The split between the **public API** and the **internal control stack** is deliberate: users never instantiate the `Controller` or `InverseKinematics` classes directly.
 
-Layered view of the Torq stack (top to bottom): inputs (scene, robot, config)
-→ models (Pinocchio, MuJoCo) → RobotSystem → subsystems (HAL, kinematics,
-controller, GUI) → output (commands, rendered frame).
+## System diagram
 
 \dotfile system_diagram.dot
 
-## Public API and ownership
+The data flow is one directional per tick:
 
-Library users interact only with @b torq::RobotSystem. The Controller and
-InverseKinematics classes are internal implementation details and are not
-exposed in the public API. All manipulation (setTaskSpaceTarget, addTask,
-addLimit, addBarrier, IK tuning, update) goes through RobotSystem.
+1. `RobotSystem::update()` calls `HardwareInterface::step()` (advance physics
+   or read data from the hardware).
+2. The current joint state is wrapped in a `Configuration` (Pinocchio FK).
+3. Each active **Task** contributes \f$(H_i, c_i)\f$ to the QP objective;
+   each **Limit** and **Barrier** contributes inequality rows
+   \f$(G_j, h_j)\f$.
+4. `InverseKinematics::solve()` calls OSQP and returns \f$\Delta q\f$.
+5. \f$q \leftarrow q \oplus \Delta q\f$ (manifold integration) and the new
+   target is sent back to the hardware.
 
-### Ownership hierarchy
+Each update call advances the system by exactly one timestep (`HardwareInterface::getTimestep()`).
 
-| Owner | Owns | Notes |
-|-------|------|--------|
-| **RobotSystem** | `HardwareInterface`, `KinematicsEngine`, `Controller` | Sole owner of main components. |
-| **RobotSystem** | User-added tasks, limits, barriers | Objects passed to `addTask()` / `addLimit()` / `addBarrier()` are owned by RobotSystem and destroyed on `remove*()` or when RobotSystem is destroyed (passed as `unique_ptr`). |
-| **Controller** | `InverseKinematics` solver | Created and used internally. |
-| **Controller** | Built-in tasks: `FrameTask`, `PostureTask`, `DampingTask` | Created lazily on first `setTaskSpaceTarget()`. |
-| **Controller** | Built-in limits: `VelocityLimit`, `ConfigurationLimit` | Same lifecycle as built-in tasks. |
-| **Controller** | Does @e not own user tasks/limits/barriers | These are passed in each tick by RobotSystem and owned by RobotSystem. |
-
-This separation avoids memory leaks and use-after-free: user-added objects
-have a single owner (RobotSystem), and the Controller never stores raw
-pointers to them across ticks.
+---
 
 ## Class hierarchy
 
-### Core
-
-- @b torq::RobotSystem : Single entry point for all robot operations. Owns
-  `HardwareInterface`, `KinematicsEngine`, `Controller`, and any user-added
-  tasks/limits/barriers. Exposes manipulation, IK tuning, and `update()`.
-- @b torq::Controller : Internal. Manages control modes (`JOINT_SPACE`, `TASK_SPACE`),
-  owns the IK solver and built-in task/limit instances, holds `IKConfig`.
-  Invoked only by RobotSystem; receives user task/limit/barrier pointers each tick.
-- @b torq::InverseKinematics : Internal. Assembles the QP from tasks, limits, and barriers; delegates to OSQP.
-
-### Kinematics
-
-- @b torq::KinematicsEngine : Loads URDF or MJCF, builds full and reduced Pinocchio models.
-- @b torq::Configuration : Immutable snapshot of the robot state at a given \f$q\f$.
-  Provides frame transforms, Jacobians, CoM computation, collision queries,
-  and manifold-aware integration. See @ref conventions for manifold operations.
-
-### Tasks (QP objective) — see @ref tasks_page
-
-- @b torq::Task (abstract) : defines `computeError()`, `computeJacobian()`, `computeQPObjective()`.
-  - @b torq::FrameTask : Regulate end-effector SE(3) pose (built-in).
-  - @b torq::PostureTask : Regulate joint angles toward a reference (built-in).
-  - @b torq::DampingTask : Penalise joint velocities (built-in).
-  - @b torq::ComTask : Centre-of-mass regulation.
-  - @b torq::RelativeFrameTask : Pose of one frame relative to another.
-  - @b torq::LinearHolonomicTask : General linear constraint \f$A(q_0 \ominus q) = b\f$.
-  - @b torq::JointCouplingTask : Couple joint angles via ratios (extends `LinearHolonomicTask`).
-  - @b torq::JointVelocityTask : Track reference joint velocities.
-  - @b torq::LowAccelerationTask : Minimise joint accelerations.
-
-  Use `RobotSystem::addTask()` for any user tasks (e.g. humanoids, quadrupeds).
-
-### Limits (QP inequality constraints) — see @ref limits_page
-
-- @b torq::Limit (abstract) : defines `computeQPInequalities()`.
-  - @b torq::VelocityLimit, @b torq::ConfigurationLimit : Built-in.
-  - Custom subclasses of @b torq::Limit : Optional extra inequality rows; add via `RobotSystem::addLimit()`.
-
-### Barriers (CBF inequality + optional objective) — see @ref barriers_page
-
-- @b torq::Barrier (abstract) : defines `computeBarrier()`, `computeJacobian()`, `computeQPInequalities()`, `computeQPObjective()`.
-  - @b torq::PositionBarrier : Cartesian position bounds on a frame.
-  - @b torq::BodySphericalBarrier : Minimum distance between two frames.
-  - @b torq::SelfCollisionBarrier : Self-collision avoidance via geometry model.
-
-  All barriers are added via `RobotSystem::addBarrier()` and owned by RobotSystem.
-
-### Hardware abstraction
-
-- @b torq::HardwareInterface (abstract) : `connect`, `step`, `getJointPositions`, `setJointPositions`, …
-  - @b torq::MujocoDriver : Simulation backend wrapping `mjModel` / `mjData`.
-  - @b torq::ServoDriver : Serial servo communication (ST3215/STS/SMS) for real robots.
-
-### GUI
-
-- @b torq::Gui : ImGui + GLFW + OpenGL3 docking interface. Panels for joint control,
-  Cartesian jog, IK parameter tuning, and a 3D viewport rendering MuJoCo scenes.
-
-## Ownership diagram
-
-The following diagram shows ownership relations: RobotSystem owns the main
-subsystems and any user-added tasks/limits/barriers; Controller owns only the
-IK solver and built-in task/limit instances (no direct exposure to library users).
-
 \dotfile ownership_diagram.dot
 
-## How often to call `update()`
+| Layer | Class | Role |
+|-------|-------|------|
+| Orchestrator | @ref torq::RobotSystem | Single entry point. Owns everything below. |
+| Control | @ref torq::Controller | Holds built in tasks/limits, runs the IK loop. |
+| Solver | @ref torq::InverseKinematics | Builds the QP and calls OSQP. |
+| Kinematics | @ref torq::KinematicsEngine, @ref torq::Configuration | Pinocchio model and per tick FK snapshot. |
+| Hardware | @ref torq::HardwareInterface (abstract) | Driver agnostic state and command API. |
+| Driver | @ref torq::MujocoDriver, @ref torq::ServoDriver | Simulation and serial bus implementations. |
+| GUI | @ref torq::Gui | ImGui + MuJoCo viewport, joint and IK tuning panels. |
 
-Torq does not enforce a call rate: your `while` loop, timer, or GUI frame
-decides how often `RobotSystem::update()` runs. Faster calls give smoother
-closed-loop behaviour; each call still advances the simulation (or hardware
-I/O) by **one** integration step whose length is `getTimestep()` from the
-model or driver, not the wall time between your calls.
+### Tasks, Limits, Barriers
 
-- **User input** (e.g. GUI jog): often display-rate or event-driven.
-- **Hardware / simulation step**: one step per `update()`; timestep is set in the MJCF/XML or the real driver.
-- **Joint controller (real hardware)**: internal to the servo. Torq sends position setpoints each time you call `update()` while active control is on.
+All three follow the same pattern: an abstract base + a few concrete
+implementations. Users compose them by passing `unique_ptr` into
+`RobotSystem::addTask` / `addLimit` / `addBarrier`.
 
-## Data flow per tick
+| Base | Built-in concrete classes | User extends? |
+|------|---------------------------|---------------|
+| @ref torq::Task | `FrameTask`, `PostureTask`, `DampingTask` | Yes — see @ref extending_page |
+| @ref torq::Limit | `VelocityLimit`, `ConfigurationLimit` | Yes |
+| @ref torq::Barrier | `PositionBarrier`, `BodySphericalBarrier` | Yes |
 
-1. The application calls `RobotSystem::update()`.
-2. `HardwareDriver::step()` advances the physics by one timestep (applying the previous tick's commands).
-3. In TASK_SPACE, the Controller uses its **internal kinematic state** (not the physics state) to build a `Configuration`.
-4. Each @b Task computes its error \f$e_i(q)\f$ and Jacobian \f$J_i(q)\f$ from that `Configuration`.
-5. Each @b Limit computes its inequality rows \f$(G_j, h_j)\f$ from the `Configuration` and \f$\Delta t\f$.
-6. Each @b Barrier computes its inequality rows and optional objective terms from the `Configuration`.
-7. `InverseKinematics::solve()` assembles the QP (tasks + barriers → objective; limits + barriers → constraints) and calls OSQP.
-8. The resulting \f$\Delta q\f$ is integrated on the manifold using `pinocchio::integrate`:
-   \f$q_{\text{new}} = q \oplus \Delta q\f$. This correctly handles quaternion joints (floating base) by using exponential integration, while reducing to simple addition for revolute/prismatic joints. See @ref conventions for details.
-9. The new \f$q\f$ is stored as the internal kinematic state and written to the hardware interface as the next commanded position.
+`FrameTask`, `PostureTask`, `DampingTask`, `VelocityLimit` and
+`ConfigurationLimit` are created automatically by the `Controller` the first
+time you call `setTaskSpaceTarget`. Anything you add via `addTask` etc. is
+appended on top each tick.
+
+---
+
+## Simulation integration
+
+Simulation is implemented through `MujocoDriver`, an implementation of
+`HardwareInterface` that wraps `mjModel` / `mjData`. Three modes are
+supported:
+
+- @b Pure @b simulation
+- @b Real @b hardware
+- @b Real @b hardware @b + @b sim @b visualization
+
+---
 
 ## Adding a new robot
 
-1. Place model files (URDF/MJCF + meshes) under `workspace/models/`.
-2. Create `workspace/<name>/src/main.cpp` — fill a `torq::RobotConfig` and run the loop.
-3. Add `workspace/<name>/CMakeLists.txt` with `target_link_libraries(<name> PRIVATE torq)`.
-4. Add `add_subdirectory(workspace/<name>)` to the root `CMakeLists.txt`.
+Three working examples are provided that can be used as a template for a new robot:
 
-See @ref quickstart_page for a step-by-step walkthrough.
+| Folder | Robot | Notes |
+|--------|-------|-------|
+| `workspace/panda/`     | Franka Emika Panda 7-DOF arm | Pure simulation |
+| `workspace/arm_ur5e/`  | Universal Robots UR5e        | Pure simulation |
+| `workspace/so101/`     | SO-101 6-DOF arm             | Sim or real (ST3215 servos) |
+
+To bring up a new robot:
+
+1. Add the model files (URDF/MJCF + meshes) into `workspace/models/<name>/`.
+2. Copy a workspace folder
+   `workspace/<name>/` and update the `src/main.cpp` file:
+   - `scene_path`         → MuJoCo scene XML (for sim and visualization)
+   - `robot_model_path`   → URDF or MJCF for kinematics
+   - `end_effector_frame` → frame name in your URDF that you want to control
+   - `locked_joints`      → joints to freeze (e.g. fingers)
+3. Add `add_subdirectory(workspace/<name>)` to the root `CMakeLists.txt`.
+4. Build and run the example.
+
+For real hardware, set `driver_type = "serial_servo"` and provide a calibration file. See @ref sim_to_real.

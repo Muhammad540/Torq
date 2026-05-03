@@ -42,7 +42,8 @@ namespace torq {
             log_.error() << "[RobotSystem] Failed to connect Hardware";
             return false;
         }
-        if (!kinematics_->initialize(config.robot_model_path, config.locked_joints)) {
+        if (!kinematics_->initialize(config.robot_model_path, config.locked_joints,
+                                    config.joint_velocity_limit_rad_s)) {
             log_.error() << "[RobotSystem] Failed to initialize the Kinematics Engine";
             return false;
         }

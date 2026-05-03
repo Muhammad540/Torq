@@ -7,19 +7,17 @@
 namespace torq {
 
     /**
-     * @brief Abstract hardware abstraction layer for any robot driver (simulation or real).
+     * @brief Driver agnostic robot interface (simulation or real hardware).
      *
-     * All control and kinematics code targets this interface.  Swapping the
-     * concrete implementation (e.g. MujocoDriver → a real hardware driver)
-     * enables sim-to-real transfer without touching control logic.
+     * Swap the concrete implementation (e.g. MujocoDriver ↔ ServoDriver)
+     * for sim to real with no other code changes.
      *
-     * Two "spaces" are exposed:
-     * - **State space** (`getJointPositions` / `getJointVelocities`): \f$q \in \mathbb{R}^{n_q}\f$,
-     *   \f$\dot{q} \in \mathbb{R}^{n_v}\f$.
-     * - **Actuator command space** (`setJointPositions` / `setJointVelocities`, `getCtrl`):
-     *   may differ from state space (e.g. underactuated systems, gear ratios).
+     * - State space: `getJointPositions` / `getJointVelocities` return
+     *   \f$q \in \mathbb{R}^{n_q}\f$ and \f$\dot q \in \mathbb{R}^{n_v}\f$.
+     * - Command space: `setJointPositions` / `setJointVelocities`,
+     *   `getCtrl` operate on \f$n_u\f$ actuator values.
      *
-     * @see MujocoDriver
+     * @see MujocoDriver, ServoDriver
      */
     class HardwareInterface{
         public:

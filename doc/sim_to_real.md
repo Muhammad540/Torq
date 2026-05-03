@@ -1,138 +1,100 @@
-# Sim-to-real with Torq {#sim_to_real}
+# Simulation to real {#sim_to_real}
 
-Torq is designed so that the same control code (IK, tasks, limits, barriers) runs in simulation and on real hardware. You switch only the **HardwareInterface** implementation.
+The same control loop drives a MuJoCo simulation or a real robot. Only one
+field changes: `RobotConfig::driver_type`.
 
-## Architecture
+| Driver | `driver_type` | What `connect()` expects |
+|--------|---------------|--------------------------|
+| @ref torq::MujocoDriver "MujocoDriver" | `"mujoco"`       | Path to the MJCF scene (`scene_path`). |
+| @ref torq::ServoDriver "ServoDriver"   | `"serial_servo"` | Path to a calibration file (`robot_calib_file`). |
 
-- **Simulation:** `MujocoDriver` implements `HardwareInterface`; `connect(config_path)` loads an MJCF scene; `getJointPositions()` / `setJointPositions()` use MuJoCo state and `ctrl`.
-- **Real robot:** `ServoDriver` implements `HardwareInterface`; `connect(config_path)` opens the serial port (or parses a config file) and talks to ST/STS/SMS servos (e.g. ST3215) via the SCServo protocol; same get/set API.
+Both implement @ref torq::HardwareInterface so every other component
+(kinematics, IK, GUI, your tasks) works unchanged.
 
-`RobotSystem` owns a single `HardwareInterface*`. You choose the driver via **RobotConfig**:
+---
 
-- `driver_type = "mujoco"`: use `MujocoDriver`; `connect(scene_path)`.
-- `driver_type = "serial_servo"`: use `ServoDriver`; `connect(driver_connection)` where `driver_connection` is the serial port (e.g. `/dev/ttyUSB0`) or a path to a driver config file (e.g. `workspace/so101/so101.conf`).
+## ServoDriver: ST/STS/SMS bus servos
 
-The same URDF, limits, barriers, and IK parameters can be used in both cases. Tune limits and barriers **stricter** for the real robot so the commanded motion is safe.
+Currently supports the SCServo half duplex protocol used by Waveshare /
+Feetech ST/STS/SMS series (e.g. ST3215). The driver opens a POSIX serial
+port, runs `SyncRead` / `SyncWrite` cycles, and converts encoder ticks ↔
+radians per joint via the calibration file.
 
-## Real robot: ServoDriver (ST3215 / ST/STS/SMS)
+```
+ServoDriver           // HardwareInterface, radian conversion
+└── SMS_STS_Port      // ST/STS/SMS protocol, memory map, sync read/write
+    └── SCSPort       // Transport (POSIX serial today)
+```
 
-The **ServoDriver** supports ST/STS/SMS series servos (e.g. Waveshare/Feetech ST3215) using the SCServo protocol: 1 Mbps serial, 12-bit position 0–4095, 360° absolute. Used for the SO101 arm with 6× ST3215 servos. The driver uses a bottom-up stack: **SCSPort** (transport, POSIX serial; extensible to ESP32) → **SMS_STS_Port** (protocol, memory map, SyncWrite/Read) → **ServoDriver** (config, radian conversion, HardwareInterface). See `ServoDriver.hpp` and `include/torq/scservo/` for details.
+---
 
-### Connection
-
-- **Option A — port only:** Set `driver_connection` to the serial port (e.g. `/dev/ttyUSB0` on Linux, `COM3` on Windows). ServoDriver uses ST3215 defaults: baud 1000000, control_period 0.002, servo IDs 1–6.
-- **Option B — config file:** Use a small key=value config file and set `driver_connection` to its path. File extension must be `.json`, `.yaml`, or `.conf` to be parsed; otherwise the string is treated as the port path. Supported keys (one per line, `key=value`; lines without `=` are ignored):
-
-  | Key              | Type   | Effect                                | Default    |
-  |------------------|--------|----------------------------------------|------------|
-  | port             | string | Serial device path                     | (required in file) |
-  | baud_rate        | int    | Baud rate                              | 1000000    |
-  | protocol         | string | Protocol label                         | "st3215"   |
-  | control_period   | double | Timestep [s] for step() / getTimestep()| 0.002      |
-  | default_speed    | int    | Speed used in SYNC WRITE               | 2000       |
-  | servo_ids        | string | Space-separated IDs in joint order     | 1 2 3 4 5 6 |
-
-  Other `SerialServoConfig` fields (position_min, position_max, position_scale, position_zero, default_time) are not read from the file; they stay at ST3215 defaults. Use `ServoDriver::config()` after connect to inspect the resolved config.
-
-Example `so101.conf`:
+## Calibration file (currently used for the SO101 robot)
+NOTE: this section is specific to the SO101 robot.
+The calibration file uses a small key=value header with one row per joint
+in joint order.
 
 ```text
-port=/dev/ttyUSB0
+port=/dev/ttyACM0
 baud_rate=1000000
-servo_ids=1 2 3 4 5 6
+# joint_index servo_id joint_name direction raw_center raw_min raw_max
+0 1 shoulder_pan   1 2048  718 3412
+1 2 shoulder_lift  1 2048  848 3263
+2 3 elbow_flex     1 2048  852 3065
+3 4 wrist_flex     1 2048  854 3184
+4 5 wrist_roll     1 2048    0 4095
+5 6 gripper        1 2048 1786 3240
 ```
 
-### SO101 real robot example
+| Header key | Default | Notes |
+|------------|---------|-------|
+| `port`           | required | Serial device path |
+| `baud_rate`      | 1000000 | |
+| `control_period` | 0.002 s | Returned by `getTimestep()` |
+| `default_speed`  | 2000   | SyncWrite speed register |
 
-Use the same URDF and end-effector frame as in sim; only the driver and connection change:
+Joint rows are positional: each `raw_center` defines the encoder reading
+that corresponds to the URDF zero. For the gripper the calibration uses
+`raw_min` / `raw_max` as anchors (asymmetric jaw); other joints anchor
+about `raw_center`.
 
-```cpp
-torq::RobotConfig config;
-config.robot_model_path = "path/to/so101_new_calib.urdf";
-config.end_effector_frame = "gripper_frame_link";
-config.locked_joints = {"gripper"};
+---
 
-config.driver_type = "serial_servo";
-config.driver_connection = "/dev/ttyUSB0";  // or path to so101.conf
-config.active_control = false;  // passive: read only, mirror to GUI
+## Real robot example
 
-torq::RobotSystem robot;
-if (!robot.initialize(config)) {
-    // handle error (e.g. port not found, servos not responding)
-    return 1;
-}
-
-while (running) {
-    robot.update();
-}
-```
-
-### GUI with real robot (display mirror)
-
-When using `driver_type = "serial_servo"`, if you also provide `scene_path` pointing to the MuJoCo scene XML, `RobotSystem` loads a **display-only** MuJoCo model alongside the real hardware driver. Each `update()` call copies the real robot's joint positions into this model via `overrideJointPositions()` (no physics step — purely kinematic). The GUI then renders from this display model, so the 3D viewport shows the real robot's actual pose.
+Same code as a simulation example, with three lines changed:
 
 ```cpp
-torq::RobotConfig config;
-config.robot_model_path   = "path/to/so101_new_calib.urdf";
-config.scene_path         = "path/to/SO101/scene.xml";   // enables GUI display mirror
-config.end_effector_frame = "gripper_frame_link";
-config.locked_joints      = {"gripper"};
+torq::RobotConfig cfg;
+cfg.scene_path         = "workspace/models/SO101/scene.xml";   // optional, for GUI
+cfg.robot_model_path   = "workspace/models/SO101/so101_new_calib.urdf";
+cfg.end_effector_frame = "gripper_frame_link";
+cfg.locked_joints      = {"gripper"};
 
-config.driver_type        = "serial_servo";
-config.driver_connection  = "/dev/ttyUSB0";  // or path to so101.conf
-config.active_control     = false;
+cfg.driver_type        = "serial_servo";
+cfg.robot_calib_file   = "workspace/so101/calibration/calibration.txt";
+cfg.active_control     = false;   // start passive, read only
 
 torq::RobotSystem robot;
-robot.initialize(config);
+robot.initialize(cfg);
 
 torq::Gui gui;
-gui.initialize(&robot, "SO101 Real");   // mujocoVisualizationDriver() is the display model
+gui.initialize(&robot, "SO-101 (real)");
 
 while (gui.windowIsOpen()) {
-    robot.update();   // reads real servos, optionally runs IK, mirrors state to display model
+    robot.update();
     gui.render();
 }
 ```
 
-If `scene_path` is omitted, `mujocoVisualizationDriver()` returns null and the GUI 3D view is unavailable; you can still run headless or with a minimal UI.
+If `scene_path` is provided alongside the real driver, Torq loads a display only MuJoCo model. The GUI mirrors the real joint positions into it so you see the robot in 3D. No physics step is taken on the mirror.
 
-### Passive mode (display only, move by hand)
+---
 
-You do **not** need to enable active control immediately. Use **passive mode** to move the robot by hand and see its pose in the GUI; when satisfied, enable active control to send commands.
+## Active vs passive control
 
-- **At startup:** set `config.active_control = false` (default is false). Set to `true` to command the robot from the first update.
-- **At runtime:** call `robot.setActiveControl(false)` to stop sending commands, or `robot.setActiveControl(true)` to enable. The GUI shows an "Active control" checkbox in the Joint Control panel when connected to a real robot; uncheck to enter passive mode, check to enable control.
+- @b Passive (`active_control = false`): `update()` reads encoders and
+  mirrors them to the GUI but sends no commands. Good for verifying calibration.
+- @b Active (`active_control = true`): IK runs and position targets are
+  written to the hardware.
 
-In passive mode, `update()` still calls `hardware_->step()` (ServoDriver reads positions from the bus), then mirrors `hardware_->getJointPositions()` into the display model. No position or velocity commands are sent because `controller_->update()` is not called.
-
-### Calibration and joint/velocity limits
-
-You do **not** need to calibrate the real robot before using Torq for basic operation. Recommended approach:
-
-- **Joint limits (position):** Use the **same URDF** as in simulation. The Pinocchio model and **ConfigurationLimit** take joint min/max from the URDF, so the IK will not command positions outside that range. The driver converts encoder raw (0–4095) to radians via `position_zero` and `position_scale` in `SerialServoConfig`; these use ST3215 defaults (centre 2047.5, scale 2π/4096). They are not currently read from the .conf file; for a custom mapping you would set them in code or extend the config parser.
-- **Velocity limits:** Set in the **VelocityLimit** (or in the model) to safe values for the ST3215 (see the servo datasheet for max speed). This keeps the IK from commanding unrealistic velocities. No separate "calibration" step is required; use conservative limits at first and tune if needed.
-
-So: start with the same URDF and limits as in sim; optionally tighten velocity from the ST3215 manual; adjust position_zero/position_scale only if you notice a constant offset (via code or a future config key).
-
-### ST/STS/SMS protocol (SCSPort + SMS_STS_Port)
-
-ServoDriver uses the in-tree **SCSPort** and **SMS_STS_Port** layers (see `include/torq/scservo/SCSPort.hpp`, `SMS_STS_Port.hpp`). SCSPort implements the SCS virtual read/write interface over a POSIX serial fd (Linux/macOS); the same interface can be implemented on ESP32 with an UART driver. SMS_STS_Port provides the ST/STS/SMS memory map and instructions: goal position, present position, torque enable, SyncWritePosEx, ReadPos, Ping, etc. Packet layout matches the SCServo/Waveshare manual: header `0xFF 0xFF`, instructions READ, WRITE, SYNC WRITE, SYNC READ; register addresses (e.g. goal at ACC 41, present position at 56–57) as in `SMS_STS_Port.hpp`. No Arduino dependency; the stack runs on the host and can be extended to embedded by swapping the transport in SCSPort.
-
-## Limits and barriers for real hardware
-
-To avoid dangerous velocities and torques on the real robot:
-
-1. **VelocityLimit** — Ensure the model or the limit configuration uses safe max velocities (rad/s) for each joint. The ST3215 has limited speed; keep commanded velocity within spec.
-2. **ConfigurationLimit** — Use the same joint limits as in the URDF; the IK will not command outside `[q_min, q_max]`. Tune `config_limit_gain` (e.g. 0.3–0.5) so the robot slows down before hitting limits.
-3. **Barriers** — Use **PositionBarrier** (e.g. workspace bounds, CoM height) or **BodySphericalBarrier** (minimum distance between links) to keep the robot away from unsafe regions. Add via `RobotSystem::addBarrier()`.
-
-The servos (e.g. ST3215) usually have internal position (and sometimes velocity) control. Torq sends **position setpoints** whenever `update()` runs with active control; the servo's internal controller tracks them. So the "output" from Torq is desired joint positions; the HAL turns that into serial commands. Limiting the IK output (velocity, configuration, optional custom limits and barriers) keeps those setpoints safe.
-
-## Checklist for real robot
-
-- [ ] Same URDF (and calibration) as in sim.
-- [ ] Correct serial port and baud rate; servo IDs in joint order (e.g. via `driver_connection` or .conf).
-- [ ] Velocity limits set (model or limit config) to safe values.
-- [ ] Configuration limits (and any optional custom limits) enabled as needed.
-- [ ] Optional barriers for workspace or self-collision.
-- [ ] Emergency stop or disable path independent of Torq (hardware or watchdog).
+---

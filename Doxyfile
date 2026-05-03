@@ -1,9 +1,9 @@
-# Doxyfile for Torq — High performance C++ robot control and training framework
+# Doxyfile for Torq — High performance C++ robot control and training library
 # Generate with: doxygen Doxyfile
 
 PROJECT_NAME           = "Torq"
 PROJECT_NUMBER         = "0.1"
-PROJECT_BRIEF          = "High performance C++ robot control and training framework"
+PROJECT_BRIEF          = "High performance C++ robot control and training library"
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = docs
 

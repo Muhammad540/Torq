@@ -4,8 +4,8 @@
 #include "torq/logger.hpp"
 #include "torq/utils.hpp"
 
-#include <optional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -23,13 +23,11 @@
 namespace torq {
 
     /**
-     * @brief Snapshot of a robot configuration with pre-computed forward kinematics.
+     * @brief Per tick snapshot of a configuration with FK already computed.
      *
-     * A Configuration holds a Pinocchio Model reference and a Data instance where
-     * FK has been computed for a given \f$q\f$.  It provides frame transforms,
-     * Jacobians, and manifold-aware integration.
-     *
-     * Configurations are created by KinematicsEngine::makeConfiguration().
+     * Holds a reference to a Pinocchio Model and a per instance Data.
+     * Provides frame transforms, Jacobians, and manifold aware integration.
+     * Created via KinematicsEngine::makeConfiguration().
      *
      * @see KinematicsEngine
      */
@@ -158,12 +156,11 @@ namespace torq {
 	};
   
     /**
-     * @brief Loads and owns the Pinocchio model; creates Configuration objects.
+     * @brief Loads / owns the Pinocchio model and produces Configurations.
      *
-     * Supports loading from both URDF (.urdf) and MJCF (.xml) files.
-     * Joints listed in `locked_joint_names` are frozen via
-     * `pinocchio::buildReducedModel` so that IK only operates on the
-     * remaining actuated DOFs.
+     * Supports URDF (.urdf) and MJCF (.xml). Joints in `locked_joint_names`
+     * are frozen via `pinocchio::buildReducedModel` so IK operates only on
+     * the remaining actuated DOFs.
      *
      * @see Configuration
      */
@@ -174,22 +171,24 @@ namespace torq {
 
             /**
              * @brief Load a model and optionally lock named joints.
-             * @param model_path         Path to a URDF or MJCF file.
-             * @param locked_joint_names Joint names to freeze in the reduced model.
+             * @param model_path                   Path to a URDF or MJCF file.
+             * @param locked_joint_names           Joint names to freeze in the reduced model.
+             * @param joint_velocity_limit_rad_s   If set and finite and > 0, fills every entry of the reduced model's `velocityLimit`.
              * @return True on success.
              */
-            bool initialize(const std::string& model_path, const std::vector<std::string>& locked_joint_names = {});
+            bool initialize(const std::string& model_path,
+                            const std::vector<std::string>& locked_joint_names = {},
+                            const std::optional<double>& joint_velocity_limit_rad_s = std::nullopt);
 
             /**
              * @brief Load collision geometry from a URDF or MJCF file.
              *
-             * Call after initialize().  The geometry model is used by
-             * SelfCollisionBarrier.  Optionally load an SRDF to filter
-             * collision pairs.  File type is auto-detected by extension
-             * (.urdf vs .xml).
+             * Call after initialize(). File type is auto-detected by
+             * extension (.urdf vs .xml). Reserved for future collision-aware
+             * barriers and planners.
              *
-             * @param model_path Path to the URDF or MJCF file with collision geometry.
-             * @param srdf_path  Optional SRDF file for collision pair filtering. Empty = use all pairs.
+             * @param model_path Path to the URDF / MJCF with collision geometry.
+             * @param srdf_path  Optional SRDF for collision-pair filtering.
              * @return True on success.
              */
             bool loadCollisionModel(const std::string& model_path,

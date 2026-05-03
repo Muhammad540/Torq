@@ -13,20 +13,12 @@ namespace torq {
   class Configuration;
 
   /**
-   * @brief Abstract base class for kinematic limits (QP inequality constraints).
+   * @brief Abstract base for QP inequality constraints.
    *
-   * Each limit produces rows \f$(G, h)\f$ such that:
-   * \f[
-   *   G\,\Delta q \le h
-   * \f]
-   * These rows are stacked with those from other limits and passed to the
-   * OSQP solver as the constraint matrix.
+   * Each limit returns rows \f$(G, h)\f$ such that \f$G\,\Delta q \le h\f$,
+   * or `std::nullopt` if no constraints are active this tick.
    *
-   * Returns `std::nullopt` if there are no active constraints (e.g. no finite
-   * bounds in the model).
-   *
-   * @see @ref limits_page for per-limit mathematical derivations.
-   * @see @ref qp_formulation for how constraints compose in the QP.
+   * @see @ref limits_page, @ref qp_formulation
    */
   class Limit {
     public:
@@ -42,14 +34,10 @@ namespace torq {
   };
 
   /**
-   * @brief Joint velocity limits.
+   * @brief Joint velocity bounds.
    *
-   * Constrains displacements so that the implied velocity stays within hardware bounds:
-   * \f[
-   *   -\Delta t\;\dot{q}_{\max} \;\le\; \Delta q \;\le\; \Delta t\;\dot{q}_{\max}
-   * \f]
-   *
-   * Reads `model.velocityLimit` and only activates for joints with finite bounds.
+   * Enforces \f$-\Delta t\,\dot q_\text{max} \le \Delta q \le \Delta t\,\dot q_\text{max}\f$
+   * using `model.velocityLimit`. Joints with non-finite bounds are skipped.
    *
    * @see @ref limits_page
    */
@@ -75,17 +63,13 @@ namespace torq {
   };
 
   /**
-   * @brief Joint position (configuration) limits.
+   * @brief Joint position bounds with smooth deceleration.
    *
-   * Constrains \f$\Delta q\f$ so that \f$q + \Delta q\f$ stays within
-   * \f$[q_{\min}, q_{\max}]\f$, with a proportional gain \f$\gamma\f$ that
-   * smoothly decelerates the robot as it approaches a limit:
-   * \f[
-   *   \Delta q_j \le \gamma\,(q_j^{\max} - q_j), \quad
-   *   -\Delta q_j \le \gamma\,(q_j - q_j^{\min})
-   * \f]
+   * Keeps \f$q + \Delta q \in [q_\text{min}, q_\text{max}]\f$ using a
+   * proportional gain \f$\gamma \in (0, 1]\f$ so the robot decelerates
+   * smoothly before reaching a limit.
    *
-   * @see @ref limits_page for a detailed discussion of the gain parameter.
+   * @see @ref limits_page
    */
   class ConfigurationLimit: public Limit {
     public:

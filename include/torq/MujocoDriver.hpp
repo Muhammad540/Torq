@@ -20,16 +20,15 @@ namespace torq {
     using DataPtr  = std::unique_ptr<mjData,  decltype(&mj_deleteData)>;
 
     /**
-     * @brief MuJoCo simulation backend implementing HardwareInterface.
+     * @brief MuJoCo backend for HardwareInterface.
      *
-     * Wraps `mjModel` / `mjData` with RAII smart pointers.  Provides both the
-     * actuator-command interface (setJointPositions writes to `ctrl`) and
-     * direct state overrides (overrideJointPositions writes to `qpos`).
+     * Wraps `mjModel` / `mjData` with RAII smart pointers. Exposes both the
+     * actuator-command path (`setJointPositions` → `ctrl`) and direct state
+     * overrides (`overrideJointPositions` → `qpos`, used for the display
+     * mirror in real-hardware mode).
      *
-     * step() is invoked from RobotSystem::update() whenever your application calls
-     * update(). The integration timestep getTimestep() comes from the MJCF
-     * (mjModel.opt.timestep); differential IK inside the controller uses this
-     * value. How often you call update() is independent of that timestep.
+     * `getTimestep()` returns `mjModel.opt.timestep`; one `step()` advances
+     * physics by exactly this amount.
      *
      * @see HardwareInterface
      */

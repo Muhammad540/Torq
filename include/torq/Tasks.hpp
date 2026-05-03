@@ -13,23 +13,15 @@ namespace torq{
     class Configuration;
 
     /**
-     * @brief Abstract base class for kinematic tasks that contribute to the QP objective.
+     * @brief Abstract base for QP objective tasks.
      *
-     * Each task defines an error \f$e(q) \in \mathbb{R}^k\f$ and a Jacobian
-     * \f$J(q) \in \mathbb{R}^{k \times n_v}\f$ such that the first-order task
-     * dynamics are:
-     * \f[
-     *   J(q)\,\Delta q = -\alpha\,e(q)
-     * \f]
+     * A task defines an error \f$e(q) \in \mathbb{R}^k\f$ and Jacobian
+     * \f$J(q) \in \mathbb{R}^{k \times n_v}\f$ with first-order dynamics
+     * \f$J\,\Delta q = -\alpha\,e\f$. The base class assembles the QP block
+     * \f$\tfrac{1}{2}\,\Delta q^\top H\,\Delta q + c^\top \Delta q\f$ via
+     * computeQPObjective().
      *
-     * The base class converts this into a QP objective contribution:
-     * \f[
-     *   \min_{\Delta q}\;\tfrac{1}{2}\left\|W\bigl(J\,\Delta q + \alpha\,e\bigr)\right\|^2
-     * \f]
-     * which expands to \f$\tfrac{1}{2}\,\Delta q^\top H\,\Delta q + c^\top \Delta q\f$.
-     *
-     * @see @ref qp_formulation for how task contributions compose.
-     * @see @ref tasks_page for per-task mathematical derivations.
+     * @see @ref tasks_page, @ref qp_formulation
      */
     class Task{
         public:
@@ -69,22 +61,12 @@ namespace torq{
             virtual Eigen::MatrixXd computeJacobian(const Configuration& config) const = 0;
 
             /**
-             * @brief Compute this task's \f$(H, c)\f$ contribution to the QP objective.
+             * @brief Assemble this task's \f$(H, c)\f$ contribution to the QP.
              *
-             * Implements:
-             * \f[
-             *   \bar{J} = W\,J, \quad \bar{e} = W(-\alpha\,e)
-             * \f]
-             * \f[
-             *   \mu^{\text{eff}} = \mu \cdot \bar{e}^\top \bar{e}
-             * \f]
-             * \f[
-             *   H = \bar{J}^\top \bar{J} + \mu^{\text{eff}}\,I_{n_v}, \quad
-             *   c = -\bar{J}^\top \bar{e}
-             * \f]
+             * Implements the weighted least-squares form with adaptive LM
+             * damping. See @ref qp_formulation for the full derivation.
              *
-             * @param config  Current robot configuration.
-             * @return Pair (H, c) where H is \f$n_v \times n_v\f$ and c is \f$n_v \times 1\f$.
+             * @return Pair (H, c) of size \f$(n_v \times n_v)\f$ and \f$n_v\f$.
              */
             std::pair<Eigen::MatrixXd, Eigen::VectorXd> computeQPObjective(const Configuration& config) const;
 
@@ -116,21 +98,14 @@ namespace torq{
     };
 
     /**
-     * @brief Regulate the SE(3) pose of a robot frame to a desired target.
+     * @brief Track the SE(3) pose of a frame.
      *
-     * The 6-D error is computed via the logarithmic map:
-     * \f[
-     *   e = \log_6\!\left(T_{\text{cur}}^{-1}\;T_{\text{des}}\right)
-     *     = \begin{bmatrix} e_{\text{pos}} \\ e_{\text{ori}} \end{bmatrix}
-     *     \in \mathbb{R}^6
-     * \f]
+     * 6-D error from the SE(3) logarithm
+     * \f$e = \log_6(T_\text{cur}^{-1} T_\text{des})\f$, with separate
+     * position / orientation weights. Inert (zero contribution) until a
+     * target is set.
      *
-     * The 6-D cost vector is \f$[w_{\text{pos}}^{(3)},\;w_{\text{ori}}^{(3)}]\f$,
-     * allowing independent weighting of position and orientation tracking.
-     *
-     * When no target is set the task is **inert** (contributes nothing to the QP).
-     *
-     * @see @ref tasks_page for the full derivation.
+     * @see @ref tasks_page
      */
     class FrameTask : public Task {
         public:
@@ -189,17 +164,14 @@ namespace torq{
     };
 
     /**
-     * @brief Regulate joint angles toward a desired posture.
+     * @brief Bias joints toward a reference posture.
      *
-     * The error is \f$e = q_{\text{ref}} \ominus q_{\text{cur}}\f$ (manifold difference)
-     * and the Jacobian is the identity on actuated joints (floating-base coordinates excluded).
+     * Error is the manifold difference \f$q_\text{ref} \ominus q_\text{cur}\f$
+     * (floating-base coordinates excluded); Jacobian is the identity on
+     * actuated joints. Used as a low-priority regulariser. Inert until a
+     * target is set.
      *
-     * Typically used as a low-priority regularisation task to keep the arm
-     * near a sensible configuration and avoid singularities.
-     *
-     * When no target is set the task is **inert**.
-     *
-     * @see @ref tasks_page for the full derivation.
+     * @see @ref tasks_page
      */
     class PostureTask : public Task {
         public:
@@ -234,14 +206,12 @@ namespace torq{
     };
 
     /**
-     * @brief Minimise joint velocities — viscous damping.
+     * @brief Penalise joint velocity (viscous damping).
      *
-     * Error is always zero and the Jacobian is the identity on actuated joints.
-     * This penalises any motion: \f$H_{\text{damp}} = w_d^2\,I_{n_v}\f$.
+     * Zero error, identity Jacobian on actuated joints — adds
+     * \f$w^2\,I\f$ to the QP Hessian. Always active.
      *
-     * No target is needed; the task is always active once constructed.
-     *
-     * @see @ref tasks_page for the full derivation.
+     * @see @ref tasks_page
      */
     class DampingTask : public Task {
         public:

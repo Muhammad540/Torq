@@ -1,59 +1,60 @@
 # Torq {#mainpage}
 
-@b High-performance C++ framework for robot control and training.
+@b A lightweight C++ library for robot control via differential inverse kinematics.
 
-Torq combines [MuJoCo](https://mujoco.org/) (physics simulation) and
-[Pinocchio](https://github.com/stack-of-tasks/pinocchio) (rigid-body
-kinematics & dynamics) behind a concise API. The library solves differential
-inverse kinematics as a Quadratic Program at every control tick, supporting
-configurable **tasks**, **limits**, and **barrier functions**.
+Torq is a small, focused robotics library written in C++. It exposes
+a single high level API ([torq::RobotSystem](@ref torq::RobotSystem)) that
+encapsulates kinematics, control, simulation, and visualization. It builds a **Quadratic Program** at every control tick and solves for the joint velocities that best track a Cartesian target while respecting physical and safety constraints.
 
-At each control step, Torq formulates:
+The design is inspired by [Pink](https://github.com/stephane-caron/pink) and
+[Mink](https://github.com/kevinzakka/mink), reformulated in C++:
 
-\f[
-\begin{aligned}
-\min_{\Delta q} \quad & \tfrac{1}{2}\,\Delta q^\top P\,\Delta q + c^\top \Delta q \\
-\text{s.t.} \quad & G\,\Delta q \le h
-\end{aligned}
-\f]
-
-**Tasks** specify what the robot should do (e.g. reach a pose, maintain
-balance). **Limits** specify what it must not do (e.g. exceed joint bounds).
-**Barriers** enforce safety constraints via Control Barrier Functions (e.g.
-workspace bounds, collision avoidance).
-
-Torq is designed for **sim-to-real** workflows: the same control code runs
-in MuJoCo simulation and on real hardware by swapping only the hardware
-driver.
+| Library | Role |
+|---------|------|
+| [Pinocchio](https://github.com/stack-of-tasks/pinocchio) | Rigid body kinematics, Jacobians, manifold operations |
+| [MuJoCo](https://mujoco.org/) | Physics simulation and visualization scene |
+| [OSQP](https://osqp.org/) | Sparse Quadratic Program solver |
 
 ---
 
-## Key features
+## What happens at each Tick ?
 
-- @b Composable task abstraction @b — Specify multiple task-space objectives
-  (end-effector tracking, posture regulation, CoM control, joint coupling)
-  and combine them in a single QP solve.
+Torq solves:
 
-- @b Hard constraint enforcement @b — Velocity limits, configuration limits,
-  acceleration limits, and floating-base limits are enforced as QP inequality
-  constraints.
+\f[
+\min_{\Delta q}\; \tfrac{1}{2}\,\Delta q^\top P\,\Delta q + c^\top \Delta q
+\quad\text{s.t.}\quad G\,\Delta q \le h
+\f]
 
-- @b Safety via barrier functions @b — Control Barrier Functions (CBFs)
-  for workspace bounds, minimum distance, and self-collision avoidance.
+where \f$P, c\f$ come from **tasks** (objectives like end effector tracking)
+and \f$G, h\f$ come from **limits** (joint position/velocity bounds) and
+**barriers** (Cartesian safety regions). The resulting \f$\Delta q\f$ is
+integrated on the configuration manifold and sent to the hardware.
 
-- @b Designed for real-time control @b — Zero-allocation hot path with
-  pre-allocated Eigen matrices. No heap allocation per tick.
+---
 
-- @b Runtime-tunable @b — Every task cost, gain, damping, and limit parameter
-  is adjustable at runtime through the API and the built-in ImGui tuning panel.
+## Philosophy
 
-- @b Single entry point @b — Library users interact only with
-  `torq::RobotSystem`. All control, task/limit/barrier composition, and
-  tuning go through one class with a clear ownership model.
+- @b One @b API. The user only ever sees `torq::RobotSystem`. The QP solver,
+  task composition, and hardware driver are encapsulated.
+- @b Same @b code for @b sim @b or @b real. A `HardwareInterface` abstracts the
+  driver. So it is easy to switch between MuJoCo and a real robot.
+- @b Composable. Tasks, limits, and barriers all share an abstract base and
+  are added through `addTask` / `addLimit` / `addBarrier`. So custom subclasses
+  are first class citizens.
 
-- @b Hardware abstraction @b — Control code targets `torq::HardwareInterface`;
-  swap `MujocoDriver` (simulation) for `ServoDriver` (real robot) without
-  changing any control logic.
+---
+
+## What you can build today
+
+- Cartesian end effector control of any robot.
+- Real time joint and pose tuning through the built in GUI.
+- Sim to real workflows: same control code drives a MuJoCo scene or a real robot given that you provide the right hardware driver.
+
+## Future goals
+- @b Collision support: Pinocchio based self collision avoidance.
+- @b Trajectory planning: joint and Cartesian path generation (RRT, splines).
+- @b Robot learning: batched simulation rollouts for imitation and reinforcement learning.
 
 ---
 
@@ -64,17 +65,16 @@ driver.
 #include "torq/Gui.hpp"
 
 int main() {
-    torq::RobotConfig config;
-    config.scene_path            = "path/to/scene.xml";
-    config.robot_model_path      = "path/to/robot.urdf";
-    config.end_effector_frame    = "ee_frame";
-    config.locked_joints         = {"joint_6"};
+    torq::RobotConfig cfg;
+    cfg.scene_path         = "workspace/models/franka_emika_panda/scene.xml";
+    cfg.robot_model_path   = "workspace/models/franka_emika_panda/panda.xml";
+    cfg.end_effector_frame = "hand";
 
     torq::RobotSystem robot;
-    robot.initialize(config);
+    robot.initialize(cfg);
 
     torq::Gui gui;
-    gui.initialize(&robot);
+    gui.initialize(&robot, "Panda");
 
     while (gui.windowIsOpen()) {
         robot.update();
@@ -83,16 +83,7 @@ int main() {
 }
 ```
 
-<!-- Video placeholder: record a short demo of the SO101 arm tracking a target
-     and embed here using raw HTML:
-
-     \htmlonly
-     <video width="600" controls style="display: block; margin: 1em auto;">
-       <source src="path/to/demo.mp4" type="video/mp4">
-       Your browser does not support the video tag.
-     </video>
-     \endhtmlonly
--->
+Working examples for the Franka Panda, UR5e, and SO-101 arms are present under the `workspace/` folder. See [architecture](@ref architecture) for details.
 
 ---
 
@@ -100,45 +91,32 @@ int main() {
 
 | Page | Contents |
 |------|----------|
-| @subpage conventions | Notation, coordinate frames, manifold conventions |
-| @subpage quickstart_page | Step-by-step getting started tutorial |
-| @subpage tutorials_page | Tutorials with worked examples and video walkthroughs |
-| @subpage architecture | System diagram, class hierarchy, data flow |
-| @subpage qp_formulation | Complete QP derivation: objective, constraints, barriers, solver |
-| @subpage tasks_page | All task types with mathematical derivations |
-| @subpage limits_page | All limit types with constraint formulations |
-| @subpage barriers_page | All barrier types with CBF formulations |
-| @subpage extending_page | How to add custom tasks, limits, and barriers |
-| @subpage tuning_guide | Parameter reference and tuning recipes |
-| @subpage sim_to_real | ServoDriver, hardware setup, and real robot deployment |
+| @subpage quickstart_page | A minimal example |
+| @subpage architecture | Class hierarchy, ownership, control loop, adding new robots |
+| @subpage qp_formulation | The Quadratic Program: how tasks, limits and barriers compose |
+| @subpage tasks_page | Built in tasks and their parameters |
+| @subpage limits_page | Built in limits |
+| @subpage barriers_page | Built in safety barriers |
+| @subpage extending_page | Writing your own task, limit or barrier |
+| @subpage tuning_guide | Tuning the IK parameters |
+| @subpage sim_to_real | Running on real hardware |
+| @subpage conventions | Notation and frame conventions |
 
 ---
 
-## Building the documentation
+## Build
 
 ```bash
-# From the repository root:
+mkdir -p build && cd build
+cmake ..
+cmake --build . -j
+```
+
+Then run any of the workspace examples, e.g. `./bin/panda`.
+
+To regenerate this documentation:
+
+```bash
 doxygen Doxyfile
-
-# Open in browser:
-xdg-open docs/html/index.html   # Linux
-open docs/html/index.html        # macOS
+xdg-open docs/html/index.html
 ```
-
-## Embedding videos in documentation
-
-Torq documentation supports embedded videos for tutorials and demos.
-To add a video to any documentation page, use Doxygen's `\htmlonly` block:
-
-```
-\htmlonly
-<video width="600" controls style="display: block; margin: 1em auto;">
-  <source src="https://your-host.com/path/to/video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-\endhtmlonly
-```
-
-For locally hosted videos, place `.mp4` files in `doc/videos/` and reference
-them with a relative path. For GitHub-hosted videos, use a raw URL from
-a dedicated assets branch or release.

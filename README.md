@@ -1,6 +1,18 @@
 # Torq
 
-C++ library for robot manipulation: **MuJoCo** for simulation, **Pinocchio** for kinematics, and **QPbased inverse kinematics** (tasks, limits, barriers). A HAL based approach is used to switch between sim and real.
+A lightweight C++ library for robot control via differential inverse
+kinematics. Inspired by [Pink](https://github.com/stephane-caron/pink) and
+[Mink](https://github.com/kevinzakka/mink), built on top of
+[Pinocchio](https://github.com/stack-of-tasks/pinocchio) (kinematics),
+[MuJoCo](https://mujoco.org/) (simulation), and [OSQP](https://osqp.org/)
+(QP solver).
+
+At every control tick Torq formulates and solves a Quadratic Program that
+finds joint velocities tracking a Cartesian (or joint-space) target while
+respecting joint, velocity, and Cartesian safety constraints.
+
+The same control code drives a MuJoCo simulation or a real robot —
+swap the hardware driver via one config field.
 
 ## Dependencies
 
@@ -8,67 +20,72 @@ C++ library for robot manipulation: **MuJoCo** for simulation, **Pinocchio** for
 - CMake 3.22+
 - **Pinocchio**, **Eigen3**, **OSQP**, **OsqpEigen** (system packages)
 - **OpenGL** + **GLEW**
-- **MuJoCo**, **Dear ImGui**, **ImPlot** — fetched by CMake when you configure the project
+- **MuJoCo**, **Dear ImGui**, **ImPlot** — fetched by CMake
 
-Install Pinocchio using the [official instructions](https://stack-of-tasks.github.io/pinocchio/).
+Install Pinocchio via the [official instructions](https://stack-of-tasks.github.io/pinocchio/).
 
 ## Build
-
-From the repository root:
 
 ```bash
 mkdir -p build && cd build
 cmake ..
 cmake --build . -j
 ```
-## Example
+
+## Examples
+
+Three reference robots ship in `workspace/`:
 
 ```bash
 cd build/bin
-./so101          # SO-101 arm (sim or real, depending on config)
-./panda          # Panda example
-./arm_ur5e
+./panda     # Franka Emika Panda (sim)
+./arm_ur5e  # Universal Robots UR5e (sim)
+./so101     # SO-101 6-DOF arm (sim or real ST3215 servos)
 ```
+
+To bring up your own robot, copy the closest `workspace/<robot>/`
+directory and point `RobotConfig` at your URDF/MJCF.
 
 ## Project layout
 
 ```text
-Torq/
-├── include/torq/         # headers
-├── src/
-│   ├── core/             # RobotSystem
-│   ├── hardware/         # MujocoDriver, ServoDriver, scservo protocol
-│   ├── kinematics/       # Pinocchio model / configuration
-│   ├── control/          # Controller, InverseKinematics (OSQP)
-│   ├── tasks/            # IK tasks
-│   ├── limits/           # Joint / velocity limits
-│   ├── barriers/         # QP barriers
-│   └── gui/              # ImGui + MuJoCo viewport
-├── workspace/
-│   ├── models/           # URDF / MJCF assets
-│   ├── so101/            # SO-101 + calibration
-│   ├── panda/
-│   └── arm_ur5e/
-├── CMakeLists.txt
-└── Doxyfile
+include/torq/         # Public headers
+src/
+├── core/             # RobotSystem (facade)
+├── control/          # Controller, InverseKinematics
+├── kinematics/       # Pinocchio model and configuration
+├── tasks/            # FrameTask, PostureTask, DampingTask
+├── limits/           # VelocityLimit, ConfigurationLimit
+├── barriers/         # PositionBarrier, BodySphericalBarrier
+├── hardware/         # MujocoDriver, ServoDriver, SCServo protocol
+└── gui/              # ImGui + MuJoCo viewport
+workspace/
+├── models/           # URDF / MJCF assets
+├── panda/
+├── arm_ur5e/
+└── so101/
 ```
-
-## Overview
-
-- **`libtorq`** — shared library: `RobotSystem` (orchestrator), `Controller` + IK, kinematics, GUI, and drivers.
-- **`workspace/*`** — executables that link `libtorq`
 
 ## Documentation
 
-API docs are built with Doxygen:
-
 ```bash
 doxygen Doxyfile
-# Open docs/html/index.html
+xdg-open docs/html/index.html
 ```
+
+The generated docs cover the QP formulation, the class hierarchy and
+ownership model, every built-in task / limit / barrier, the IK tuning
+parameters, and how to run on real hardware.
+
+## Roadmap
+
+- Full Pinocchio-based collision avoidance (self-collision and environment)
+- Trajectory planning (RRT and spline-based)
+- Batched simulation rollouts for imitation and reinforcement learning
 
 ## Acknowledgements
 
 Torq draws on ideas from:
+
 - [Pink](https://github.com/stephane-caron/pink)
 - [Mink](https://github.com/kevinzakka/mink.git)

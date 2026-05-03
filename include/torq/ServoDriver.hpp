@@ -3,20 +3,15 @@
 
 /**
  * @file ServoDriver.hpp
- * @brief Real-hardware driver for STS3215 serial bus servos.
+ * @brief HardwareInterface implementation for ST/STS/SMS bus servos.
  *
- * 1 tick = (2*PI/4096) radians.
- * The calibration file defines the direction, raw_center, and raw_min / raw_max.
- * raw_zero: all joints use the center anchor except the gripper , it uses raw_min/max with mj_low as the anchor (asymmetric jaw):
- *   Center (for non-gripper joints): raw_zero = round(raw_center - direction * mj_center_ticks)
- *   dir==+1 -> raw_zero = raw_min - round(mj_low * STS_TICKS_PER_RAD)
- *   dir==-1 -> raw_zero = raw_max + round(mj_low * STS_TICKS_PER_RAD)
+ * Encoder maths (12-bit, 4096 ticks per revolution):
+ *   `rawToRadian = direction * (raw - raw_zero) * (2π / 4096)`
+ *   `radianToRaw = raw_zero + (rad * 4096 / 2π) / direction`
  *
- *   rawToRadian: direction * (raw - raw_zero) * STS_RADIAN_PER_TICK
- *   radianToRaw: raw_zero + (radians * STS_TICKS_PER_RAD) / direction
- *
- * Hardware safety is enforced by EEPROM min/max limits and homing offset
- * flashed during calibration, not by software clamping.
+ * The calibration file (see @ref sim_to_real) supplies `direction`,
+ * `raw_center`, `raw_min`, `raw_max`. Hardware safety relies on EEPROM
+ * limits flashed at calibration time, not on software clamping.
  */
 
 #include "torq/HardwareInterface.hpp"

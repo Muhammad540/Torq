@@ -3,7 +3,7 @@
 
   <option integrator="implicitfast"/>
 
-  <default>
+<default>
     <default class="ur5e">
       <default class="visual">
         <geom type="mesh" contype="0" conaffinity="0" group="2"/>
@@ -14,17 +14,22 @@
           <geom type="cylinder"/>
         </default>
       </default>
-      <joint axis="0 1 0" range="-6.28319 6.28319"/>
+      
+      <!-- FIX 1: Add armature and damping to all joints to resist sudden spikes -->
+      <joint axis="0 1 0" range="-6.28319 6.28319" armature="0.1" damping="2.0"/>
+      
       <default class="joint_limited">
         <joint range="-3.1415 3.1415"/>
       </default>
       <default class="position">
-        <position ctrlrange="-6.2831 6.2831" kp="2000" kv="100" forcerange="-150 150"/>
+        <!-- FIX 2: Lower kp/kv on big joints to reduce chain-reaction shaking -->
+        <position ctrlrange="-6.2831 6.2831" kp="1000" kv="50" forcerange="-150 150"/>
         <default class="position_limited">
           <position ctrlrange="-3.1415 3.1415"/>
         </default>
         <default class="position_small">
-          <position kp="500" kv="25" forcerange="-28 28"/>
+          <!-- FIX 3: Drastically lower kp/kv for the tiny wrists -->
+          <position kp="100" kv="10" forcerange="-28 28"/>
         </default>
       </default>
     </default>

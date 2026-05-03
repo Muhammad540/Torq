@@ -11,9 +11,10 @@
 #include "Limits.hpp"
 #include "Barriers.hpp"
 
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace torq {
 
@@ -38,29 +39,23 @@ namespace torq {
         std::string robot_calib_file;
         /** When true (default), send position commands to real hardware. When false (passive mode), only read positions and mirror to display — e.g. move by hand and observe in GUI. Ignored when driver_type is "mujoco". */
         bool active_control = true;
+        /** If set (rad/s, finite and > 0), assigns this limit to every velocity DoF of the reduced Pinocchio model after load (overrides parser defaults, e.g. unbounded MJCF). */
+        std::optional<double> joint_velocity_limit_rad_s;
     };
 
     class HardwareInterface;
 
     /**
-     * @brief Top-level user-facing API and sole owner of all main components.
+     * @brief Single entry point for the library.
      *
-     * **Ownership hierarchy**
+     * Owns the HardwareInterface, KinematicsEngine, Controller, and any
+     * user-added tasks/limits/barriers. The Controller and InverseKinematics
+     * are internal: all manipulation, IK tuning, and the per-tick update go
+     * through RobotSystem.
      *
-     * RobotSystem is the single entry point for library users. It owns:
-     * - HardwareInterface (simulation or real hardware)
-     * - KinematicsEngine (Pinocchio model and configurations)
-     * - Controller (control modes, built-in IK tasks/limits, QP solver)
-     * - User-added tasks, limits, and barriers (when added via addTask/addLimit/addBarrier)
-     *
-     * The Controller is an internal implementation detail: it owns the
-     * InverseKinematics solver and built-in tasks/limits (FrameTask, PostureTask,
-     * DampingTask, VelocityLimit, ConfigurationLimit). Users do not access the
-     * Controller or IK solver directly; all interaction is through RobotSystem.
-     *
-     * Call `update()` whenever your application needs a new control / physics tick
-     * Differential IK integrates with the hardware driver's `getTimestep()` (e.g. MuJoCo
-     * `opt.timestep`); that timestep is independent of how often you call `update()`.
+     * Call `update()` once per control iteration. Each call advances the
+     * driver by one `getTimestep()` (MuJoCo `opt.timestep` or the servo
+     * control period), independent of how often you call `update()`.
      *
      * @code
      * torq::RobotConfig cfg;
@@ -70,13 +65,10 @@ namespace torq {
      *
      * torq::RobotSystem robot;
      * robot.initialize(cfg);
-     *
-     * while (running) {
-     *     robot.update();
-     * }
+     * while (running) robot.update();
      * @endcode
      *
-     * @see Controller, KinematicsEngine, MujocoDriver
+     * @see Controller, KinematicsEngine, HardwareInterface
      */
     class RobotSystem {
         public:
@@ -98,31 +90,21 @@ namespace torq {
             /**
              * @brief Execute one control + physics tick.
              *
-             * Performs one tick: `hardware_->step()`, then (if active control is on)
-             * `Controller::update()`. Task-space IK uses `hardware_->getTimestep()` for
-             * integration (MuJoCo model timestep or the real driver's period), not the
-             * interval between your calls to `update()`.
+             * Steps the hardware then (if active control is on) runs one IK
+             * solve via the Controller. The IK integration timestep is
+             * `hardware_->getTimestep()`, not the wall-clock interval between
+             * calls to `update()`.
              */
             void update();
-            
+
             /**
-             * @brief MuJoCo backend that owns `mjModel` / `mjData` for this robot, if any.
+             * @brief MuJoCo driver used for visualization (rendering / introspection).
              *
-             * This is **not** the abstract hardware used for control (that is internal).
-             * It is the `MujocoDriver` instance whose scene you can render or introspect:
-             *
-             * - **Simulation** (`driver_type == "mujoco"`): returns the same driver that
-             *   steps physics and receives commands.
-             * - **Real hardware** with `scene_path` set: returns a **display-only** driver
-             *   loaded from that XML; joint poses are copied from the real robot each
-             *   `update()` for visualization. It is never stepped for dynamics.
-             * - **Real hardware** without `scene_path`: returns nullptr (no MuJoCo scene).
-             *
-             * Typical uses: attach `Gui` (viewport), or read MuJoCo-only metadata such as
-             * actuator `ctrlrange` during initialize(). Do not assume this pointer is the
-             * control plant when using serial servos.
-             *
-             * @return nullptr if no MuJoCo scene is loaded.
+             * - Simulation (`driver_type == "mujoco"`): the same driver that
+             *   steps physics.
+             * - Real hardware with `scene_path` set: a display-only mirror
+             *   driven from real joint positions (never stepped).
+             * - Real hardware without `scene_path`: `nullptr`.
              */
             MujocoDriver* mujocoVisualizationDriver();
 
@@ -175,14 +157,12 @@ namespace torq {
             void jogCartesian(int axis, double sign, const std::string& frame_name);
 
             /**
-             * @brief Sync the persistent task-space target to the current end-effector pose.
+             * @brief Snap the cached task-space target to the current frame pose.
              *
-             * Call after the robot has been moved outside task-space IK (e.g. Move to Home,
-             * joint sliders, or external motion) so that the next jog does not see a huge
-             * error and command a velocity spike. moveToHome() already resets target via
-             * setJointSpaceTarget(); use this when the robot was moved by other means.
+             * Call after the robot has been moved outside task-space IK (e.g.
+             * via joint sliders) so the next jog does not see a stale error.
              *
-             * @param frame_name Frame whose current pose becomes the new persistent target.
+             * @param frame_name Frame whose current pose becomes the new target.
              */
             void resetTaskSpaceTargetToCurrentPose(const std::string& frame_name);
 
@@ -226,51 +206,37 @@ namespace torq {
             /** @} */
 
             /**
-             * @brief Load collision geometry for self-collision avoidance.
+             * @brief Load collision geometry into the kinematics engine.
              *
              * Forwards to KinematicsEngine::loadCollisionModel(). Call after
-             * initialize(). Required before adding a SelfCollisionBarrier.
-             * Accepts both URDF and MJCF files (auto-detected by extension).
+             * initialize(). Accepts URDF or MJCF (detected by extension).
              *
-             * @param model_path Path to the URDF or MJCF file with collision geometry.
-             * @param srdf_path  Optional SRDF for filtering collision pairs.
+             * @param model_path Path to the URDF or MJCF with collision geometry.
+             * @param srdf_path  Optional SRDF to filter collision pairs.
              * @return True on success.
              */
             bool loadCollisionModel(const std::string& model_path,
                                     const std::string& srdf_path = "");
 
-            /** @name User task / limit / barrier composition
-             *  RobotSystem owns all objects added here. They are included in
-             *  every IK solve alongside the built-in tasks/limits. Use for
-             *  humanoids, quadrupeds, or custom constraints.
+            /** @name User-added tasks, limits and barriers
+             *  RobotSystem takes ownership and includes them in every IK
+             *  solve alongside the built-in tasks/limits.
              *  @{
              */
 
-            /**
-             * @brief Add a task; RobotSystem takes ownership.
-             * @param task  Task to add (e.g. ComTask, RelativeFrameTask). Must be heap-allocated.
-             */
+            /** @brief Add a task; RobotSystem takes ownership. */
             void addTask(std::unique_ptr<Task> task);
-
-            /** @brief Remove a task by pointer. It is destroyed and no longer used in IK. */
+            /** @brief Remove and destroy a previously added task. */
             void removeTask(Task* task);
 
-            /**
-             * @brief Add a limit; RobotSystem takes ownership.
-             * @param limit  Limit to add (e.g. a custom Limit subclass).
-             */
+            /** @brief Add a limit; RobotSystem takes ownership. */
             void addLimit(std::unique_ptr<Limit> limit);
-
-            /** @brief Remove a limit by pointer. It is destroyed and no longer used in IK. */
+            /** @brief Remove and destroy a previously added limit. */
             void removeLimit(Limit* limit);
 
-            /**
-             * @brief Add a barrier; RobotSystem takes ownership.
-             * @param barrier  Barrier to add (e.g. PositionBarrier, BodySphericalBarrier).
-             */
+            /** @brief Add a barrier (e.g. PositionBarrier, BodySphericalBarrier). */
             void addBarrier(std::unique_ptr<Barrier> barrier);
-
-            /** @brief Remove a barrier by pointer. It is destroyed and no longer used in IK. */
+            /** @brief Remove and destroy a previously added barrier. */
             void removeBarrier(Barrier* barrier);
             /** @} */
 

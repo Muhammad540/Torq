@@ -49,20 +49,15 @@ namespace torq{
   };
 
   /**
-   * @brief Internal component: control modes, built-in IK tasks/limits, QP solver.
+   * @brief Internal: control modes, built-in IK tasks/limits, OSQP solver.
    *
-   * **Ownership:** Controller owns the InverseKinematics solver and all
-   * *built-in* tasks and limits (FrameTask, PostureTask, DampingTask,
-   * VelocityLimit, ConfigurationLimit). It does **not** own user-added
-   * tasks/limits/barriers; those are owned by RobotSystem and passed into
-   * update() each tick.
+   * Owns the InverseKinematics solver and the built-in FrameTask,
+   * PostureTask, DampingTask, VelocityLimit, ConfigurationLimit. User-added
+   * tasks/limits/barriers are owned by RobotSystem and passed in by raw
+   * pointer each tick.
    *
-   * **Separation of concern:** Library users interact only with RobotSystem.
-   * Controller is not part of the public API; RobotSystem forwards
-   * setTaskSpaceTarget, setJointSpaceTarget, IK tuning, and update().
-   *
-   * In TASK_SPACE, the IK integration timestep is hardware_->getTimestep()
-   * (MuJoCo model opt.timestep, or the real driver's control period).
+   * Not part of the public API — library users interact only with
+   * RobotSystem, which forwards the relevant methods.
    *
    * @see RobotSystem, InverseKinematics, Task, Limit, Barrier
    */

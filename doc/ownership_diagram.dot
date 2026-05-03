@@ -1,35 +1,70 @@
-// Ownership: RobotSystem owns HAL, KinematicsEngine, Controller; Controller owns IK and task/limit objects.
+// Class hierarchy and ownership.
+// - Solid edges:    "owns" (unique_ptr).
+// - Dashed edges:   "is-a" (inheritance).
 digraph OwnershipDiagram {
   rankdir=TB;
-  node [shape=box, style=rounded, fontname="Helvetica"];
+  nodesep=0.4;
+  ranksep=0.6;
+  node [shape=box, style="rounded,filled", fillcolor="#FFFFFF",
+        fontname="Helvetica", fontsize=11];
   edge [fontname="Helvetica", fontsize=9];
 
-  RobotSystem [label="RobotSystem"];
+  // Facade and core ---------------------------------------------------------
+  RobotSystem [label="RobotSystem", fillcolor="#FFA500"];
+  Controller  [label="Controller",  fillcolor="#FFD27F"];
+  IK          [label="InverseKinematics\n(OSQP)", fillcolor="#FFD27F"];
+  Kinematics  [label="KinematicsEngine\n(Pinocchio)", fillcolor="#B8E6B8"];
 
-  subgraph cluster_owned {
-    label="unique_ptr";
-    HAL [label="HardwareInterface"];
-    KinematicsEngine [label="KinematicsEngine"];
-    Controller [label="Controller"];
-  }
+  // Hardware abstraction ----------------------------------------------------
+  HAL    [label="HardwareInterface", fillcolor="#D0E0FF"];
+  Mujoco [label="MujocoDriver",      fillcolor="#FFFFFF"];
+  Servo  [label="ServoDriver",       fillcolor="#FFFFFF"];
 
-  RobotSystem -> HAL;
-  RobotSystem -> KinematicsEngine;
-  RobotSystem -> Controller;
+  // Tasks -------------------------------------------------------------------
+  Task     [label="Task",        fillcolor="#FCE5B4"];
+  Frame    [label="FrameTask",   fillcolor="#FFFFFF"];
+  Posture  [label="PostureTask", fillcolor="#FFFFFF"];
+  Damping  [label="DampingTask", fillcolor="#FFFFFF"];
 
-  Controller -> IKConfig [label="value"];
-  Controller -> InverseKinematics [label="value\n(OSQP solver)"];
-  Controller -> FrameTask [label="unique_ptr"];
-  Controller -> PostureTask [label="unique_ptr"];
-  Controller -> DampingTask [label="unique_ptr"];
-  Controller -> VelocityLimit [label="unique_ptr"];
-  Controller -> ConfigurationLimit [label="unique_ptr"];
+  // Limits ------------------------------------------------------------------
+  Limit    [label="Limit",              fillcolor="#FCE5B4"];
+  VelLim   [label="VelocityLimit",      fillcolor="#FFFFFF"];
+  CfgLim   [label="ConfigurationLimit", fillcolor="#FFFFFF"];
 
-  IKConfig [label="IKConfig", shape=plaintext];
-  InverseKinematics [label="InverseKinematics", shape=plaintext];
-  FrameTask [label="FrameTask", shape=plaintext];
-  PostureTask [label="PostureTask", shape=plaintext];
-  DampingTask [label="DampingTask", shape=plaintext];
-  VelocityLimit [label="VelocityLimit", shape=plaintext];
-  ConfigurationLimit [label="ConfigurationLimit", shape=plaintext];
+  // Barriers ----------------------------------------------------------------
+  Barrier  [label="Barrier",               fillcolor="#FCE5B4"];
+  PosBar   [label="PositionBarrier",       fillcolor="#FFFFFF"];
+  SphBar   [label="BodySphericalBarrier",  fillcolor="#FFFFFF"];
+
+  // GUI ---------------------------------------------------------------------
+  GUI [label="Gui", fillcolor="#B8E6B8"];
+
+  // Ownership (solid) -------------------------------------------------------
+  RobotSystem -> Controller   [label="owns"];
+  RobotSystem -> Kinematics   [label="owns"];
+  RobotSystem -> HAL          [label="owns"];
+  Controller  -> IK           [label="owns"];
+  Controller  -> Frame        [label="owns (built-in)"];
+  Controller  -> Posture      [label="owns (built-in)"];
+  Controller  -> Damping      [label="owns (built-in)"];
+  Controller  -> VelLim       [label="owns (built-in)"];
+  Controller  -> CfgLim       [label="owns (built-in)"];
+  GUI         -> RobotSystem  [label="non-owning", style=dotted, dir=back];
+
+  // Inheritance (dashed) ----------------------------------------------------
+  Mujoco  -> HAL     [style=dashed, arrowhead=onormal];
+  Servo   -> HAL     [style=dashed, arrowhead=onormal];
+  Frame   -> Task    [style=dashed, arrowhead=onormal];
+  Posture -> Task    [style=dashed, arrowhead=onormal];
+  Damping -> Task    [style=dashed, arrowhead=onormal];
+  VelLim  -> Limit   [style=dashed, arrowhead=onormal];
+  CfgLim  -> Limit   [style=dashed, arrowhead=onormal];
+  PosBar  -> Barrier [style=dashed, arrowhead=onormal];
+  SphBar  -> Barrier [style=dashed, arrowhead=onormal];
+
+  // Layout hints ------------------------------------------------------------
+  { rank=same; Frame; Posture; Damping; }
+  { rank=same; VelLim; CfgLim; }
+  { rank=same; PosBar; SphBar; }
+  { rank=same; Mujoco; Servo; }
 }

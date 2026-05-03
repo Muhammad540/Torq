@@ -14,8 +14,13 @@ namespace torq {
   class Configuration;
 
   /**
-   * @brief Abstract base class for Control Barrier Functions (CBFs).
+   * @brief Abstract base for Control Barrier Function safety constraints.
    *
+   * A subclass defines a barrier value \f$h(q) \ge 0\f$ on the safe set and
+   * its Jacobian. The base assembles a QP inequality (CBF condition) and
+   * an optional safe-displacement objective.
+   *
+   * @see @ref barriers_page, @ref qp_formulation
    */
   class Barrier {
     public:
@@ -23,17 +28,21 @@ namespace torq {
       Barrier(int dim, const Eigen::VectorXd& gain, double safe_displacement_gain = 0.0);
       virtual ~Barrier() = default;
 
-      /** 
-       * @brief Computes QP inequalities and QP objectives
-       */
+      /** @brief Recompute G, h, H, c from the current configuration. */
       void updateQP(const Configuration& config, double dt);
 
+      /** @brief Inequality matrix \f$G\f$ (size dim × nv). */
       const Eigen::MatrixXd& G() const { return G_; }
+      /** @brief Inequality upper bound \f$h\f$ (size dim). */
       const Eigen::VectorXd& h() const { return h_qp_; }
+      /** @brief Safe-displacement Hessian (zero unless `safe_displacement_gain` > 0). */
       const Eigen::MatrixXd& H() const { return H_; }
+      /** @brief Safe-displacement gradient. */
       const Eigen::VectorXd& c() const { return c_; }
 
+      /** @brief Override the gain function applied to \f$h(q)\f$ (default identity). */
       void setGainFunction(std::function<double(double)> fn) { gain_function_ = std::move(fn); }
+
       int dim() const { return dim_; }
       const Eigen::VectorXd& gain() const { return gain_; }
       double safeDisplacementGain() const { return safe_displacement_gain_; }
@@ -41,14 +50,13 @@ namespace torq {
     protected:
       virtual void computeBarrier(const Configuration& config, Eigen::Ref<Eigen::VectorXd> out_h) const = 0;
       virtual void computeJacobian(const Configuration& config, Eigen::Ref<Eigen::MatrixXd> out_J) const = 0;
+      /** @brief Optional: a known-safe displacement to bias the solver toward. Default: zero. */
       virtual void computeSafeDisplacement(const Configuration& config, Eigen::Ref<Eigen::VectorXd> out_dq) const;
-      // number of constraints the barriers add to the QP solver
-      int dim_;
-      // gain defines the aggressiveness of deceleration when approaching a boundary ( higher = stiffer )
-      Eigen::VectorXd gain_;
+
+      int dim_;                                ///< Number of constraint rows.
+      Eigen::VectorXd gain_;                   ///< CBF gain \f$\alpha\f$ (per dim).
       std::function<double(double)> gain_function_;
-      // to pull the robot to 0 velocity when squashed close to a barrier
-      double safe_displacement_gain_;
+      double safe_displacement_gain_;          ///< \f$\kappa\f$; 0 disables the objective term.
 
     private:
       bool is_initialized_ = false;
@@ -64,7 +72,13 @@ namespace torq {
   };
 
   /**
-   * @brief Cartesian position barrier on a robot frame.
+   * @brief Box bounds on a frame's Cartesian position.
+   *
+   * At least one of `p_min` or `p_max` must be provided. The barrier
+   * dimension equals the number of active sides times the number of
+   * selected axes (`indices`).
+   *
+   * @see @ref barriers_page
    */
   class PositionBarrier : public Barrier {
     public:
@@ -89,7 +103,12 @@ namespace torq {
   };
 
   /**
-   * @brief Minimum-distance barrier between two frames
+   * @brief Minimum distance between two frames using a point to point constraint.
+   *
+   * Uses a saturating gain function so the constraint stays smooth when the
+   * frames are far apart.
+   *
+   * @see @ref barriers_page
    */
   class BodySphericalBarrier : public Barrier {
     public:
