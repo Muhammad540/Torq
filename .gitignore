@@ -14,9 +14,11 @@ compile_commands.json
 # my notes
 Torq.md
 *.txt
+!documentation/requirements.txt
 pink/
 
 workspace/imgui.ini
 thirdparty/
 .cursor/
 docs/
+documentation/_build/
