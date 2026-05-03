@@ -5,6 +5,7 @@
 #include "torq/RobotSystem.hpp"
 #include "torq/MujocoDriver.hpp"
 #include "torq/logger.hpp"
+#include <algorithm>
 #include <cstring>
 #include <cmath>
 
@@ -83,7 +84,20 @@ namespace torq {
         glfwSetWindowUserPointer(window_, this);
 
         model_->vis.headlight.active = 1;
-        
+
+        {
+            int ow = std::max(1, viewport_width_);
+            int oh = std::max(1, viewport_height_);
+            if (display_pip) {
+                const int pip_w = std::max(1, static_cast<int>(viewport_width_ * pip_scale_));
+                const int pip_h = std::max(1, static_cast<int>(viewport_height_ * pip_scale_));
+                ow = std::max(ow, pip_w);
+                oh = std::max(oh, pip_h);
+            }
+            model_->vis.global.offwidth = ow;
+            model_->vis.global.offheight = oh;
+        }
+
         mjv_defaultCamera(cam_.get());
         mjv_defaultOption(opt_.get());
         mjv_defaultScene(scn_.get());
@@ -141,16 +155,51 @@ namespace torq {
         return (window_ && !glfwWindowShouldClose(window_));
     }
 
+    void Gui::ensureMujocoOffscreenAtLeast(int min_w, int min_h) {
+        const int need_w = std::max(1, min_w);
+        const int need_h = std::max(1, min_h);
+        if (ctx_->offWidth >= need_w && ctx_->offHeight >= need_h) {
+            return;
+        }
+        model_->vis.global.offwidth = std::max(need_w, model_->vis.global.offwidth);
+        model_->vis.global.offheight = std::max(need_h, model_->vis.global.offheight);
+        mjr_freeContext(ctx_.get());
+        mjr_defaultContext(ctx_.get());
+        mjr_makeContext(model_, ctx_.get(), mjFONTSCALE_150);
+    }
+
+    void Gui::renderMujocoBlitToFbo(unsigned int dst_fbo, int w, int h, mjvCamera* cam) {
+        mjr_setBuffer(mjFB_OFFSCREEN, ctx_.get());
+        if (ctx_->currentBuffer != mjFB_OFFSCREEN) {
+            logger.error() << "[Gui] Failed to bind MuJoCo offscreen buffer";
+            return;
+        }
+        const mjrRect mjr_viewport = {0, 0, w, h};
+        mjv_updateScene(model_, data_, opt_.get(), nullptr, cam, mjCAT_ALL, scn_.get());
+        mjr_render(mjr_viewport, scn_.get(), ctx_.get());
+        
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, ctx_->offFBO);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst_fbo);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
     void Gui::render(){
         if (!window_) return;
 
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-        glViewport(0, 0, viewport_width_, viewport_height_);
-        mjrRect mjr_viewport = {0, 0, viewport_width_, viewport_height_};
-        mjv_updateScene(model_, data_, opt_.get(), NULL, cam_.get(), mjCAT_ALL, scn_.get());
+        int need_w = std::max(1, viewport_width_);
+        int need_h = std::max(1, viewport_height_);
+        if (display_pip) {
+            const int pip_w = std::max(1, static_cast<int>(viewport_width_ * pip_scale_));
+            const int pip_h = std::max(1, static_cast<int>(viewport_height_ * pip_scale_));
+            need_w = std::max(need_w, pip_w);
+            need_h = std::max(need_h, pip_h);
+        }
+        ensureMujocoOffscreenAtLeast(need_w, need_h);
 
-        mjr_render(mjr_viewport, scn_.get(), ctx_.get());
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        renderMujocoBlitToFbo(fbo_, viewport_width_, viewport_height_, cam_.get());
 
         if (display_pip){
             // pip size is scaled down version of the full viewport
@@ -183,16 +232,11 @@ namespace torq {
                     glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 }
 
-                glBindFramebuffer(GL_FRAMEBUFFER, pip.fbo);
-                glViewport(0, 0, pip_w, pip_h);
-                mjrRect pip_rect = {0, 0, pip_w, pip_h};
-                mjv_updateScene(model_, data_, opt_.get(), NULL, pip.cam.get(), mjCAT_ALL, scn_.get());
-                mjr_render(pip_rect, scn_.get(), ctx_.get());
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                renderMujocoBlitToFbo(pip.fbo, pip_w, pip_h, pip.cam.get());
             }
 
             if (!pip_cameras_.empty()) {
-                mjv_updateScene(model_, data_, opt_.get(), NULL, cam_.get(), mjCAT_ALL, scn_.get());
+                mjv_updateScene(model_, data_, opt_.get(), nullptr, cam_.get(), mjCAT_ALL, scn_.get());
             }
         }
         glfwPollEvents();
@@ -237,7 +281,7 @@ namespace torq {
 
         glGenTextures(1, &texture_color_);
         glBindTexture(GL_TEXTURE_2D, texture_color_);
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_color_, 0);

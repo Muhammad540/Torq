@@ -135,6 +135,9 @@ namespace torq {
             std::array<float, 4> clear_color_ = {0.45f, 0.55f, 0.60f, 1.00f};
             void createFBO(int width, int height);
             void destroyFBO();
+
+            void ensureMujocoOffscreenAtLeast(int min_w, int min_h);
+            void renderMujocoBlitToFbo(unsigned int dst_fbo, int w, int h, mjvCamera* cam);
             bool first_frame_ = true;
 
             void setupDockLayout(unsigned int dockerspace_id);
