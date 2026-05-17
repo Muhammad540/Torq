@@ -127,5 +127,6 @@ set_target_properties(torq PROPERTIES NO_SYSTEM_FROM_IMPORTED ON)
 add_subdirectory(workspace/so101)
 add_subdirectory(workspace/panda)
 add_subdirectory(workspace/arm_ur5e)
+add_subdirectory(workspace/kuka)
 
 message(STATUS "--- Configuration Done ---")
