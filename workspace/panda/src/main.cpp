@@ -13,6 +13,7 @@ int main(int argc, char** argv){
     config.robot_model_path = (root / "workspace/models/franka_emika_panda/panda.xml").string();
     config.end_effector_frame = "hand";
     config.locked_joints = {"finger_joint1", "finger_joint2"};
+    config.joint_velocity_limit_rad_s = 2.5;
 
     torq::RobotSystem robot;
     if (!robot.initialize(config)){

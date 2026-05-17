@@ -40,10 +40,10 @@ namespace torq{
     double frame_orientation_cost = 1.0;  ///< FrameTask rotational weight [cost/rad].
     double frame_gain            = 1.0;   ///< FrameTask gain \f$\alpha \in (0,1]\f$.
     double frame_lm_damping      = 0.5;   ///< FrameTask Levenberg–Marquardt damping \f$\mu\f$.
-    double posture_cost          = 1e-3;  ///< PostureTask weight [cost/rad].
+    double posture_cost          = 0.01;  ///< PostureTask weight [cost/rad].
     double posture_gain          = 1.0;   ///< PostureTask gain \f$\alpha\f$.
     double posture_lm_damping    = 0.5;   ///< PostureTask LM damping.
-    double damping_cost          = 1e-2;  ///< DampingTask weight [cost·s/rad].
+    double damping_cost          = 0.5;  ///< DampingTask weight [cost·s/rad].
     double solver_damping        = 1e-12; ///< Tikhonov damping \f$\lambda\f$ on the QP Hessian.
     double config_limit_gain     = 0.5;   ///< ConfigurationLimit gain \f$\gamma \in (0,1]\f$.
   };

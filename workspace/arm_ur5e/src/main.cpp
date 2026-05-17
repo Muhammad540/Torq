@@ -14,7 +14,9 @@ int main(int argc, char** argv) {
     config.scene_path       = (root / "workspace/models/universal_robots_ur5e/scene.xml").string();
     config.robot_model_path = (root / "workspace/models/universal_robots_ur5e/ur5e.xml").string();
     config.joint_velocity_limit_rad_s = 2.5;
-    config.end_effector_frame = "wrist_3_link";
+    config.end_effector_frame = "attachment_site";
+    config.joint_velocity_limit_rad_s = 2.5;
+
 
     torq::RobotSystem robot;
     if (!robot.initialize(config)) {
@@ -22,7 +24,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     Eigen::VectorXd home_position(6);
-    home_position << 0.0212908, -2.12746, 1.96702, -1.40262, 4.71712, 6.2831;
+    home_position <<  -3.98815 ,-1.32759 ,-1.99854 ,-1.39978  ,1.63068   ,6.2831;
     robot.setHomePosition(home_position);
     robot.moveToHome();
 
