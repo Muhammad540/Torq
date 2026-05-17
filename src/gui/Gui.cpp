@@ -606,6 +606,35 @@ namespace torq {
                 robot_->setConfigLimitGain(ik_config_limit_gain_);
         }
 
+        const std::size_t n_barriers = robot_->userBarrierCount();
+        if (n_barriers == 0) {
+            ik_barrier_sliders_initialized_ = false;
+            ik_barrier_gain_.clear();
+            ik_barrier_safe_disp_gain_.clear();
+        } else if (ImGui::CollapsingHeader("Barriers", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (!ik_barrier_sliders_initialized_ || ik_barrier_gain_.size() != n_barriers) {
+                ik_barrier_gain_.resize(n_barriers);
+                ik_barrier_safe_disp_gain_.resize(n_barriers);
+                for (std::size_t i = 0; i < n_barriers; ++i) {
+                    ik_barrier_gain_[i] = static_cast<float>(robot_->userBarrierGain(i));
+                    ik_barrier_safe_disp_gain_[i] =
+                        static_cast<float>(robot_->userBarrierSafeDisplacementGain(i));
+                }
+                ik_barrier_sliders_initialized_ = true;
+            }
+            for (std::size_t i = 0; i < n_barriers; ++i) {
+                ImGui::PushID(static_cast<int>(i));
+                if (n_barriers > 1)
+                    ImGui::Text("Barrier %zu", i + 1);
+                if (ImGui::SliderFloat("Gain##barrier", &ik_barrier_gain_[i], 0.01f, 5.0f, "%.3f"))
+                    robot_->setUserBarrierGain(i, ik_barrier_gain_[i]);
+                if (ImGui::SliderFloat("Safe Disp. Gain##barrier", &ik_barrier_safe_disp_gain_[i],
+                                       0.0f, 1.0f, "%.4f"))
+                    robot_->setUserBarrierSafeDisplacementGain(i, ik_barrier_safe_disp_gain_[i]);
+                ImGui::PopID();
+            }
+        }
+
         ImGui::End();
     }
 
@@ -680,10 +709,4 @@ namespace torq {
     Gui* Gui::getGui(GLFWwindow* window) {
         return static_cast<Gui*>(glfwGetWindowUserPointer(window));
     }
-
-    // #ifdef ENABLE_TRACKING_POINTS
-    // void Gui::drawtp(const Eigen::Vector3d &pos, double radius, const Eigen::Vector3d &color){
-    //     tps.push_back({pos, radius, color});
-    // }
-    // #endif
 }

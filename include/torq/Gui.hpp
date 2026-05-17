@@ -168,7 +168,11 @@ namespace torq {
             float ik_damping_cost_ = 1e-4f;
             float ik_solver_damping_ = 1e-12f;
             float ik_config_limit_gain_ = 0.5f;
-	
+
+            bool ik_barrier_sliders_initialized_ = false;
+            std::vector<float> ik_barrier_gain_;
+            std::vector<float> ik_barrier_safe_disp_gain_;
+
             std::vector<ScrollingBuffer> pos_history_;
             std::vector<ScrollingBuffer> vel_history_;
             float plot_history_s_ = 5.0f;
