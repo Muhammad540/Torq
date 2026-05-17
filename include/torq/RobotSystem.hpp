@@ -238,6 +238,14 @@ namespace torq {
             void addBarrier(std::unique_ptr<Barrier> barrier);
             /** @brief Remove and destroy a previously added barrier. */
             void removeBarrier(Barrier* barrier);
+
+            /** @brief Number of user-added barriers (0 if none). */
+            std::size_t userBarrierCount() const;
+            /** @brief Scalar CBF gain (first row; all rows are set together via setUserBarrierGain). */
+            double userBarrierGain(std::size_t index) const;
+            double userBarrierSafeDisplacementGain(std::size_t index) const;
+            void setUserBarrierGain(std::size_t index, double gain);
+            void setUserBarrierSafeDisplacementGain(std::size_t index, double gain);
             /** @} */
 
             /** @name State queries

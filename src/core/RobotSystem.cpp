@@ -353,4 +353,30 @@ namespace torq {
                 [barrier](const std::unique_ptr<Barrier>& p) { return p.get() == barrier; }),
             user_barriers_.end());
     }
+
+    std::size_t RobotSystem::userBarrierCount() const {
+        return user_barriers_.size();
+    }
+
+    double RobotSystem::userBarrierGain(std::size_t index) const {
+        if (index >= user_barriers_.size() || user_barriers_[index]->dim() == 0)
+            return 1.0;
+        return user_barriers_[index]->gain()(0);
+    }
+
+    double RobotSystem::userBarrierSafeDisplacementGain(std::size_t index) const {
+        if (index >= user_barriers_.size())
+            return 0.0;
+        return user_barriers_[index]->safeDisplacementGain();
+    }
+
+    void RobotSystem::setUserBarrierGain(std::size_t index, double gain) {
+        if (index < user_barriers_.size())
+            user_barriers_[index]->setGain(gain);
+    }
+
+    void RobotSystem::setUserBarrierSafeDisplacementGain(std::size_t index, double gain) {
+        if (index < user_barriers_.size())
+            user_barriers_[index]->setSafeDisplacementGain(gain);
+    }
 }
