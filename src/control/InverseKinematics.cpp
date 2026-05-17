@@ -5,9 +5,62 @@
 #include "torq/Barriers.hpp"
 #include "torq/logger.hpp"
 #include <OsqpEigen/Compat.hpp>
+#include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace torq {
+
+namespace {
+// Tolerance for constraint slack, if below this, return zero velocity
+constexpr double kConstraintSlackTol = 1e-4;
+
+const char* osqpFlagName(OsqpEigen::ErrorExitFlag flag) {
+  switch (flag) {
+    case OsqpEigen::ErrorExitFlag::NoError: return "NoError";
+    case OsqpEigen::ErrorExitFlag::DataValidationError: return "DataValidationError";
+    case OsqpEigen::ErrorExitFlag::SettingsValidationError: return "SettingsValidationError";
+    default: return "Unknown";
+  }
+}
+
+/*
+  QP is stacked as G * dq <= h (limits, barriers)
+  For each row i, the slack (how much room is left before violating the inequality is):
+  slack_i = h_i - G_i * dq
+
+  Positive slack: constraint satisfied with a margin 
+  Zero: on the boundary
+  Negative: violated
+
+  minConstraintSlack returns the minimum slack across all constraints
+*/
+double minConstraintSlack(const QPProblem& qp, const Eigen::VectorXd& dq) {
+  const int m = static_cast<int>(qp.G.rows());
+  double slack_min = std::numeric_limits<double>::infinity();
+  for (int i = 0; i < m; ++i) {
+    slack_min = std::min(slack_min, qp.h(i) - qp.G.row(i).dot(dq));
+  }
+  return slack_min;
+}
+
+/*
+  After slack check, if any commanded velocity is above the model velocity limit, clamp it to the limit.
+*/
+Eigen::VectorXd clampDeltaQByVelocityLimit(const Eigen::VectorXd& dq,
+                                           const pinocchio::Model& model,
+                                           double dt) {
+  Eigen::VectorXd out = dq;
+  for (int i = 0; i < model.nv; ++i) {
+    const double v_lim = model.velocityLimit[i];
+    if (!std::isfinite(v_lim) || v_lim >= 1e20 || v_lim <= 1e-10) continue;
+    const double dq_max = dt * v_lim;
+    out[i] = std::clamp(out[i], -dq_max, dq_max);
+  }
+  return out;
+}
+
+} // namespace
 
 Eigen::SparseMatrix<double> InverseKinematics::toDenseSparse(const Eigen::MatrixXd& dense, bool is_upper_triangular) {
   const int rows = static_cast<int>(dense.rows());
@@ -106,8 +159,8 @@ bool InverseKinematics::initSolver(
 
   solver_.settings()->setVerbosity(false);
   solver_.settings()->setWarmStart(true);
-  solver_.settings()->setAbsoluteTolerance(1e-8);
-  solver_.settings()->setRelativeTolerance(1e-8);
+  solver_.settings()->setAbsoluteTolerance(1e-5);
+  solver_.settings()->setRelativeTolerance(1e-5);
   solver_.settings()->setMaxIteration(200);
   solver_.settings()->setPolish(false);
 
@@ -165,7 +218,8 @@ Eigen::VectorXd InverseKinematics::solve(
   QPProblem qp = buildIK(config, tasks, dt, damping, limits, barriers);
 
   if (!qp.has_constraints) {
-    const Eigen::VectorXd dq = qp.H.ldlt().solve(-qp.c);
+    Eigen::VectorXd dq = qp.H.ldlt().solve(-qp.c);
+    dq = clampDeltaQByVelocityLimit(dq, config.model(), dt);
     return dq / dt;
   }
 
@@ -178,10 +232,12 @@ Eigen::VectorXd InverseKinematics::solve(
   Eigen::VectorXd upper = qp.h;
 
   OsqpEigen::ErrorExitFlag solve_flag;
+  const bool reinit = !initialized_ || nv != last_nv_ || m != last_m_;
 
-  if (!initialized_ || nv != last_nv_ || m != last_m_) {
+  if (reinit) {
     solver_.clearSolver();
     if (!initSolver(nv, m, H_sparse, qp.c, G_sparse, lower, upper)) {
+      log_.error() << "[IK] OSQP initSolver failed (nv=" << nv << " m=" << m << ")";
       return Eigen::VectorXd::Zero(nv);
     }
     solve_flag = solver_.solveProblem();
@@ -190,11 +246,23 @@ Eigen::VectorXd InverseKinematics::solve(
   }
 
   if (solve_flag != OsqpEigen::ErrorExitFlag::NoError) {
-    log_.error() << "[IK] OSQP did not reach optimality. Commanding zero velocity for safety";
+    log_.error() << "[IK] OSQP " << osqpFlagName(solve_flag)
+                 << " (nv=" << nv << " m=" << m << " dt=" << dt
+                 << "). Commanding zero velocity.";
     return Eigen::VectorXd::Zero(nv);
   }
 
-  const Eigen::VectorXd dq = solver_.getSolution();
+  Eigen::VectorXd dq = solver_.getSolution();
+  const double slack_min = minConstraintSlack(qp, dq);
+  if (slack_min < -kConstraintSlackTol) {
+    static int slack_warn_count = 0;
+    if (slack_warn_count++ % 200 == 0) {
+      log_.warning() << "[IK] Primal violates G*dq<=h (min slack=" << slack_min<< "); commanding zero velocity.";
+    }
+    return Eigen::VectorXd::Zero(nv);
+  }
+
+  dq = clampDeltaQByVelocityLimit(dq, config.model(), dt);
   return dq / dt;
 }
 

@@ -33,7 +33,9 @@ namespace torq {
    * \f$\min_{\Delta q}\,\tfrac12 \Delta q^\top P\,\Delta q + c^\top \Delta q\f$
    * s.t. \f$G\,\Delta q \le h\f$ and returns \f$v = \Delta q / \Delta t\f$.
    * When there are no inequality constraints, falls back to a direct LDLT
-   * solve. On any non-optimal OSQP exit, returns zero velocity for safety.
+   * solve. On any non-optimal OSQP exit, or if the primal violates
+   * \f$G\Delta q \le h\f$, returns zero velocity. Solutions are also
+   * clamped to `model.velocityLimit` when finite bounds are set.
    *
    * @see @ref qp_formulation
    */
