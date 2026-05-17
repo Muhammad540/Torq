@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <functional>
 #include <utility>
 #include <optional>
 #include <Eigen/Dense>
@@ -40,12 +39,13 @@ namespace torq {
       /** @brief Safe-displacement gradient. */
       const Eigen::VectorXd& c() const { return c_; }
 
-      /** @brief Override the gain function applied to \f$h(q)\f$ (default identity). */
-      void setGainFunction(std::function<double(double)> fn) { gain_function_ = std::move(fn); }
-
       int dim() const { return dim_; }
       const Eigen::VectorXd& gain() const { return gain_; }
       double safeDisplacementGain() const { return safe_displacement_gain_; }
+
+      /** @brief Set the same CBF gain on every constraint row. */
+      void setGain(double gain);
+      void setSafeDisplacementGain(double gain);
 
     protected:
       virtual void computeBarrier(const Configuration& config, Eigen::Ref<Eigen::VectorXd> out_h) const = 0;
@@ -55,7 +55,6 @@ namespace torq {
 
       int dim_;                                ///< Number of constraint rows.
       Eigen::VectorXd gain_;                   ///< CBF gain \f$\alpha\f$ (per dim).
-      std::function<double(double)> gain_function_;
       double safe_displacement_gain_;          ///< \f$\kappa\f$; 0 disables the objective term.
 
     private:
@@ -99,14 +98,13 @@ namespace torq {
       std::optional<Eigen::VectorXd> p_min_;
       std::optional<Eigen::VectorXd> p_max_;
 
-      mutable Eigen::MatrixXd J_world_; 
+      mutable Eigen::MatrixXd J_world_;
   };
 
   /**
    * @brief Minimum distance between two frames using a point to point constraint.
    *
-   * Uses a saturating gain function so the constraint stays smooth when the
-   * frames are far apart.
+   * Keeps two frames at least `d_min` apart (squared distance barrier).
    *
    * @see @ref barriers_page
    */

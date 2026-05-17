@@ -8,14 +8,12 @@ namespace torq {
     Barrier::Barrier(int dim, double gain, double safe_displacement_gain)
         : dim_(dim)
         , gain_(Eigen::VectorXd::Constant(dim, gain))
-        , gain_function_([](double x) { return x; })
         , safe_displacement_gain_(safe_displacement_gain)
     {}
 
     Barrier::Barrier(int dim, const Eigen::VectorXd& gain, double safe_displacement_gain)
         : dim_(dim)
         , gain_(gain)
-        , gain_function_([](double x) { return x; })
         , safe_displacement_gain_(safe_displacement_gain)
     {}
 
@@ -23,7 +21,18 @@ namespace torq {
         out_dq.setZero();
     }
 
+    void Barrier::setGain(double gain) {
+        gain_.setConstant(dim_, gain);
+    }
+
+    void Barrier::setSafeDisplacementGain(double gain) {
+        safe_displacement_gain_ = gain;
+    }
+
     void Barrier::updateQP(const Configuration& config, double dt) {
+        if (dt <= 0.0)
+            throw std::invalid_argument("Barrier::updateQP requires dt > 0.");
+
         int nv = config.nv();
     
         if (!is_initialized_ || H_.rows() != nv) {
@@ -40,21 +49,28 @@ namespace torq {
         computeBarrier(config, barrier_cache_);
         computeJacobian(config, jac_cache_);
     
-        G_.noalias() = -jac_cache_ / dt;
+        // QP variable is joint displacement dq; discrete CBF: h(q) + J Δq ≥ 0  ⇔  -J Δq ≤ h(q).
+        G_.noalias() = -jac_cache_;
         for (int i = 0; i < dim_; ++i)
-            h_qp_(i) = gain_(i) * gain_function_(barrier_cache_(i));
-    
+            h_qp_(i) = gain_(i) * barrier_cache_(i);
+
         H_.setZero();
         c_.setZero();
-    
         if (safe_displacement_gain_ > 1e-6) {
-            double jac_sq_norm = jac_cache_.squaredNorm();
-            if (jac_sq_norm >= 1e-12) {
-                computeSafeDisplacement(config, safe_dq_cache_);
-                double weight = safe_displacement_gain_ / jac_sq_norm;
-                H_.diagonal().setConstant(weight);
-                c_.noalias() = -weight * safe_dq_cache_;
-            }
+            computeSafeDisplacement(config, safe_dq_cache_);
+            H_.diagonal().setConstant(safe_displacement_gain_);
+            c_.noalias() = -safe_displacement_gain_ * safe_dq_cache_;
+        }
+    }
+
+    namespace {
+        int positionBarrierDim(const std::optional<Eigen::VectorXd>& p_min,
+                               const std::optional<Eigen::VectorXd>& p_max,
+                               std::size_t num_indices) {
+            int d = 0;
+            if (p_min.has_value()) d += static_cast<int>(num_indices);
+            if (p_max.has_value()) d += static_cast<int>(num_indices);
+            return d;
         }
     }
 
@@ -64,7 +80,7 @@ namespace torq {
                                      const std::optional<Eigen::VectorXd>& p_max,
                                      double gain,
                                      double safe_displacement_gain)
-        : Barrier(0, gain, safe_displacement_gain)
+        : Barrier(positionBarrierDim(p_min, p_max, indices.size()), gain, safe_displacement_gain)
         , frame_(frame)
         , indices_(indices)
         , p_min_(p_min)
@@ -72,12 +88,6 @@ namespace torq {
     {
         if (!p_min_.has_value() && !p_max_.has_value())
             throw std::invalid_argument("PositionBarrier requires at least one of p_min or p_max.");
-
-        int d = 0;
-        if (p_min_.has_value()) d += static_cast<int>(indices_.size());
-        if (p_max_.has_value()) d += static_cast<int>(indices_.size());
-        dim_ = d;
-        gain_ = Eigen::VectorXd::Constant(dim_, gain);
     }
 
     void PositionBarrier::computeBarrier(const Configuration& config, Eigen::Ref<Eigen::VectorXd> out_h) const {
@@ -134,8 +144,6 @@ namespace torq {
     {
         if (d_min < 0.0)
             throw std::invalid_argument("Minimum distance must be non-negative.");
-        
-        gain_function_ = [](double h) { return h / (1.0 + std::abs(h)); };
     }
 
     void BodySphericalBarrier::computeBarrier(const Configuration& config, Eigen::Ref<Eigen::VectorXd> out_h) const {
