@@ -49,7 +49,12 @@ The error must be **zero at the target**; the system drives \f$e \to 0\f$.
 ## Custom Limit
 
 Return inequality rows \f$G\,\Delta q \le h\f$, or `std::nullopt` when the
-limit is inactive.
+limit is inactive. Build `G` with `nv` columns matching the reduced model.
+`VelocityLimit::computeQPInequalities` requires `dt > 0`.
+
+For joint position boxes on scalar coordinates, use direct margins
+\f$q^\text{max} - q\f$ rather than `pinocchio::difference` (see
+@ref configurationlimit).
 
 ```cpp
 class CapJointZeroVel : public torq::Limit {
@@ -77,9 +82,11 @@ private:
 
 ## Custom Barrier
 
-Implement `computeBarrier` (must satisfy \f$h(q) \ge 0\f$ in the safe set)
-and `computeJacobian` (\f$\partial h / \partial q\f$). The base class turns
-them into a CBF inequality and an optional safe displacement objective.
+Implement `computeBarrier` (must satisfy \f$h(q) \ge 0\f$ in the safe set) and
+`computeJacobian` with rows \f$\partial h / \partial q\f$. In `updateQP` the base
+class sets \f$G = -\partial h/\partial q\f$ and
+\f$h_\text{rhs} = \alpha \odot h(q)\f$ (discrete CBF with QP variable
+\f$\Delta q\f$). `updateQP` throws if `dt \le 0`.
 
 ```cpp
 class UprightBarrier : public torq::Barrier {
@@ -97,7 +104,7 @@ protected:
                          Eigen::Ref<Eigen::MatrixXd> out_J) const override {
         Eigen::Matrix3d R = c.getTransformFrameToWorld(frame_).rotation();
         Eigen::MatrixXd J = R * c.getFrameJacobian(frame_).bottomRows<3>();
-        out_J = -J.row(2);
+        out_J.row(0) = J.row(2);   // ∂h/∂q for h = R_zz - min_cos
     }
 
 private:
@@ -106,15 +113,10 @@ private:
 };
 ```
 
-To bias the robot toward a known safe configuration, override
-`computeSafeDisplacement` (default zero) and pass a non zero
-`safe_displacement_gain`.
+To bias motion inside the safe set, override `computeSafeDisplacement`
+(default returns zero) and set `safe_displacement_gain` \f$\kappa > 0\f$.
 
-To shape the CBF response (e.g. saturate near boundaries) replace the gain
-function:
-
-```cpp
-barrier->setGainFunction([](double h) { return h / (1.0 + std::abs(h)); });
-```
+Tune enforcement with `gain` at construction (scalar or `Eigen::VectorXd` per
+row). There is no runtime gain function hook.
 
 ---

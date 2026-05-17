@@ -7,25 +7,35 @@ A **barrier** enforces a safety region with a Control Barrier Function
 - (optionally) an objective term that pushes the robot away from the
   boundary.
 
-The CBF condition
+The continuous-time CBF condition
 
 \f[
 \frac{\partial h}{\partial q}\,\dot q + \alpha\, h(q) \;\ge\; 0
 \f]
 
-becomes (with \f$\Delta q = \dot q\, \Delta t\f$):
+is discretised with forward Euler on the QP decision variable
+\f$\Delta q\f$ (joint displacement over one tick):
 
 \f[
--\frac{1}{\Delta t}\,\frac{\partial h}{\partial q}\,\Delta q
-\;\le\; \alpha \cdot g\!\bigl(h(q)\bigr)
+h(q) + \frac{\partial h}{\partial q}\,\Delta q \;\ge\; 0
+\quad\Leftrightarrow\quad
+G\,\Delta q \le h_\text{rhs},
+\qquad
+G = -\frac{\partial h}{\partial q},
+\qquad
+h_\text{rhs} = \alpha \odot h(q)
 \f]
 
-where \f$g(\cdot)\f$ is a per barrier gain function (default identity).
+where \f$\alpha\f$ is the per-row `gain` vector.
+
+`Barrier::updateQP` requires `dt > 0`. The implementation sets
+`G = -\texttt{computeJacobian}` (rows of `computeJacobian` are
+\f$\partial h / \partial q\f$).
 
 | Parameter | Symbol | Effect |
 |-----------|--------|--------|
-| `gain`                   | \f$\alpha\f$ | How aggressively to enforce the constraint. |
-| `safe_displacement_gain` | \f$\kappa\f$ | If > 0, also push actively away from the boundary. |
+| `gain`                   | \f$\alpha\f$ | Per-row scale on \f$h(q)\f$ in \f$h_\text{rhs}\f$ (constant; no runtime gain function). |
+| `safe_displacement_gain` | \f$\kappa\f$ | If > 0, adds \f$\tfrac{\kappa}{2}\|\Delta q - \Delta q_\text{safe}\|^2\f$ with \f$\Delta q_\text{safe}\f$ from `computeSafeDisplacement` (default zero). |
 
 Add barriers via `RobotSystem::addBarrier(std::unique_ptr<Barrier>)`.
 
@@ -57,6 +67,9 @@ Useful for defining the workspace of the robot.
 | `p_min`, `p_max` | One or both bounds, per selected axis. |
 | `gain`, `safe_displacement_gain` | CBF parameters. |
 
+`PositionBarrier` dimension is computed from which of `p_min` / `p_max` are set
+and how many axes are in `indices` (up to six rows for full XYZ min and max).
+
 ---
 
 ## BodySphericalBarrier {#bodysphericalbarrier}
@@ -67,9 +80,6 @@ Maintain a minimum distance between two frames using a point to point
 \f[
 h(q) = \|p_1(q) - p_2(q)\|^2 - d_\text{min}^2
 \f]
-
-A non linear gain \f$g(h) = h / (1 + |h|)\f$ smooths the response when the
-frames are far apart so the barrier does not over react.
 
 | Parameter | Meaning |
 |-----------|---------|

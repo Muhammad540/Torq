@@ -83,7 +83,7 @@ int main() {
 }
 ```
 
-Working examples for the Franka Panda, UR5e, and SO-101 arms are present under the `workspace/` folder. See [architecture](@ref architecture) for details.
+Working examples for the Franka Panda, UR5e, KUKA iiwa 14, and SO-101 arms are present under the `workspace/` folder. See [architecture](@ref architecture) for details.
 
 ---
 

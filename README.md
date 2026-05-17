@@ -32,17 +32,20 @@ cmake --build . -j
 ```
 ## Examples
 
-The following examples are rovided:
+The following examples are provided:
 
 - `workspace/panda/`: Franka Emika Panda 7 DOF arm (simulation only)
 - `workspace/arm_ur5e/`: Universal Robots UR5e (simulation only)
+- `workspace/kuka/`: KUKA LBR iiwa 14 (simulation only)
 - `workspace/so101/`: SO-101 6 DOF arm (simulation or real ST3215 servos)
 
-To run an example, navigate to the workspace folder and run:
+To run an example, build from the repo root then run the binary from `build/bin/`:
 
 ```bash
-cd workspace/panda
-./build/bin/panda
+mkdir -p build && cd build
+cmake ..
+cmake --build . -j
+./bin/panda    # or arm_ur5e, kuka, so101
 ```
 
 ## Documentation
